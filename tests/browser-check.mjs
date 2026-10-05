@@ -6,7 +6,7 @@ const base = process.env.BASE_URL || 'http://127.0.0.1:8447/cre249/';
 await mkdir('artifacts/angular', { recursive: true });
 const browser = await chromium.launch({ headless: true });
 try {
-  for (const width of [360, 390, 1440]) {
+  for (const width of [360, 390, 768, 1440]) {
     const page = await browser.newPage({ viewport: { width, height: 900 }, deviceScaleFactor: 1 });
     const errors = [];
     page.on('pageerror', error => errors.push(error.message));
@@ -63,6 +63,10 @@ try {
   await page.goto(`${base}#/item/pechenochny`);
   assert.match(await page.getByRole('dialog').innerText(), /недоступно/i);
   await page.goto(`${base}#/catalog`);
+  await page.locator('[data-product-slug="milka"]').click();
+  await page.getByRole('button', { name: 'Закрыть подробности' }).click();
+  await page.waitForURL('**/#/catalog');
+  assert.equal(await page.evaluate(() => document.querySelector('.dialog-photo img')?.style.visibility ?? ''), '');
   await page.getByRole('button', { name: 'Торты', exact: true }).click();
   await page.getByRole('button', { name: 'Десерты и зефир', exact: true }).click();
   await page.getByRole('button', { name: 'Все', exact: true }).click();

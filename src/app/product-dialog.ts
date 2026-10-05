@@ -1,6 +1,6 @@
 import { AfterViewInit, ChangeDetectionStrategy, Component, DestroyRef, ElementRef, inject, input, output, signal } from '@angular/core';
 import { animate } from 'animejs';
-import { ASSORTI_FILLINGS, buildMessage, formatPrice, Product, waLink } from './data';
+import { ASSORTI_FILLINGS, buildMessage, formatPrice, Product, waLink, webpSet } from './data';
 import { NavigationState } from './navigation-state';
 @Component({selector:'app-product-dialog', standalone:true, templateUrl:'./product-dialog.html', changeDetection:ChangeDetectionStrategy.OnPush})
 export class ProductDialog implements AfterViewInit {
@@ -13,6 +13,7 @@ export class ProductDialog implements AfterViewInit {
  readonly copied=signal(false);
  readonly fillings=ASSORTI_FILLINGS;
  readonly price=formatPrice;
+ readonly webpSet=webpSet;
  private host=inject<ElementRef<HTMLElement>>(ElementRef);
  private destroy=inject(DestroyRef);
  private nav=inject(NavigationState);
@@ -31,6 +32,8 @@ export class ProductDialog implements AfterViewInit {
  };
  ngAfterViewInit(){
    document.body.style.overflow='hidden';
+   document.querySelector('header')?.setAttribute('inert','');
+   document.querySelector('.contacts')?.setAttribute('inert','');
    document.addEventListener('keydown',this.onKey);
    this.host.nativeElement.querySelector<HTMLButtonElement>('.dialog-close')?.focus();
    if(!matchMedia('(prefers-reduced-motion: reduce)').matches){
@@ -46,7 +49,7 @@ export class ProductDialog implements AfterViewInit {
        this.animations.push(animate(image,{left:end.left,top:end.top,width:end.width,height:end.height,duration:420,ease:'out(3)',onComplete:()=>{image.remove();this.flyingImage=null;target.style.visibility='';}}));
      }
    }
-   this.destroy.onDestroy(()=>{document.removeEventListener('keydown',this.onKey);document.body.style.overflow='';this.animations.forEach(animation=>animation.cancel());this.flyingImage?.remove();});
+   this.destroy.onDestroy(()=>{document.removeEventListener('keydown',this.onKey);document.body.style.overflow='';document.querySelector('header')?.removeAttribute('inert');document.querySelector('.contacts')?.removeAttribute('inert');this.animations.forEach(animation=>animation.cancel());this.flyingImage?.remove();const target=this.host.nativeElement.querySelector<HTMLImageElement>('.dialog-photo img');if(target)target.style.visibility='';});
  }
  requestClose(){
    if(this.closing)return;
@@ -57,6 +60,7 @@ export class ProductDialog implements AfterViewInit {
    const origin=this.nav.flight;
    const target=this.host.nativeElement.querySelector<HTMLImageElement>('.dialog-photo img');
    if(origin && target){
+     this.animations.forEach(animation=>animation.cancel());
      this.flyingImage?.remove();
      const start=target.getBoundingClientRect();
      const image=new Image();image.src=origin.src;image.alt='';

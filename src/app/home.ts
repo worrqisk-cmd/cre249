@@ -1,7 +1,7 @@
 import { AfterViewInit, ChangeDetectionStrategy, Component, DestroyRef, ElementRef, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { animate } from 'animejs';
-import { PHOTOS, PRODUCTS, waLink } from './data';
+import { PHOTOS, PRODUCTS, waLink, webpSet } from './data';
 import { ProductCard } from './product-card';
 @Component({standalone:true, imports:[RouterLink,ProductCard], templateUrl:'./home.html', changeDetection:ChangeDetectionStrategy.OnPush})
 export class Home implements AfterViewInit {
@@ -9,6 +9,7 @@ export class Home implements AfterViewInit {
  private destroy = inject(DestroyRef);
  private animations: ReturnType<typeof animate>[] = [];
  readonly photos=PHOTOS;
+ readonly webpSet=webpSet;
  readonly products=PRODUCTS.filter(p=>p.featured&&!p.hidden).slice(0,8);
  readonly whatsapp=waLink();
  ngAfterViewInit() {

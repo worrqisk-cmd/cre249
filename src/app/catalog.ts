@@ -19,7 +19,6 @@ export class Catalog implements AfterViewInit {
  readonly missing=signal(false);
  readonly state=signal<'ok'|'loading'|'empty'|'error'>('ok');
  readonly indicator=signal({left:0,width:0});
- private navTimer: ReturnType<typeof setTimeout>|null=null;
  readonly products=computed(()=>PRODUCTS.filter(p=>!p.hidden&&(this.category()==='all'||p.category===this.category())));
  private sub=this.route.paramMap.subscribe(params=>{
    const c=params.get('category');
@@ -29,7 +28,7 @@ export class Catalog implements AfterViewInit {
    this.dialog.set(slug?PRODUCTS.find(p=>p.slug===slug&&!p.hidden)||null:null);
    this.missing.set(!!slug&&!this.dialog());
  });
- constructor(){this.destroy.onDestroy(()=>{this.sub.unsubscribe();if(this.navTimer)clearTimeout(this.navTimer);});}
+ constructor(){this.destroy.onDestroy(()=>this.sub.unsubscribe());}
  ngAfterViewInit(){
    requestAnimationFrame(()=>this.moveIndicator());
    if(this.slug()) {
@@ -43,8 +42,7 @@ export class Catalog implements AfterViewInit {
    this.nav.category.set(c);
    this.category.set(c);
    requestAnimationFrame(()=>this.moveIndicator());
-   if(this.navTimer)clearTimeout(this.navTimer);
-   this.navTimer=setTimeout(()=>this.router.navigateByUrl(c==='all'?'/catalog':`/catalog/${c}`),220);
+   void this.router.navigateByUrl(c==='all'?'/catalog':`/catalog/${c}`);
  }
  private moveIndicator(){
    const active=this.host.nativeElement.querySelector<HTMLElement>('.category-list button.active');

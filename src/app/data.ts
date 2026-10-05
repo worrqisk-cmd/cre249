@@ -9,8 +9,11 @@ const tvorog = 'photos/07_tvorozhny_pirog_s_zelenyu.jpg'
 const milka = 'photos/08_tort_milka.jpg'
 const rulet = 'photos/09_merengovy_rulet.jpg'
 const zefir = 'photos/10_zefirnye_tsvety.jpg'
+const orehovy = 'photos/11_orehovy_tort.jpg'
+const molochnaya = 'photos/12_molochnaya_devochka.jpg'
 
-export const PHOTOS = { medovik, assorti, milka, rulet }
+export const PHOTOS = { medovik, assorti, milka, rulet, process: 'photos/13_medovik_process.jpg' }
+export const webpSet = (photo: string) => photo.replace(/\.jpg$/, '-480.webp') + ' 480w, ' + photo.replace(/\.jpg$/, '-960.webp') + ' 960w'
 
 export type CategoryId = 'all' | 'savory' | 'sweet' | 'cakes' | 'desserts'
 export const CATEGORIES: { id: CategoryId; label: string }[] = [
@@ -47,13 +50,13 @@ export const PRODUCTS: Product[] = [
   },
   { slug: 'slivochno-karamelny', title: 'Сливочно-карамельный пирог', category: 'sweet', photos: [karamel], featured: true },
   { slug: 'kuraga-oreh', title: 'Двухслойный пирог с курагой и грецким орехом', category: 'sweet', photos: [kuraga] },
-  { slug: 'molochnaya-devochka', title: 'Торт «Молочная девочка»', category: 'cakes', photos: [] },
+  { slug: 'molochnaya-devochka', title: 'Торт «Молочная девочка»', category: 'cakes', photos: [molochnaya], focus: { mobile: '50% 62%', desktop: '50% 60%' } },
   {
     slug: 'milka', title: 'Торт «Милка»', category: 'cakes', photos: [milka], featured: true,
     focus: { mobile: '50% 30%', desktop: '50% 35%' },
     description: 'Шоколадные бисквитные коржи и крем, напоминающий пломбир с молочным шоколадом.',
   },
-  { slug: 'orehovy', title: 'Ореховый торт', category: 'cakes', photos: [] },
+  { slug: 'orehovy', title: 'Ореховый торт', category: 'cakes', photos: [orehovy], focus: { mobile: '50% 55%', desktop: '50% 55%' } },
   { slug: 'medovik', title: 'Медовик', category: 'cakes', photos: [medovik], featured: true, focus: { mobile: '55% 40%', desktop: '50% 40%' } },
   { slug: 'merengovy-rulet', title: 'Меренговый рулет', category: 'desserts', photos: [rulet], featured: true },
   { slug: 'tart', title: 'Тарт фруктово-ягодный', category: 'desserts', photos: [] },
