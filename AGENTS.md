@@ -1,41 +1,21 @@
-# figma-make-app
+# Repository Guidelines
 
-React + Vite + Tailwind CSS project running inside Figma Make.
+## Current application
 
-## Development Server
+This repository now contains the public «Выпечка у Миланы» site on Angular 22.2.1. It uses standalone components, zoneless change detection, Signals, lazy hash routes, anime.js and static assets. There is no backend, Supabase integration or admin interface in this phase. The React prototype remains in the untouched `../milana` folder and its `react-prototype-baseline.tar.gz` archive.
 
-A Vite development server is **already running** on `$PORT` (default 8443). You don't need to start it manually.
+## Structure
 
-- Preview URL: The user can access the running app through the preview panel
-- Hot reload: Changes to source files are reflected immediately
+`src/app/app.ts` is the shared shell. `home.ts`, `catalog.ts` and `product-dialog.ts` implement the public journey; `product-card.ts` is shared, `navigation-state.ts` restores focus and scroll, and `data.ts` contains typed demonstration data. `src/styles.css` defines the visual system. Selected real photos are in `public/photos/`. `tests/browser-check.mjs` checks the built site with Playwright. `artifacts/react/` and `artifacts/angular/` contain baseline and result screenshots. The source archive remains at `../milana/vypech.zip` and is excluded from the site build.
 
-## Project Structure
+## Commands
 
-This is the canonical project structure. Start with task-relevant files below. Only follow imports or inspect other files when required, when a documented path is missing, or when the repository contradicts this guide.
+Use Node 22.22.3 and pnpm 12.8.1 (`.mise.toml`). Run `pnpm install --frozen-lockfile`, `pnpm start --port 8446` for development, `pnpm test --watch=false` for unit checks, and `pnpm build` for the production build. The production configuration sets `baseHref` to `/cre249/`; output is `dist/milana-angular/browser`. Run `pnpm preview:pages` to serve that output at `http://127.0.0.1:8447/cre249/`, then `pnpm test:e2e`. Install Chromium once with `pnpm exec playwright install chromium` if needed.
 
-- `src/main.tsx` - React entrypoint; imports `src/index.css` and mounts `src/App.tsx` into the `#root` element
-- `src/App.tsx` - Primary application component and the usual starting point for UI work
-- `src/index.css` - Global CSS entrypoint and Tailwind CSS v4 import
-- `index.html` - Vite HTML shell containing the `#root` element and loading `src/main.tsx`
-- `package.json` - Project dependencies and the Vite build, development, preview, and formatting scripts
-- `vite.config.ts` - Vite configuration with React, Tailwind CSS v4, and Figma Make plugins plus the `@` alias for `src`
-- `.mise.toml` - Toolchain versions for Node.js and pnpm
+## Design and content
 
-## Dependencies
+Follow `Milana_Figma_Make_Public_Brief.md` for approved content and flows. `guidelines/Guidelines.md` records prototype colors and motion; the Angular version omits decorative section numbers and simplifies typography. Keep semantic controls, visible focus, reduced-motion behavior and readable content without IntersectionObserver. Archive prices, availability, collection rules and contact validity are unconfirmed. Never expose them as current facts. Use real supplied photos or an explicit missing-photo placeholder; do not invent a personal Telegram contact.
 
-- Runtime: React 19 and React DOM 19
-- Styling: Tailwind CSS v4 with the `@tailwindcss/vite` plugin
-- Build tooling: Vite 8, TypeScript 5.7, and `@vitejs/plugin-react`
-- Formatting: oxfmt
+## Changes and review
 
-## Styling
-
-This project uses **Tailwind CSS v4** through the `@tailwindcss/vite` plugin configured in `vite.config.ts`. `src/index.css` imports Tailwind with `@import 'tailwindcss';`. Use Tailwind utility classes directly in JSX and put global CSS or Tailwind v4 theme customization in `src/index.css`. This scaffold does not need a Tailwind config file or PostCSS config.
-
-`src/main.tsx` imports `src/index.css`, so global font wiring belongs in `src/index.css`. Keep CSS `@import` statements first, then add any `@font-face` rules and font-family defaults there.
-
-## Code quality
-
-- Use double quotes for strings containing apostrophes (`"We're here to help"`), or escape them in single-quoted strings. An unescaped apostrophe in a single-quoted string breaks the build.
-- Ensure JSX tags are closed and braces are balanced.
-- Export components as default exports.
+Work on `feat/angular-public-migration` until reviewed. Do not publish or push without authorization. Include affected routes, build and browser results, and screenshots for visible changes. `.gitattributes` keeps ordinary site photos in Git; do not reintroduce broad LFS rules for those files. Keep `../milana` and its backup intact.

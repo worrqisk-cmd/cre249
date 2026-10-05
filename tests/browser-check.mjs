@@ -1,0 +1,87 @@
+import assert from 'node:assert/strict';
+import { chromium } from 'playwright';
+import { mkdir } from 'node:fs/promises';
+
+const base = process.env.BASE_URL || 'http://127.0.0.1:8447/cre249/';
+await mkdir('artifacts/angular', { recursive: true });
+const browser = await chromium.launch({ headless: true });
+try {
+  for (const width of [360, 390, 1440]) {
+    const page = await browser.newPage({ viewport: { width, height: 900 }, deviceScaleFactor: 1 });
+    const errors = [];
+    page.on('pageerror', error => errors.push(error.message));
+    await page.goto(base);
+    for (const id of ['featured', 'about', 'order']) await page.locator(`#${id}`).scrollIntoViewIfNeeded();
+    await page.waitForTimeout(500);
+    for (const selector of ['#featured .product-card', '#about .about-copy', '#order .steps li']) {
+      assert.equal(await page.locator(selector).first().isVisible(), true, `${selector} hidden at ${width}px`);
+      assert.equal(await page.locator(selector).first().evaluate(el => getComputedStyle(el).opacity), '1');
+    }
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false, `horizontal overflow at ${width}px`);
+    await page.evaluate(() => scrollTo(0, 0));
+    await page.screenshot({ path: `artifacts/angular/home-${width}.png`, fullPage: true });
+    await page.goto(`${base}#/catalog`);
+    await page.locator('.catalog-page .product-card').first().waitFor();
+    assert.equal(await page.locator('.product-card').count(), 14);
+    await page.screenshot({ path: `artifacts/angular/catalog-${width}.png`, fullPage: true });
+    await page.goto(`${base}#/item/milka`);
+    await page.getByRole('dialog').waitFor();
+    assert.equal(await page.locator('.dialog-photo img').evaluate(img => img.complete && img.naturalWidth > 0), true);
+    await page.screenshot({ path: `artifacts/angular/item-${width}.png` });
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
+    assert.deepEqual(errors, [], `browser errors at ${width}px`);
+    await page.close();
+  }
+  const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+  await page.goto(base);
+  await page.getByRole('link', { name: 'Выбрать выпечку' }).click();
+  await page.waitForURL('**/#/catalog');
+  await page.getByRole('button', { name: 'Сладкие пироги', exact: true }).click();
+  await page.waitForURL('**/#/catalog/sweet');
+  assert.equal(await page.locator('.product-card').count(), 3);
+  await page.locator('[data-product-slug="assorti"]').click();
+  await page.waitForURL('**/#/item/assorti');
+  await page.getByRole('button', { name: 'Клубника' }).click();
+  await page.getByRole('button', { name: 'Обсудить заказ' }).click();
+  const message = await page.locator('textarea').inputValue();
+  assert.match(message, /Пирог «Ассорти» \(начинка: клубника\)/);
+  const href = await page.getByRole('link', { name: 'Открыть WhatsApp' }).getAttribute('href');
+  assert.equal(new URL(href).searchParams.get('text'), message);
+  await page.keyboard.press('Escape');
+  await page.waitForURL('**/#/catalog/sweet');
+  await page.waitForTimeout(150);
+  assert.equal(await page.getByRole('dialog').count(), 0);
+  assert.equal(await page.evaluate(() => document.activeElement?.getAttribute('data-product-slug')), 'assorti');
+  await page.goto(`${base}#/item/milka`);
+  await page.reload();
+  assert.equal(await page.getByRole('dialog').count(), 1);
+  assert.equal(await page.evaluate(() => document.activeElement?.getAttribute('aria-label')), 'Закрыть подробности');
+  await page.keyboard.press('Shift+Tab');
+  assert.equal(await page.evaluate(() => document.activeElement?.textContent?.trim()), 'Обсудить заказ');
+  await page.getByRole('button', { name: 'Закрыть подробности' }).click();
+  await page.waitForURL('**/#/catalog');
+  await page.goto(`${base}#/item/pechenochny`);
+  assert.match(await page.getByRole('dialog').innerText(), /недоступно/i);
+  await page.goto(`${base}#/catalog`);
+  await page.getByRole('button', { name: 'Торты', exact: true }).click();
+  await page.getByRole('button', { name: 'Десерты и зефир', exact: true }).click();
+  await page.getByRole('button', { name: 'Все', exact: true }).click();
+  await page.waitForFunction(() => location.hash === '#/catalog' && document.querySelectorAll('.catalog-page .product-card').length === 14);
+  assert.equal(await page.locator('.product-card').count(), 14);
+  await page.close();
+  const reduced = await browser.newPage({ viewport: { width: 390, height: 844 }, reducedMotion: 'reduce' });
+  await reduced.goto(base);
+  await reduced.locator('#order').scrollIntoViewIfNeeded();
+  assert.equal(await reduced.locator('#order .steps li').first().isVisible(), true);
+  await reduced.close();
+  const noObserver = await browser.newPage({ viewport: { width: 390, height: 844 } });
+  const noObserverErrors = [];
+  noObserver.on('pageerror', error => noObserverErrors.push(error.message));
+  await noObserver.addInitScript(() => Object.defineProperty(window, 'IntersectionObserver', { value: undefined }));
+  await noObserver.goto(base);
+  await noObserver.locator('#order').scrollIntoViewIfNeeded();
+  assert.equal(await noObserver.locator('#order .steps li').first().isVisible(), true);
+  assert.deepEqual(noObserverErrors, []);
+  await noObserver.close();
+  console.log('Browser checks passed: routes, filter, dialog, focus, WhatsApp, viewports, images, reduced motion.');
+} finally { await browser.close(); }
