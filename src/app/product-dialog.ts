@@ -37,19 +37,23 @@ export class ProductDialog implements AfterViewInit {
    document.addEventListener('keydown',this.onKey);
    this.host.nativeElement.querySelector<HTMLButtonElement>('.dialog-close')?.focus();
    if(!matchMedia('(prefers-reduced-motion: reduce)').matches){
-     const panel=this.host.nativeElement.querySelector('.dialog-panel');
+     const backdrop=this.host.nativeElement.querySelector<HTMLElement>('.dialog-backdrop');
+     const panel=this.host.nativeElement.querySelector<HTMLElement>('.dialog-panel');
+     const content=this.host.nativeElement.querySelector<HTMLElement>('.dialog-content, .dialog-missing');
+     const closeButton=this.host.nativeElement.querySelector<HTMLElement>('.dialog-close');
      const origin=this.nav.flight;
      const target=this.host.nativeElement.querySelector<HTMLImageElement>('.dialog-photo img');
-     // A moving panel changes the image's destination while its copy is in flight.
-     if(panel) this.animations.push(animate(panel,origin && target
-       ? {opacity:[0,1],duration:300,ease:'out(3)'}
-       : {opacity:[0,1],translateY:[18,0],duration:360,ease:'out(3)'}));
+     if(backdrop)this.animations.push(animate(backdrop,{opacity:[0,1],duration:360,ease:'out(2)'}));
+     // Keep the image's destination fixed while the panel and its content emerge.
+     if(panel)this.animations.push(animate(panel,{opacity:[0,1],duration:340,ease:'out(2)'}));
+     if(content)this.animations.push(animate(content,{opacity:[0,1],translateX:[10,0],duration:340,delay:70,ease:'out(2)'}));
+     if(closeButton)this.animations.push(animate(closeButton,{opacity:[0,1],duration:280,delay:100,ease:'out(2)'}));
      if(origin && target){
        const end=target.getBoundingClientRect();
        const image=new Image(); image.src=origin.src; image.alt='';
        Object.assign(image.style,{position:'fixed',zIndex:'100',left:`${origin.rect.left}px`,top:`${origin.rect.top}px`,width:`${origin.rect.width}px`,height:`${origin.rect.height}px`,objectFit:'cover',objectPosition:getComputedStyle(target).objectPosition,borderRadius:'14px',pointerEvents:'none'});
        document.body.append(image);this.flyingImage=image;target.style.visibility='hidden';
-       this.animations.push(animate(image,{left:end.left,top:end.top,width:end.width,height:end.height,duration:420,ease:'out(3)',onComplete:()=>{void this.finishOpen(target,image);}}));
+       this.animations.push(animate(image,{left:end.left,top:end.top,width:end.width,height:end.height,duration:410,ease:'out(2)',onComplete:()=>{void this.finishOpen(target,image);}}));
      }
    }
    this.destroy.onDestroy(()=>{document.removeEventListener('keydown',this.onKey);document.body.style.overflow='';document.querySelector('header')?.removeAttribute('inert');document.querySelector('.contacts')?.removeAttribute('inert');this.animations.forEach(animation=>animation.cancel());this.flyingImage?.remove();const target=this.host.nativeElement.querySelector<HTMLImageElement>('.dialog-photo img');if(target)target.style.visibility='';});
@@ -69,22 +73,29 @@ export class ProductDialog implements AfterViewInit {
    this.closing=true;
    const done=()=>this.closeRequested.emit();
    if(matchMedia('(prefers-reduced-motion: reduce)').matches){done();return;}
-   const panel=this.host.nativeElement.querySelector('.dialog-panel');
+   const backdrop=this.host.nativeElement.querySelector<HTMLElement>('.dialog-backdrop');
+   const panel=this.host.nativeElement.querySelector<HTMLElement>('.dialog-panel');
+   const content=this.host.nativeElement.querySelector<HTMLElement>('.dialog-content, .dialog-missing');
+   const closeButton=this.host.nativeElement.querySelector<HTMLElement>('.dialog-close');
    const origin=this.nav.flight;
    const target=this.host.nativeElement.querySelector<HTMLImageElement>('.dialog-photo img');
+   const activeCopy=this.flyingImage;
+   const start=(activeCopy || target)?.getBoundingClientRect();
+   const source=activeCopy?.src || target?.currentSrc || origin?.src;
+   const position=activeCopy || target ? getComputedStyle(activeCopy || target!).objectPosition : '50% 50%';
+   this.animations.forEach(animation=>animation.cancel());
+   this.animations=[];
+   if(content)this.animations.push(animate(content,{opacity:0,translateX:8,duration:230,ease:'in(2)'}));
+   if(closeButton)this.animations.push(animate(closeButton,{opacity:0,duration:180,ease:'in(2)'}));
+   if(panel && origin && target)this.animations.push(animate(panel,{opacity:0,duration:310,ease:'inOut(2)'}));
+   if(backdrop)this.animations.push(animate(backdrop,{opacity:0,duration:330,ease:'inOut(2)'}));
    if(origin && target){
-     const activeCopy=this.flyingImage;
-     const start=(activeCopy || target).getBoundingClientRect();
-     const source=activeCopy?.src || target.currentSrc || origin.src;
-     const position=getComputedStyle(activeCopy || target).objectPosition;
-     this.animations.forEach(animation=>animation.cancel());
-     const image=new Image();image.src=source;image.alt='';
-     Object.assign(image.style,{position:'fixed',zIndex:'100',left:`${start.left}px`,top:`${start.top}px`,width:`${start.width}px`,height:`${start.height}px`,objectFit:'cover',objectPosition:position,borderRadius:'14px',pointerEvents:'none'});
+     const image=new Image();image.src=source || origin.src;image.alt='';
+     Object.assign(image.style,{position:'fixed',zIndex:'100',left:`${start!.left}px`,top:`${start!.top}px`,width:`${start!.width}px`,height:`${start!.height}px`,objectFit:'cover',objectPosition:position,borderRadius:'14px',pointerEvents:'none'});
      document.body.append(image);this.flyingImage=image;target.style.visibility='hidden';
      activeCopy?.remove();
-     this.animations.push(animate(image,{left:origin.rect.left,top:origin.rect.top,width:origin.rect.width,height:origin.rect.height,duration:280,ease:'inOut(2)',onComplete:()=>{image.remove();this.flyingImage=null;done();}}));
-     if(panel)this.animations.push(animate(panel,{opacity:[1,0],duration:240,ease:'in(2)'}));
-   } else if(panel)this.animations.push(animate(panel,{opacity:[1,0],translateY:[0,12],duration:220,ease:'in(2)',onComplete:done}));
+     this.animations.push(animate(image,{left:origin.rect.left,top:origin.rect.top,width:origin.rect.width,height:origin.rect.height,duration:330,ease:'inOut(2)',onComplete:()=>{image.remove();this.flyingImage=null;done();}}));
+   } else if(panel)this.animations.push(animate(panel,{opacity:0,duration:310,ease:'inOut(2)',onComplete:done}));
    else done();
  }
  compose(){const p=this.product();if(!p)return;this.message.set(buildMessage(p,this.variant()||undefined));this.composing.set(true);setTimeout(()=>this.host.nativeElement.querySelector('textarea')?.focus(),0);}

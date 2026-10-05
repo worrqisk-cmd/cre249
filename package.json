@@ -8,6 +8,7 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "test:e2e": "node tests/browser-check.mjs",
+    "test:motion": "node tests/product-motion-check.mjs",
     "preview:pages": "node scripts/serve-production.mjs"
   },
   "private": true,
