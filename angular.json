@@ -49,6 +49,16 @@
               "optimization": false,
               "extractLicenses": false,
               "sourceMap": true
+            },
+            "design": {
+              "optimization": false,
+              "sourceMap": true,
+              "fileReplacements": [
+                {
+                  "replace": "src/app/preview.routes.ts",
+                  "with": "src/app/design-preview/preview.routes.ts"
+                }
+              ]
             }
           },
           "defaultConfiguration": "production"
@@ -61,6 +71,9 @@
             },
             "development": {
               "buildTarget": "milana-angular:build:development"
+            },
+            "design": {
+              "buildTarget": "milana-angular:build:design"
             }
           },
           "defaultConfiguration": "development"

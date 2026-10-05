@@ -1,6 +1,8 @@
 import { Routes } from '@angular/router';
+import { previewRoutes } from './preview.routes';
 import { adminGuard, unsavedGuard } from './admin-guards';
 export const routes: Routes = [
+  ...previewRoutes,
   { path: '', loadComponent: () => import('./home').then(m => m.Home) },
   { path: 'catalog', loadComponent: () => import('./catalog').then(m => m.Catalog) },
   { path: 'catalog/:category', loadComponent: () => import('./catalog').then(m => m.Catalog) },
