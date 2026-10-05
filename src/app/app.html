@@ -9,14 +9,14 @@
       <button type="button" (click)="goSection('order')">Как заказать</button>
       <button type="button" (click)="goSection('contacts')">Контакты</button>
     </nav>
-    <a class="header-contact" [href]="whatsapp" target="_blank" rel="noopener noreferrer">Написать Милане ↗</a>
+    @if(whatsapp()){<a class="header-contact" [href]="whatsapp()" target="_blank" rel="noopener noreferrer">Написать Милане ↗</a>}
   </div>
 </header>
 <main id="content"><router-outlet /></main>
 <section class="contacts" id="contacts">
   <div class="container contacts-grid">
     <div><p class="eyebrow">Контакты</p><h2>Напишите мне —<br><span>обсудим ваш заказ</span></h2></div>
-    <div><p>Москва · Домашняя выпечка на заказ</p><p>WhatsApp: <a [href]="whatsapp" target="_blank" rel="noopener noreferrer">{{contact.whatsappDisplay}}</a></p><p class="contact-note">Номер указан в архиве; актуальность перед публикацией уточняется.</p><a class="button light" [href]="whatsapp" target="_blank" rel="noopener noreferrer">Написать в WhatsApp</a><a class="text-link" routerLink="/catalog">К каталогу →</a></div>
+    <div><p>{{catalog.settings()?.city || 'Москва'}} · Домашняя выпечка на заказ</p>@if(whatsapp()){<p>WhatsApp: <a [href]="whatsapp()" target="_blank" rel="noopener noreferrer">{{catalog.settings()?.whatsapp_number}}</a></p><a class="button light" [href]="whatsapp()" target="_blank" rel="noopener noreferrer">Написать в WhatsApp</a>}@if(telegram()){<p><a [href]="telegram()" target="_blank" rel="noopener noreferrer">Написать в Telegram</a></p>}@if(!whatsapp()&&!telegram()){<p>Контакты временно недоступны.</p>}<a class="text-link" routerLink="/catalog">К каталогу →</a></div>
   </div>
-  <footer class="container footer"><span>© Выпечка у Миланы, Москва</span><span>Способ получения согласуем при заказе</span></footer>
+  <footer class="container footer"><span>© Выпечка у Миланы, Москва</span><span>{{delivery()}}</span></footer>
 </section>

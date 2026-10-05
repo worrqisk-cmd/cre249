@@ -1,6 +1,7 @@
-import { AfterViewInit, ChangeDetectionStrategy, Component, DestroyRef, ElementRef, inject, input, output, signal } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, Component, computed, DestroyRef, ElementRef, inject, input, output, signal } from '@angular/core';
 import { animate } from 'animejs';
-import { ASSORTI_FILLINGS, buildMessage, formatPrice, Product, waLink, webpSet } from './data';
+import { buildMessage, formatPrice, Product, waLink, webpSet } from './data';
+import { CatalogStore } from './catalog-store';
 import { NavigationState } from './navigation-state';
 @Component({selector:'app-product-dialog', standalone:true, templateUrl:'./product-dialog.html', changeDetection:ChangeDetectionStrategy.OnPush})
 export class ProductDialog implements AfterViewInit {
@@ -11,7 +12,11 @@ export class ProductDialog implements AfterViewInit {
  readonly composing=signal(false);
  readonly message=signal('');
  readonly copied=signal(false);
- readonly fillings=ASSORTI_FILLINGS;
+ readonly selectedPhoto=signal(0);
+ readonly photoReady=signal(false);
+ readonly currentPhoto=computed(()=>this.product()?.photos[this.selectedPhoto()]||'');
+ readonly currentFocus=computed(()=>this.product()?.photoFocus[this.selectedPhoto()]||{desktop:'50% 50%',mobile:'50% 50%'});
+ private catalog=inject(CatalogStore);
  readonly price=formatPrice;
  readonly webpSet=webpSet;
  private host=inject<ElementRef<HTMLElement>>(ElementRef);
@@ -54,8 +59,8 @@ export class ProductDialog implements AfterViewInit {
        Object.assign(image.style,{position:'fixed',zIndex:'100',left:`${origin.rect.left}px`,top:`${origin.rect.top}px`,width:`${origin.rect.width}px`,height:`${origin.rect.height}px`,objectFit:'cover',objectPosition:getComputedStyle(target).objectPosition,borderRadius:'14px',pointerEvents:'none'});
        document.body.append(image);this.flyingImage=image;target.style.visibility='hidden';
        this.animations.push(animate(image,{left:end.left,top:end.top,width:end.width,height:end.height,duration:410,ease:'out(2)',onComplete:()=>{void this.finishOpen(target,image);}}));
-     }
-   }
+     } else this.photoReady.set(true);
+   } else this.photoReady.set(true);
    this.destroy.onDestroy(()=>{document.removeEventListener('keydown',this.onKey);document.body.style.overflow='';document.querySelector('header')?.removeAttribute('inert');document.querySelector('.contacts')?.removeAttribute('inert');this.animations.forEach(animation=>animation.cancel());this.flyingImage?.remove();const target=this.host.nativeElement.querySelector<HTMLImageElement>('.dialog-photo img');if(target)target.style.visibility='';});
  }
  private async finishOpen(target:HTMLImageElement,image:HTMLImageElement){
@@ -66,6 +71,7 @@ export class ProductDialog implements AfterViewInit {
    requestAnimationFrame(()=>{
      if(this.closing || this.destroy.destroyed || this.flyingImage!==image)return;
      image.remove();this.flyingImage=null;
+     this.photoReady.set(true);
    });
  }
  requestClose(){
@@ -100,6 +106,7 @@ export class ProductDialog implements AfterViewInit {
  }
  compose(){const p=this.product();if(!p)return;this.message.set(buildMessage(p,this.variant()||undefined));this.composing.set(true);setTimeout(()=>this.host.nativeElement.querySelector('textarea')?.focus(),0);}
  select(v:string){this.variant.set(this.variant()===v?null:v);if(this.composing()){const p=this.product();if(p)this.message.set(buildMessage(p,this.variant()||undefined));}}
- link(){return waLink(this.message());}
+ selectPhoto(index:number){if(this.photoReady())this.selectedPhoto.set(index);}
+ link(){const number=this.catalog.settings()?.whatsapp_number;return number?waLink(number,this.message()):null;}
  async copy(){try{await navigator.clipboard.writeText(this.message());this.copied.set(true);setTimeout(()=>this.copied.set(false),1800);}catch{this.host.nativeElement.querySelector('textarea')?.select();}}
 }

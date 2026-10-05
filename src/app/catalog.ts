@@ -1,7 +1,7 @@
-import { AfterViewInit, ChangeDetectionStrategy, Component, computed, DestroyRef, effect, ElementRef, inject, signal } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, Component, computed, DestroyRef, ElementRef, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { animate } from 'animejs';
-import { CATEGORIES, CategoryId, PRODUCTS, Product } from './data';
+import { CategoryId } from './data';
+import { CatalogStore } from './catalog-store';
 import { NavigationState } from './navigation-state';
 import { ProductCard } from './product-card';
 import { ProductDialog } from './product-dialog';
@@ -11,24 +11,23 @@ export class Catalog implements AfterViewInit {
  private router=inject(Router);
  private host=inject<ElementRef<HTMLElement>>(ElementRef);
  private destroy=inject(DestroyRef);
+ readonly catalog=inject(CatalogStore);
  readonly nav=inject(NavigationState);
- readonly categories=CATEGORIES;
+ readonly categories=computed(()=>[{id:'all',label:'Все'},...this.catalog.categories()]);
  readonly category=signal<CategoryId>('all');
  readonly slug=signal<string|null>(null);
- readonly dialog=signal<Product|null>(null);
- readonly missing=signal(false);
- readonly state=signal<'ok'|'loading'|'empty'|'error'>('ok');
+ readonly dialog=computed(()=>this.catalog.products().find(product=>product.slug===this.slug())||null);
+ readonly missing=computed(()=>!!this.slug()&&!this.dialog());
+ readonly state=this.catalog.state;
  readonly indicator=signal({left:0,width:0});
- readonly products=computed(()=>PRODUCTS.filter(p=>!p.hidden&&(this.category()==='all'||p.category===this.category())));
+ readonly products=computed(()=>this.catalog.products().filter(p=>this.category()==='all'||p.category===this.category()));
  private sub=this.route.paramMap.subscribe(params=>{
    const c=params.get('category');
    const slug=params.get('slug');
-   this.category.set(CATEGORIES.some(x=>x.id===c)?c as CategoryId:this.nav.category() as CategoryId);
+   this.category.set(c||this.nav.category());
    this.slug.set(slug);
-   this.dialog.set(slug?PRODUCTS.find(p=>p.slug===slug&&!p.hidden)||null:null);
-   this.missing.set(!!slug&&!this.dialog());
  });
- constructor(){this.destroy.onDestroy(()=>this.sub.unsubscribe());}
+ constructor(){void this.catalog.load();this.destroy.onDestroy(()=>this.sub.unsubscribe());}
  ngAfterViewInit(){
    requestAnimationFrame(()=>this.moveIndicator());
    if(this.slug()) {
@@ -52,5 +51,5 @@ export class Catalog implements AfterViewInit {
    if(this.nav.priorUrl()) {this.nav.priorUrl.set(null); history.back();}
    else this.router.navigateByUrl(this.nav.category()==='all'?'/catalog':`/catalog/${this.nav.category()}`);
  }
- retry(){this.state.set('loading');setTimeout(()=>this.state.set('ok'),350);}
+ retry(){void this.catalog.load();}
 }

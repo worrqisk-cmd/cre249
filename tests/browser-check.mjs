@@ -3,7 +3,8 @@ import { chromium } from 'playwright';
 import { mkdir } from 'node:fs/promises';
 
 const base = process.env.BASE_URL || 'http://127.0.0.1:8447/cre249/';
-await mkdir('artifacts/angular', { recursive: true });
+const captureScreenshots = process.env.CAPTURE_SCREENSHOTS === '1';
+if (captureScreenshots) await mkdir('artifacts/angular', { recursive: true });
 const browser = await chromium.launch({ headless: true });
 try {
   for (const width of [360, 390, 768, 1440]) {
@@ -19,15 +20,15 @@ try {
     }
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false, `horizontal overflow at ${width}px`);
     await page.evaluate(() => scrollTo(0, 0));
-    await page.screenshot({ path: `artifacts/angular/home-${width}.png`, fullPage: true });
+    if (captureScreenshots) await page.screenshot({ path: `artifacts/angular/home-${width}.png`, fullPage: true });
     await page.goto(`${base}#/catalog`);
     await page.locator('.catalog-page .product-card').first().waitFor();
     assert.equal(await page.locator('.product-card').count(), 14);
-    await page.screenshot({ path: `artifacts/angular/catalog-${width}.png`, fullPage: true });
+    if (captureScreenshots) await page.screenshot({ path: `artifacts/angular/catalog-${width}.png`, fullPage: true });
     await page.goto(`${base}#/item/milka`);
     await page.getByRole('dialog').waitFor();
     assert.equal(await page.locator('.dialog-photo img').evaluate(img => img.complete && img.naturalWidth > 0), true);
-    await page.screenshot({ path: `artifacts/angular/item-${width}.png` });
+    if (captureScreenshots) await page.screenshot({ path: `artifacts/angular/item-${width}.png` });
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
     assert.deepEqual(errors, [], `browser errors at ${width}px`);
     await page.close();
