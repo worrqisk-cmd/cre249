@@ -21,6 +21,8 @@ main{min-height:100vh}
 .product-card:focus-visible .view-hint{opacity:1}
 .product-card:focus-visible .product-image{outline:3px solid var(--berry);outline-offset:3px}
 .dialog-panel:focus-within{outline:none}
+.nav a,.nav button{display:flex;align-items:center;min-height:44px;padding:8px 0;line-height:1.25}
+.nav a[aria-current="page"]{color:var(--berry)}
 @media(min-width:701px) and (max-width:1000px){
   .hero-grid{grid-template-columns:1fr 1fr;gap:32px;padding-block:42px 60px}
   .hero h1{font-size:clamp(3.3rem,6.8vw,5rem)}

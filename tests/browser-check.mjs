@@ -87,5 +87,58 @@ try {
   assert.equal(await noObserver.locator('#order .steps li').first().isVisible(), true);
   assert.deepEqual(noObserverErrors, []);
   await noObserver.close();
+  const desktop = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+  for (const route of ['', '#/catalog']) {
+    await desktop.goto(base + route);
+    if (route) await desktop.locator('.catalog-page').waitFor();
+    const menu = await desktop.locator('#primary-nav > *').evaluateAll(items => items.map(item => {
+      const range = document.createRange();
+      range.selectNodeContents(item);
+      return { top: range.getBoundingClientRect().top, height: item.getBoundingClientRect().height };
+    }));
+    assert.equal(new Set(menu.map(item => item.top)).size, 1, `menu text alignment on ${route || 'home'}`);
+    assert.ok(menu.every(item => item.height >= 44));
+    assert.equal(await desktop.locator('#primary-nav a').first().getAttribute('aria-current'), route ? 'page' : null);
+    const sectionLink = desktop.locator('#primary-nav button').first();
+    await desktop.mouse.move(0, 200);
+    const normalColor = await sectionLink.evaluate(el => getComputedStyle(el).color);
+    await sectionLink.hover();
+    assert.notEqual(await sectionLink.evaluate(el => getComputedStyle(el).color), normalColor);
+    await sectionLink.focus();
+    assert.equal(await sectionLink.evaluate(el => getComputedStyle(el).outlineStyle), 'solid');
+  }
+  for (const slug of ['orehovy', 'myasnoy', 'molochnaya-devochka']) {
+    await desktop.goto(`${base}#/catalog`);
+    await desktop.locator(`[data-product-slug="${slug}"]`).scrollIntoViewIfNeeded();
+    await desktop.evaluate(() => {
+      window.flightFrames = [];
+      const until = performance.now() + 750;
+      function sample() {
+        const target = document.querySelector('.dialog-photo img');
+        const copy = [...document.body.children].find(el => el.tagName === 'IMG' && el.style.zIndex === '100');
+        if (target) {
+          const targetRect = target.getBoundingClientRect();
+          const copyRect = copy?.getBoundingClientRect();
+          window.flightFrames.push({
+            covered: getComputedStyle(target).visibility === 'visible' || !!copy,
+            sameCrop: !copy || getComputedStyle(copy).objectPosition === getComputedStyle(target).objectPosition,
+            readyAtHandoff: !!copy || (target.complete && target.naturalWidth > 0),
+            distance: copyRect ? Math.hypot(targetRect.x - copyRect.x, targetRect.y - copyRect.y, targetRect.width - copyRect.width, targetRect.height - copyRect.height) : null,
+          });
+        }
+        if (performance.now() < until) requestAnimationFrame(sample);
+      }
+      requestAnimationFrame(sample);
+    });
+    await desktop.locator(`[data-product-slug="${slug}"]`).click();
+    await desktop.waitForTimeout(770);
+    const frames = await desktop.evaluate(() => window.flightFrames);
+    assert.ok(frames.length > 15, `${slug}: animation frames captured`);
+    assert.ok(frames.every(frame => frame.covered && frame.sameCrop && frame.readyAtHandoff), `${slug}: continuous image handoff`);
+    assert.ok(frames.filter(frame => frame.distance !== null).at(-1).distance < 1, `${slug}: copy reaches final image bounds`);
+    await desktop.keyboard.press('Escape');
+    await desktop.waitForURL('**/#/catalog');
+  }
+  await desktop.close();
   console.log('Browser checks passed: routes, filter, dialog, focus, WhatsApp, viewports, images, reduced motion.');
 } finally { await browser.close(); }

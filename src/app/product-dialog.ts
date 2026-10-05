@@ -38,18 +38,31 @@ export class ProductDialog implements AfterViewInit {
    this.host.nativeElement.querySelector<HTMLButtonElement>('.dialog-close')?.focus();
    if(!matchMedia('(prefers-reduced-motion: reduce)').matches){
      const panel=this.host.nativeElement.querySelector('.dialog-panel');
-     if(panel) this.animations.push(animate(panel,{opacity:[0,1],translateY:[18,0],duration:360,ease:'out(3)'}));
      const origin=this.nav.flight;
      const target=this.host.nativeElement.querySelector<HTMLImageElement>('.dialog-photo img');
+     // A moving panel changes the image's destination while its copy is in flight.
+     if(panel) this.animations.push(animate(panel,origin && target
+       ? {opacity:[0,1],duration:300,ease:'out(3)'}
+       : {opacity:[0,1],translateY:[18,0],duration:360,ease:'out(3)'}));
      if(origin && target){
        const end=target.getBoundingClientRect();
        const image=new Image(); image.src=origin.src; image.alt='';
-       Object.assign(image.style,{position:'fixed',zIndex:'100',left:`${origin.rect.left}px`,top:`${origin.rect.top}px`,width:`${origin.rect.width}px`,height:`${origin.rect.height}px`,objectFit:'cover',borderRadius:'14px',pointerEvents:'none'});
+       Object.assign(image.style,{position:'fixed',zIndex:'100',left:`${origin.rect.left}px`,top:`${origin.rect.top}px`,width:`${origin.rect.width}px`,height:`${origin.rect.height}px`,objectFit:'cover',objectPosition:getComputedStyle(target).objectPosition,borderRadius:'14px',pointerEvents:'none'});
        document.body.append(image);this.flyingImage=image;target.style.visibility='hidden';
-       this.animations.push(animate(image,{left:end.left,top:end.top,width:end.width,height:end.height,duration:420,ease:'out(3)',onComplete:()=>{image.remove();this.flyingImage=null;target.style.visibility='';}}));
+       this.animations.push(animate(image,{left:end.left,top:end.top,width:end.width,height:end.height,duration:420,ease:'out(3)',onComplete:()=>{void this.finishOpen(target,image);}}));
      }
    }
    this.destroy.onDestroy(()=>{document.removeEventListener('keydown',this.onKey);document.body.style.overflow='';document.querySelector('header')?.removeAttribute('inert');document.querySelector('.contacts')?.removeAttribute('inert');this.animations.forEach(animation=>animation.cancel());this.flyingImage?.remove();const target=this.host.nativeElement.querySelector<HTMLImageElement>('.dialog-photo img');if(target)target.style.visibility='';});
+ }
+ private async finishOpen(target:HTMLImageElement,image:HTMLImageElement){
+   // Let the selected responsive source decode before exposing it under the copy.
+   try { await target.decode(); } catch { /* A failed source still needs the normal image fallback. */ }
+   if(this.closing || this.destroy.destroyed || this.flyingImage!==image)return;
+   target.style.visibility='';
+   requestAnimationFrame(()=>{
+     if(this.closing || this.destroy.destroyed || this.flyingImage!==image)return;
+     image.remove();this.flyingImage=null;
+   });
  }
  requestClose(){
    if(this.closing)return;
@@ -60,12 +73,15 @@ export class ProductDialog implements AfterViewInit {
    const origin=this.nav.flight;
    const target=this.host.nativeElement.querySelector<HTMLImageElement>('.dialog-photo img');
    if(origin && target){
+     const activeCopy=this.flyingImage;
+     const start=(activeCopy || target).getBoundingClientRect();
+     const source=activeCopy?.src || target.currentSrc || origin.src;
+     const position=getComputedStyle(activeCopy || target).objectPosition;
      this.animations.forEach(animation=>animation.cancel());
-     this.flyingImage?.remove();
-     const start=target.getBoundingClientRect();
-     const image=new Image();image.src=origin.src;image.alt='';
-     Object.assign(image.style,{position:'fixed',zIndex:'100',left:`${start.left}px`,top:`${start.top}px`,width:`${start.width}px`,height:`${start.height}px`,objectFit:'cover',borderRadius:'14px',pointerEvents:'none'});
+     const image=new Image();image.src=source;image.alt='';
+     Object.assign(image.style,{position:'fixed',zIndex:'100',left:`${start.left}px`,top:`${start.top}px`,width:`${start.width}px`,height:`${start.height}px`,objectFit:'cover',objectPosition:position,borderRadius:'14px',pointerEvents:'none'});
      document.body.append(image);this.flyingImage=image;target.style.visibility='hidden';
+     activeCopy?.remove();
      this.animations.push(animate(image,{left:origin.rect.left,top:origin.rect.top,width:origin.rect.width,height:origin.rect.height,duration:280,ease:'inOut(2)',onComplete:()=>{image.remove();this.flyingImage=null;done();}}));
      if(panel)this.animations.push(animate(panel,{opacity:[1,0],duration:240,ease:'in(2)'}));
    } else if(panel)this.animations.push(animate(panel,{opacity:[1,0],translateY:[0,12],duration:220,ease:'in(2)',onComplete:done}));

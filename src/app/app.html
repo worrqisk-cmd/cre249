@@ -4,7 +4,7 @@
     <a class="brand" routerLink="/" aria-label="Выпечка у Миланы — главная">Выпечка <em>у Миланы</em></a>
     <button class="menu-toggle" type="button" (click)="menu.set(!menu())" [attr.aria-expanded]="menu()" aria-controls="primary-nav">{{menu()?'Закрыть':'Меню'}}</button>
     <nav id="primary-nav" class="nav" [class.open]="menu()" aria-label="Основная навигация">
-      <a routerLink="/catalog" (click)="menu.set(false)">Каталог</a>
+      <a routerLink="/catalog" [attr.aria-current]="isHome() ? null : 'page'" (click)="menu.set(false)">Каталог</a>
       <button type="button" (click)="goSection('about')">О Милане</button>
       <button type="button" (click)="goSection('order')">Как заказать</button>
       <button type="button" (click)="goSection('contacts')">Контакты</button>
