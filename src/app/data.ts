@@ -74,7 +74,7 @@ export const buildMessage = (product: Product, variant?: string) =>
   'Подскажите, пожалуйста, возможность приготовления, стоимость и удобную дату.';
 
 export const CONTACT_MESSAGE = 'Здравствуйте, Милана! Хочу обсудить заказ выпечки. Подскажите, пожалуйста, что можно заказать сейчас.';
-// From the source archive; Milana must confirm it before public launch.
+// From the source archive; the owner confirmed the number on 2026-10-06.
 export const PROTOTYPE_WHATSAPP = '+7 (964) 203-48-35';
 
 export const waLink = (number: string, text?: string) =>

@@ -14,7 +14,7 @@ Use Node 22.22.3 and pnpm 12.8.1 (`.mise.toml`). Run `pnpm install --frozen-lock
 
 ## Design and content
 
-Follow `Milana_Figma_Make_Public_Brief.md` for approved content and flows. `guidelines/Guidelines.md` records prototype colors and motion; the Angular version omits decorative section numbers and simplifies typography. Keep semantic controls, visible focus, reduced-motion behavior and readable content without IntersectionObserver. Archive prices, availability, collection rules and contact validity are unconfirmed. Never expose them as current facts. Use real supplied photos or an explicit missing-photo placeholder; do not invent a personal Telegram contact.
+Follow `Milana_Figma_Make_Public_Brief.md` for approved content and flows. `guidelines/Guidelines.md` records prototype colors and motion; the Angular version omits decorative section numbers and simplifies typography. Keep semantic controls, visible focus, reduced-motion behavior and readable content without IntersectionObserver. Archive prices, availability and collection rules are unconfirmed. The owner confirmed WhatsApp +7 (964) 203-48-35 on 2026-10-06. Use real supplied photos or an explicit missing-photo placeholder; do not invent a personal Telegram contact.
 
 ## Changes and review
 
