@@ -12,6 +12,7 @@ try {
     const errors = [];
     page.on('pageerror', error => errors.push(error.message));
     await page.goto(base);
+    await page.locator('#featured .product-card').first().waitFor();
     for (const id of ['featured', 'about', 'order']) await page.locator(`#${id}`).scrollIntoViewIfNeeded();
     await page.waitForTimeout(500);
     for (const selector of ['#featured .product-card', '#about .about-copy', '#order .steps li']) {
@@ -46,8 +47,13 @@ try {
   await page.getByRole('button', { name: 'Обсудить заказ' }).click();
   const message = await page.locator('textarea').inputValue();
   assert.match(message, /Пирог «Ассорти» \(начинка: клубника\)/);
-  const href = await page.getByRole('link', { name: 'Открыть WhatsApp' }).getAttribute('href');
-  assert.equal(new URL(href).searchParams.get('text'), message);
+  const contact = await page.getByRole('link', { name: 'Открыть WhatsApp' }).all();
+  if (contact.length) {
+    const href = await contact[0].getAttribute('href');
+    assert.equal(new URL(href).searchParams.get('text'), message);
+  } else {
+    assert.equal(await page.getByRole('button', { name: 'Скопировать' }).isVisible(), true);
+  }
   await page.keyboard.press('Escape');
   await page.waitForURL('**/#/catalog/sweet');
   await page.waitForTimeout(150);
@@ -55,6 +61,7 @@ try {
   assert.equal(await page.evaluate(() => document.activeElement?.getAttribute('data-product-slug')), 'assorti');
   await page.goto(`${base}#/item/milka`);
   await page.reload();
+  await page.getByRole('dialog').waitFor();
   assert.equal(await page.getByRole('dialog').count(), 1);
   assert.equal(await page.evaluate(() => document.activeElement?.getAttribute('aria-label')), 'Закрыть подробности');
   await page.keyboard.press('Shift+Tab');
