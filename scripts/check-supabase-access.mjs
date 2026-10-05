@@ -5,9 +5,20 @@ import { createClient } from '@supabase/supabase-js';
 
 const config = JSON.parse(await readFile('public/site-config.json', 'utf8'));
 assert.equal(new URL(config.supabaseUrl).hostname, 'bvlcyhcuneaphuletnqz.supabase.co');
-const ownerToken = process.env.OWNER_ACCESS_TOKEN;
-const otherToken = process.env.OTHER_ACCESS_TOKEN;
-if (!ownerToken || !otherToken) throw new Error('Set OWNER_ACCESS_TOKEN and OTHER_ACCESS_TOKEN from two real Supabase Auth sessions.');
+async function signIn(email, password) {
+  const authClient = createClient(config.supabaseUrl, config.supabasePublishableKey, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+  const { data, error } = await authClient.auth.signInWithPassword({ email, password });
+  if (error || !data.session) throw error || new Error('Could not create test session');
+  return data.session.access_token;
+}
+const ownerToken = process.env.OWNER_ACCESS_TOKEN ||
+  (process.env.SUPABASE_ADMIN_PASSWORD ? await signIn(config.adminEmail, process.env.SUPABASE_ADMIN_PASSWORD) : null);
+const otherToken = process.env.OTHER_ACCESS_TOKEN ||
+  (process.env.OTHER_TEST_EMAIL && process.env.OTHER_TEST_PASSWORD
+    ? await signIn(process.env.OTHER_TEST_EMAIL, process.env.OTHER_TEST_PASSWORD) : null);
+if (!ownerToken || !otherToken) throw new Error('Provide two real Auth sessions: OWNER_ACCESS_TOKEN and OTHER_ACCESS_TOKEN, or owner and other test passwords in process environment.');
 const client = token => createClient(config.supabaseUrl, config.supabasePublishableKey, {
   global: token ? { headers: { Authorization: `Bearer ${token}` } } : undefined,
   auth: { persistSession: false, autoRefreshToken: false },

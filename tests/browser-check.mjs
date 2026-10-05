@@ -28,6 +28,7 @@ try {
     if (captureScreenshots) await page.screenshot({ path: `artifacts/angular/catalog-${width}.png`, fullPage: true });
     await page.goto(`${base}#/item/milka`);
     await page.getByRole('dialog').waitFor();
+    await page.waitForFunction(() => { const img = document.querySelector('.dialog-photo img'); return img?.complete && img.naturalWidth > 0; });
     assert.equal(await page.locator('.dialog-photo img').evaluate(img => img.complete && img.naturalWidth > 0), true);
     if (captureScreenshots) await page.screenshot({ path: `artifacts/angular/item-${width}.png` });
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
@@ -70,6 +71,12 @@ try {
   await page.waitForURL('**/#/catalog');
   await page.goto(`${base}#/item/pechenochny`);
   assert.match(await page.getByRole('dialog').innerText(), /недоступно/i);
+  await page.goto(`${base}#/item/napoleon`);
+  assert.match(await page.getByRole('dialog').innerText(), /недоступно/i);
+  await page.goto(`${base}#/item/medovik`);
+  await page.getByRole('button', { name: 'Фото 2' }).click();
+  await page.waitForFunction(() => { const img = document.querySelector('.dialog-photo img'); return img?.complete && img.naturalWidth > 0; });
+  assert.equal(await page.locator('.dialog-photo img').first().evaluate(img => img.complete && img.naturalWidth > 0), true);
   await page.goto(`${base}#/catalog`);
   await page.locator('[data-product-slug="milka"]').click();
   await page.getByRole('button', { name: 'Закрыть подробности' }).click();
