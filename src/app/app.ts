@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { Router, RouterLink, RouterOutlet, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs';
 import { NavigationState } from './navigation-state';
-import { DEFAULT_DELIVERY, telegramLink, waLink } from './data';
+import { CONTACT_MESSAGE, DEFAULT_DELIVERY, PROTOTYPE_WHATSAPP, telegramLink, waLink } from './data';
 import { CatalogStore } from './catalog-store';
 @Component({selector:'app-root', standalone:true, imports:[RouterOutlet,RouterLink], templateUrl:'./app.html', styleUrl:'./app.css', changeDetection:ChangeDetectionStrategy.OnPush})
 export class App {
@@ -11,7 +11,8 @@ export class App {
   readonly catalog = inject(CatalogStore);
   readonly menu = signal(false);
   readonly isHome = signal(true);
-  readonly whatsapp = computed(() => this.catalog.settings()?.whatsapp_number ? waLink(this.catalog.settings()!.whatsapp_number!) : null);
+  readonly contactNumber = computed(() => this.catalog.settings()?.whatsapp_number || (this.catalog.state() === 'error' ? PROTOTYPE_WHATSAPP : null));
+  readonly whatsapp = computed(() => this.contactNumber() ? waLink(this.contactNumber()!, CONTACT_MESSAGE) : null);
   readonly telegram = computed(() => this.catalog.settings()?.telegram_username ? telegramLink(this.catalog.settings()!.telegram_username!) : null);
   readonly delivery = computed(() => this.catalog.settings()?.delivery_text || DEFAULT_DELIVERY);
   constructor() {

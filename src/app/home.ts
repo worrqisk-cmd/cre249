@@ -1,7 +1,7 @@
 import { AfterViewInit, ChangeDetectionStrategy, Component, computed, DestroyRef, ElementRef, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { animate } from 'animejs';
-import { DEFAULT_DELIVERY, PHOTOS, waLink, webpSet } from './data';
+import { CONTACT_MESSAGE, DEFAULT_DELIVERY, PHOTOS, PROTOTYPE_WHATSAPP, waLink, webpSet } from './data';
 import { CatalogStore } from './catalog-store';
 import { ProductCard } from './product-card';
 @Component({standalone:true, imports:[RouterLink,ProductCard], templateUrl:'./home.html', changeDetection:ChangeDetectionStrategy.OnPush})
@@ -13,7 +13,8 @@ export class Home implements AfterViewInit {
  readonly photos=PHOTOS;
  readonly webpSet=webpSet;
  readonly products=this.catalog.featured;
- readonly whatsapp=computed(()=>this.catalog.settings()?.whatsapp_number ? waLink(this.catalog.settings()!.whatsapp_number!) : null);
+ readonly contactNumber=computed(()=>this.catalog.settings()?.whatsapp_number || (this.catalog.state()==='error'?PROTOTYPE_WHATSAPP:null));
+ readonly whatsapp=computed(()=>this.contactNumber()?waLink(this.contactNumber()!,CONTACT_MESSAGE):null);
  readonly delivery=computed(()=>this.catalog.settings()?.delivery_text || DEFAULT_DELIVERY);
  constructor(){void this.catalog.load();}
  ngAfterViewInit() {

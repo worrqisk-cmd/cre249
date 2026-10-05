@@ -73,6 +73,10 @@ export const buildMessage = (product: Product, variant?: string) =>
   `Здравствуйте, Милана! Хочу обсудить заказ: ${product.title}${variant ? ` (начинка: ${variant.toLowerCase()})` : ''}. ` +
   'Подскажите, пожалуйста, возможность приготовления, стоимость и удобную дату.';
 
+export const CONTACT_MESSAGE = 'Здравствуйте, Милана! Хочу обсудить заказ выпечки. Подскажите, пожалуйста, что можно заказать сейчас.';
+// From the source archive; Milana must confirm it before public launch.
+export const PROTOTYPE_WHATSAPP = '+7 (964) 203-48-35';
+
 export const waLink = (number: string, text?: string) =>
   `https://wa.me/${number.replace(/\D/g, '')}${text ? `?text=${encodeURIComponent(text)}` : ''}`;
 

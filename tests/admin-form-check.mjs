@@ -8,6 +8,7 @@ const jwt = ['eyJhbGciOiJIUzI1NiJ9', Buffer.from(JSON.stringify({ sub: uid, role
 const browser = await chromium.launch({ headless: true });
 const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
 let saves = 0;
+let settingsSave;
 try {
   await page.route('**/auth/v1/**', route => {
     const url = new URL(route.request().url());
@@ -26,9 +27,13 @@ try {
       await new Promise(resolve => setTimeout(resolve, 180));
       return route.fulfill({ status: 201, contentType: 'application/json', body: JSON.stringify([{ ...record, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }]) });
     }
+    if (table === 'site_settings' && route.request().method() !== 'GET') {
+      settingsSave = JSON.parse(route.request().postData());
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([settingsSave]) });
+    }
     const body = table === 'products' ? [] : table === 'categories'
       ? [{ id: 'cakes', label: 'Торты', sort_order: 1, is_public: true }]
-      : { id: true, city: 'Москва', whatsapp_number: null, telegram_username: null, delivery_text: '' };
+      : { id: true, city: 'Москва', whatsapp_number: '+7 (964) 203-48-35', telegram_username: null, delivery_text: 'По договорённости' };
     return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(body) });
   });
   await page.goto(`${base}#/admin/login`);
@@ -36,6 +41,15 @@ try {
   await page.getByLabel('Пароль').fill('test-only');
   await page.getByRole('button', { name: 'Войти' }).click();
   await page.waitForURL('**/#/admin');
+  await page.getByRole('button', { name: 'Настройки сайта' }).click();
+  const phone = page.getByLabel('WhatsApp, номер телефона');
+  assert.equal(await phone.inputValue(), '+7 (964) 203-48-35');
+  await phone.fill('+7 (999) 111-22-33');
+  await page.getByRole('button', { name: 'Сохранить настройки' }).click();
+  await page.getByText('Настройки сохранены.').waitFor();
+  assert.equal(settingsSave.whatsapp_number, '+7 (999) 111-22-33');
+  assert.equal(settingsSave.delivery_text, 'По договорённости');
+  await page.getByRole('button', { name: 'Изделия' }).click();
   await page.getByRole('button', { name: 'Добавить' }).click();
   await page.getByLabel('Название').fill('Тестовый торт');
   await page.getByLabel('Slug').fill('test-cake');
@@ -46,5 +60,5 @@ try {
   page.once('dialog', dialog => dialog.dismiss());
   await page.getByRole('link', { name: /Посмотреть каталог/ }).click();
   assert.match(page.url(), /#\/admin$/, 'discard cancellation retains editor');
-  console.log('Admin form browser checks passed: owner login, one save on double click, unsaved guard.');
+  console.log('Admin form browser checks passed: editable WhatsApp settings, one product save on double click, unsaved guard.');
 } finally { await page.close(); await browser.close(); }

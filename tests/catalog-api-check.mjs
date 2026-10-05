@@ -24,6 +24,9 @@ async function scenario(name, productsStatus, products) {
   } else if (name === 'error') {
     await page.getByRole('heading', { name: 'Каталог сейчас не загрузился' }).waitFor();
     assert.equal(await page.locator('.product-card').count(), 0);
+    const href = await page.getByRole('link', { name: 'Написать в WhatsApp' }).getAttribute('href');
+    assert.equal(new URL(href).pathname, '/79642034835');
+    assert.match(new URL(href).searchParams.get('text'), /Хочу обсудить заказ выпечки/);
   } else {
     await page.locator('[data-product-slug="milka"]').waitFor();
     const request = page.waitForRequest(req => req.url().includes('/rest/v1/products'));

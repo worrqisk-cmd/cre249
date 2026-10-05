@@ -7,6 +7,7 @@ const captureScreenshots = process.env.CAPTURE_SCREENSHOTS === '1';
 if (captureScreenshots) await mkdir('artifacts/angular', { recursive: true });
 const browser = await chromium.launch({ headless: true });
 try {
+  let expectedProductCount;
   for (const width of [360, 390, 768, 1440]) {
     const page = await browser.newPage({ viewport: { width, height: 900 }, deviceScaleFactor: 1 });
     const errors = [];
@@ -24,7 +25,11 @@ try {
     if (captureScreenshots) await page.screenshot({ path: `artifacts/angular/home-${width}.png`, fullPage: true });
     await page.goto(`${base}#/catalog`);
     await page.locator('.catalog-page .product-card').first().waitFor();
-    assert.equal(await page.locator('.product-card').count(), 14);
+    const productCount = await page.locator('.catalog-page .product-card').count();
+    if (expectedProductCount === undefined) {
+      assert.ok(productCount >= 14, 'seeded products are visible');
+      expectedProductCount = productCount;
+    } else assert.equal(productCount, expectedProductCount);
     if (captureScreenshots) await page.screenshot({ path: `artifacts/angular/catalog-${width}.png`, fullPage: true });
     await page.goto(`${base}#/item/milka`);
     await page.getByRole('dialog').waitFor();
@@ -37,6 +42,16 @@ try {
   }
   const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
   await page.goto(base);
+  await page.getByRole('link', { name: 'Написать в WhatsApp' }).waitFor();
+  assert.match(await page.locator('#contacts').innerText(), /\+7 \(964\) 203-48-35/);
+  const generalLinks = await page.locator('a[href*="wa.me/"]').evaluateAll(links => links.map(link => link.getAttribute('href')));
+  assert.ok(generalLinks.length >= 3);
+  for (const href of generalLinks) {
+    const url = new URL(href);
+    assert.equal(url.pathname, '/79642034835');
+    assert.match(url.searchParams.get('text'), /Хочу обсудить заказ выпечки/);
+  }
+  assert.equal(await page.getByRole('link', { name: 'Написать в Telegram' }).count(), 0);
   await page.getByRole('link', { name: 'Выбрать выпечку' }).click();
   await page.waitForURL('**/#/catalog');
   await page.getByRole('button', { name: 'Сладкие пироги', exact: true }).click();
@@ -49,12 +64,10 @@ try {
   const message = await page.locator('textarea').inputValue();
   assert.match(message, /Пирог «Ассорти» \(начинка: клубника\)/);
   const contact = await page.getByRole('link', { name: 'Открыть WhatsApp' }).all();
-  if (contact.length) {
-    const href = await contact[0].getAttribute('href');
-    assert.equal(new URL(href).searchParams.get('text'), message);
-  } else {
-    assert.equal(await page.getByRole('button', { name: 'Скопировать' }).isVisible(), true);
-  }
+  assert.equal(contact.length, 1);
+  const href = await contact[0].getAttribute('href');
+  assert.equal(new URL(href).pathname, '/79642034835');
+  assert.equal(new URL(href).searchParams.get('text'), message);
   await page.keyboard.press('Escape');
   await page.waitForURL('**/#/catalog/sweet');
   await page.waitForTimeout(150);
@@ -85,8 +98,8 @@ try {
   await page.getByRole('button', { name: 'Торты', exact: true }).click();
   await page.getByRole('button', { name: 'Десерты и зефир', exact: true }).click();
   await page.getByRole('button', { name: 'Все', exact: true }).click();
-  await page.waitForFunction(() => location.hash === '#/catalog' && document.querySelectorAll('.catalog-page .product-card').length === 14);
-  assert.equal(await page.locator('.product-card').count(), 14);
+  await page.waitForFunction(count => location.hash === '#/catalog' && document.querySelectorAll('.catalog-page .product-card').length === count, expectedProductCount);
+  assert.equal(await page.locator('.product-card').count(), expectedProductCount);
   await page.close();
   const reduced = await browser.newPage({ viewport: { width: 390, height: 844 }, reducedMotion: 'reduce' });
   await reduced.goto(base);
