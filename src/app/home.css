@@ -138,3 +138,14 @@ app-product-card {
     padding: 16px 12px;
   }
 }
+
+/* The complete square archive photo stays uncropped on both layouts. */
+.about-photo {
+  aspect-ratio: 1;
+  max-width: 420px;
+  max-height: none;
+}
+.about-photo img {
+  object-fit: contain;
+  object-position: 50% 50%;
+}
