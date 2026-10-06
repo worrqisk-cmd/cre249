@@ -1,0 +1,61 @@
+name: Publish Angular to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.8.1
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22.22.3
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test --watch=false
+      - run: pnpm build
+      - run: pnpm exec playwright install --with-deps chromium
+      - name: Check production journeys without media capture
+        run: |
+          pnpm preview:pages > /tmp/pages-preview.log 2>&1 &
+          for attempt in {1..30}; do
+            if curl --fail --silent http://127.0.0.1:8447/cre249/ > /dev/null; then break; fi
+            sleep 1
+          done
+          pnpm test:catalog-api
+          pnpm test:admin-form
+          pnpm test:e2e
+        env:
+          CAPTURE_SCREENSHOTS: '0'
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: dist/milana-angular/browser
+  deploy:
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/configure-pages@v5
+      - uses: actions/deploy-pages@v4
+        id: deployment
