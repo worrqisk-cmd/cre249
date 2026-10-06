@@ -3,7 +3,19 @@ import { appConfig } from './app/app.config';
 import { App } from './app/app';
 import { SITE_CONFIG, SiteConfig } from './app/site-config';
 
+window.addEventListener('hashchange', () => {
+  if (location.hash.startsWith('#/')) location.reload();
+});
+
 async function start() {
+  if (location.hash.startsWith('#/')) {
+    const legacy = location.hash.slice(1);
+    if (/^\/(?:catalog(?:\/[a-z0-9-]+)?|item\/[a-z0-9-]+|admin(?:\/login)?|)\/?(?:\?.*)?$/.test(legacy)) {
+      const target = new URL(legacy.replace(/^\//, ''), document.baseURI);
+      if (!target.pathname.endsWith('/')) target.pathname += '/';
+      history.replaceState(null, '', target.pathname + target.search);
+    }
+  }
   const response = await fetch(new URL('site-config.json', document.baseURI), { cache: 'no-store' });
   if (!response.ok) throw new Error('Public site configuration is unavailable');
   const config = await response.json() as SiteConfig;

@@ -9,5 +9,5 @@ export const routes: Routes = [
   { path: 'item/:slug', loadComponent: () => import('./catalog').then(m => m.Catalog) },
   { path: 'admin/login', loadComponent: () => import('./admin-login').then(m => m.AdminLogin) },
   { path: 'admin', canActivate: [adminGuard], canDeactivate: [unsavedGuard], loadComponent: () => import('./admin-panel').then(m => m.AdminPanel) },
-  { path: '**', redirectTo: '' },
+  { path: '**', loadComponent: () => import('./not-found').then(m => m.NotFound) },
 ];

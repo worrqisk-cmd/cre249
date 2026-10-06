@@ -1,6 +1,7 @@
 import { Injectable, signal } from "@angular/core";
 @Injectable({ providedIn: "root" })
 export class NavigationState {
+  readonly openedSlugs = new Set<string>();
   flight: { rect: DOMRect; src: string; photo?: string } | null = null;
   readonly category = signal("all");
   readonly scrollY = signal(0);
@@ -12,6 +13,7 @@ export class NavigationState {
     image?: HTMLImageElement | null,
     photo?: string,
   ) {
+    this.openedSlugs.add(slug);
     this.scrollY.set(window.scrollY);
     this.itemOrigin.set(slug);
     this.priorUrl.set(url);

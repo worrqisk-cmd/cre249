@@ -88,6 +88,7 @@ export class ProductCard {
   private router = inject(Router);
   private nav = inject(NavigationState);
   open(event: MouseEvent) {
+    if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey || event.button !== 0) return;
     this.nav.open(
       this.product().slug,
       this.router.url,

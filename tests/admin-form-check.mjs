@@ -40,7 +40,7 @@ try {
   await page.getByLabel('Логин').fill('milana');
   await page.getByLabel('Пароль').fill('test-only');
   await page.getByRole('button', { name: 'Войти' }).click();
-  await page.waitForURL('**/#/admin');
+  await page.waitForURL('**/admin/');
   await page.getByRole('button', { name: 'Настройки сайта' }).click();
   const phone = page.getByLabel('WhatsApp, номер телефона');
   assert.equal(await phone.inputValue(), '+7 (964) 203-48-35');
@@ -59,6 +59,6 @@ try {
   await page.getByLabel('Описание').fill('Несохранённый текст');
   page.once('dialog', dialog => dialog.dismiss());
   await page.getByRole('link', { name: /Посмотреть каталог/ }).click();
-  assert.match(page.url(), /#\/admin$/, 'discard cancellation retains editor');
+  assert.match(page.url(), /\/admin\/$/, 'discard cancellation retains editor');
   console.log('Admin form browser checks passed: editable WhatsApp settings, one product save on double click, unsaved guard.');
 } finally { await page.close(); await browser.close(); }

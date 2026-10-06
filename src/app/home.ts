@@ -80,6 +80,7 @@ export class Home implements AfterViewInit {
     void this.catalog.load();
   }
   ngAfterViewInit() {
+    if (typeof window === "undefined") return;
     if (this.nav.itemOrigin()) setTimeout(() => this.nav.restoreFocus(), 50);
     const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
     this.destroy.onDestroy(() =>

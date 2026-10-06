@@ -2,7 +2,7 @@
 
 ## Current application
 
-This repository contains the public «Выпечка у Миланы» site on Angular 22.2.1. It uses standalone components, zoneless change detection, Signals, lazy hash routes, anime.js and static assets. The Supabase catalog and owner-only admin are developed on `feat/supabase-catalog-admin`. The React prototype remains in the untouched `../milana` folder and its `react-prototype-baseline.tar.gz` archive.
+This repository contains the public «Выпечка у Миланы» site on Angular 22.2.1. It uses standalone components, zoneless change detection, Signals, lazy path routes and static public prerender, anime.js and static assets. The Supabase catalog and owner-only admin are developed on `feat/supabase-catalog-admin`. The React prototype remains in the untouched `../milana` folder and its `react-prototype-baseline.tar.gz` archive.
 
 ## Structure
 
@@ -19,3 +19,5 @@ Follow `Milana_Figma_Make_Public_Brief.md` for approved content and flows. `guid
 ## Changes and review
 
 Work on `feat/supabase-catalog-admin` for the catalog/admin task. Do not publish or push without authorization. Do not record video or create screenshots unless the user explicitly asks for them. Include affected routes and build/browser results. `.gitattributes` keeps ordinary site photos in Git; do not reintroduce broad LFS rules for those files. Keep `../milana` and its backup intact.
+
+Static URL generation and catalog unpublishing procedure: see `STATIC_PAGES.md`. Run `pnpm test:routing` against production without SPA fallback.

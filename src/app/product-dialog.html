@@ -1,8 +1,9 @@
-<div class="dialog-backdrop" (click)="requestClose()"></div>
+@if(!standalone()){<div class="dialog-backdrop" (click)="requestClose()"></div>}
 <div
   class="dialog-panel"
-  role="dialog"
-  aria-modal="true"
+  [class.item-page]="standalone()"
+  [attr.role]="standalone() ? null : 'dialog'"
+  [attr.aria-modal]="standalone() ? null : 'true'"
   aria-labelledby="dialog-title"
 >
   <button
@@ -60,7 +61,7 @@
     </div>
     <div class="dialog-content" [class.is-composing]="composing()">
       <p class="eyebrow">Выпечка у Миланы</p>
-      <h2 id="dialog-title">{{product()!.title}}</h2>
+      @if(standalone()){<h1 id="dialog-title">{{product()!.title}}</h1>}@else{<h2 id="dialog-title">{{product()!.title}}</h2>}
       @if(!composing()){
       <p
         class="dialog-price"

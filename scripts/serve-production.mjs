@@ -9,11 +9,11 @@ const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; ch
 createServer(async (request, response) => {
   const pathname = new URL(request.url || '/', `http://${request.headers.host}`).pathname;
   if (!pathname.startsWith(prefix)) { response.writeHead(404).end(); return; }
-  const relative = decodeURIComponent(pathname.slice(prefix.length)) || 'index.html';
+  const relative = decodeURIComponent(pathname.slice(prefix.length)) + (pathname.endsWith('/') ? 'index.html' : '');
   const file = resolve(root, relative);
   if (file !== root && !file.startsWith(root + sep)) { response.writeHead(403).end(); return; }
   try {
     const body = await readFile(file);
     response.writeHead(200, { 'Content-Type': types[extname(file)] || 'application/octet-stream' }).end(body);
-  } catch { response.writeHead(404).end(); }
+  } catch { response.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8' }).end(await readFile(resolve(root, '404.html'))); }
 }).listen(port, '127.0.0.1', () => console.log(`Production preview: http://127.0.0.1:${port}${prefix}`));

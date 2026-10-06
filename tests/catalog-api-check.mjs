@@ -34,8 +34,8 @@ async function scenario(name, productsStatus, products) {
     const url = new URL((await request).url());
     assert.equal(url.searchParams.get('published'), 'eq.true');
     await page.goto(`${base}#/item/pechenochny`);
-    await page.getByRole('dialog').waitFor();
-    assert.match(await page.getByRole('dialog').innerText(), /недоступно/i);
+    await page.locator('.item-page').waitFor();
+    assert.match(await page.locator('.item-page').innerText(), /недоступно/i);
   }
   assert.deepEqual(errors, [], `${name}: browser errors`);
   await page.close();
@@ -55,7 +55,7 @@ try {
   await admin.route('**/auth/v1/user', route => route.fulfill({ status: 401, contentType: 'application/json', body: '{"message":"no session"}' }));
   await admin.route('**/auth/v1/token**', route => { passwordRequests++; return route.fulfill({ status: 400, contentType: 'application/json', body: '{"message":"invalid"}' }); });
   await admin.goto(`${base}#/admin`);
-  await admin.waitForURL('**/#/admin/login');
+  await admin.waitForURL('**/admin/login/');
   await admin.getByLabel('Логин').fill('other');
   await admin.getByLabel('Пароль').fill('example-password');
   await admin.getByRole('button', { name: 'Войти' }).click();

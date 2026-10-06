@@ -22,6 +22,7 @@ import { NavigationState } from "./navigation-state";
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProductDialog implements AfterViewInit {
+  readonly standalone = input(false);
   readonly product = input<Product | null>(null);
   readonly missing = input(false);
   readonly closeRequested = output<void>();
@@ -76,7 +77,7 @@ export class ProductDialog implements AfterViewInit {
   private closing = false;
   private flyingImage: HTMLImageElement | null = null;
   private animations: ReturnType<typeof animate>[] = [];
-  private viewport = window.visualViewport;
+  private viewport = typeof window === "undefined" ? null : window.visualViewport;
   private updateViewport = () => {
     const viewport = this.viewport;
     if (!viewport) return;
@@ -94,7 +95,7 @@ export class ProductDialog implements AfterViewInit {
       event.preventDefault();
       this.requestClose();
     }
-    if (event.key === "Tab") {
+    if (event.key === "Tab" && !this.standalone()) {
       const items = [
         ...this.host.nativeElement.querySelectorAll<HTMLElement>(
           "button,a[href],textarea",
@@ -111,6 +112,13 @@ export class ProductDialog implements AfterViewInit {
     }
   };
   ngAfterViewInit() {
+    if (typeof window === "undefined") return;
+    if (this.standalone()) {
+      this.photoReady.set(true);
+      document.addEventListener("keydown", this.onKey);
+      this.destroy.onDestroy(() => document.removeEventListener("keydown", this.onKey));
+      return;
+    }
     document.body.style.overflow = "hidden";
     this.updateViewport();
     this.viewport?.addEventListener("resize", this.updateViewport);

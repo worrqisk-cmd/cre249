@@ -39,7 +39,7 @@ jobs:
           done
           pnpm test:catalog-api
           pnpm test:admin-form
-          pnpm test:e2e
+          pnpm test:routing
         env:
           CAPTURE_SCREENSHOTS: '0'
       - uses: actions/upload-pages-artifact@v4
