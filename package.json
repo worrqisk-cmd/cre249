@@ -4,10 +4,10 @@
   "scripts": {
     "ng": "ng",
     "start": "node scripts/configure.mjs && ng serve",
-    "build": "node scripts/configure.mjs && ng build",
+    "build": "node scripts/configure.mjs && node scripts/prepare-static.mjs && ng build && node scripts/finalize-static.mjs",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "test:e2e": "node tests/browser-check.mjs",
+    "test:e2e": "node tests/static-routing-check.mjs",
     "test:catalog-api": "node tests/catalog-api-check.mjs",
     "test:admin-form": "node tests/admin-form-check.mjs",
     "test:public-ui": "node tests/public-ui-check.mjs",
@@ -17,7 +17,8 @@
     "import:photos": "node scripts/configure.mjs && node scripts/import-catalog-photos.mjs",
     "check:owner-photos": "node scripts/configure.mjs && node scripts/check-owner-photos.mjs",
     "check:access": "node scripts/configure.mjs && node scripts/check-supabase-access.mjs",
-    "preview:design": "node scripts/configure.mjs && ng serve --configuration design --host 127.0.0.1 --port 8450"
+    "preview:design": "node scripts/configure.mjs && ng serve --configuration design --host 127.0.0.1 --port 8450",
+    "test:routing": "node tests/static-routing-check.mjs"
   },
   "private": true,
   "packageManager": "pnpm@12.8.1",
@@ -27,7 +28,9 @@
     "@angular/core": "22.2.1",
     "@angular/forms": "22.2.1",
     "@angular/platform-browser": "22.2.1",
+    "@angular/platform-server": "22.2.1",
     "@angular/router": "22.2.1",
+    "@angular/ssr": "22.2.1",
     "@supabase/supabase-js": "^2.117.2",
     "animejs": "4.2.2",
     "rxjs": "7.8.2",

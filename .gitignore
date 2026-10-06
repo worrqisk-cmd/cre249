@@ -23,3 +23,7 @@ logs/
 /.opencode-skills/
 
 .angular/
+public/catalog-media/
+src/app/static-catalog.json
+.static-routes.txt
+.static-paths.json

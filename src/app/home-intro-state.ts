@@ -13,7 +13,7 @@ export class HomeIntroState {
   readonly shouldPlay = signal(false);
   private readonly router = inject(Router);
   private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
-  private readonly startedOnHome = this.isBrowser && this.isHomeHash();
+  private readonly startedOnHome = this.isBrowser && this.isHomePath();
   private readonly fullPageLoad = this.isBrowser && this.isDocumentLoad();
   private readonly reducedMotion =
     this.isBrowser && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -39,9 +39,8 @@ export class HomeIntroState {
       });
   }
 
-  private isHomeHash() {
-    const hash = window.location.hash;
-    return hash === "" || hash === "#/";
+  private isHomePath() {
+    return window.location.pathname === new URL(document.baseURI).pathname;
   }
 
   private isDocumentLoad() {

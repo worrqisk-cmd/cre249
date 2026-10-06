@@ -1,6 +1,8 @@
-import { computed, inject, Injectable, signal } from '@angular/core';
+import { computed, inject, Injectable, signal, InjectionToken } from '@angular/core';
 import { Category, Product, ProductPhoto, ProductRow, SiteSettings } from './data';
 import { PHOTO_BUCKET, SupabaseService } from './supabase';
+
+export const STATIC_CATALOG = new InjectionToken<{ products: Product[]; categories: Category[]; settings: SiteSettings }>('static catalog');
 
 @Injectable({ providedIn: 'root' })
 export class CatalogStore {
@@ -13,6 +15,13 @@ export class CatalogStore {
   private inFlight: Promise<void> | null = null;
   private refreshTimer: ReturnType<typeof setTimeout> | null = null;
   private refreshAt = 0;
+
+  constructor() {
+    const snapshot = inject(STATIC_CATALOG, { optional: true });
+    if (snapshot) {
+      this.products.set(snapshot.products); this.categories.set(snapshot.categories); this.settings.set(snapshot.settings); this.state.set('ok'); this.refreshAt = Infinity;
+    }
+  }
 
   load(force = false): Promise<void> {
     if (this.inFlight) return this.inFlight;

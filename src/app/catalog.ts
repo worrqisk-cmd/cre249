@@ -38,6 +38,7 @@ export class Catalog implements AfterViewInit {
       this.catalog.products().find((product) => product.slug === this.slug()) ||
       null,
   );
+  readonly standalone = !this.nav.openedSlugs.has(this.route.snapshot.paramMap.get("slug") || "");
   readonly missing = computed(() => !!this.slug() && !this.dialog());
   readonly state = this.catalog.state;
   readonly indicator = signal({ left: 0, top: 0, width: 0 });
@@ -54,12 +55,14 @@ export class Catalog implements AfterViewInit {
     const slug = params.get("slug");
     this.category.set(c || this.nav.category());
     this.slug.set(slug);
+    if (slug && this.nav.openedSlugs.has(slug)) this.nav.itemOrigin.set(slug);
   });
   constructor() {
     void this.catalog.load();
     this.destroy.onDestroy(() => this.sub.unsubscribe());
   }
   ngAfterViewInit() {
+    if (typeof window === "undefined") return;
     requestAnimationFrame(() => this.moveIndicator());
     const categories = this.host.nativeElement.querySelector(".category-list");
     if (categories && typeof ResizeObserver !== "undefined") {
@@ -67,7 +70,7 @@ export class Catalog implements AfterViewInit {
       resize.observe(categories);
       this.destroy.onDestroy(() => resize.disconnect());
     }
-    if (this.slug()) {
+    if (this.slug() && !this.standalone) {
       document.body.style.overflow = "hidden";
       this.destroy.onDestroy(() => (document.body.style.overflow = ""));
     } else if (this.nav.itemOrigin()) {
@@ -92,7 +95,7 @@ export class Catalog implements AfterViewInit {
       });
   }
   close() {
-    if (this.nav.priorUrl()) {
+    if (!this.standalone) {
       this.nav.priorUrl.set(null);
       history.back();
     } else

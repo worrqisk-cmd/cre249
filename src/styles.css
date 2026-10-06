@@ -1141,3 +1141,17 @@ p {
     height: 240px;
   }
 }
+
+.dialog-panel.item-page {
+  position: relative;
+  inset: auto;
+  transform: none;
+  margin: 32px auto;
+  width: min(1100px, calc(100% - 32px));
+  max-height: none;
+  overflow: visible;
+}
+.item-page .dialog-grid { min-height: 0; }
+.item-page .dialog-content { overflow: visible; }
+.item-page .dialog-content h1 { font-size: clamp(1.75rem, 3vw, 2.5rem); margin-bottom: 12px; }
+.item-page .dialog-photo { max-height: 800px; }

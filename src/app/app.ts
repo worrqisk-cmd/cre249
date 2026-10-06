@@ -1,3 +1,4 @@
+import { Seo } from './seo';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { Router, RouterLink, RouterOutlet, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs';
@@ -7,6 +8,7 @@ import { CONTACT_MESSAGE, DEFAULT_DELIVERY, PROTOTYPE_WHATSAPP, telegramLink, wa
 import { CatalogStore } from './catalog-store';
 @Component({selector:'app-root', standalone:true, imports:[RouterOutlet,RouterLink], templateUrl:'./app.html', styleUrl:'./app.css', changeDetection:ChangeDetectionStrategy.OnPush})
 export class App {
+  private seo = inject(Seo);
   private router = inject(Router);
   readonly nav = inject(NavigationState);
   // Instantiate this before the first lazy route resolves.

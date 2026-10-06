@@ -1,7 +1,9 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "types": []
+    "types": [
+      "node"
+    ]
   },
   "include": [
     "src/**/*.ts"
@@ -9,5 +11,9 @@
   "exclude": [
     "src/**/*.spec.ts",
     "src/app/design-preview/**/*.ts"
+  ],
+  "files": [
+    "src/main.ts",
+    "src/main.server.ts"
   ]
 }
