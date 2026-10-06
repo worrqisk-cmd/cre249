@@ -10,6 +10,7 @@
     "test:e2e": "node tests/browser-check.mjs",
     "test:catalog-api": "node tests/catalog-api-check.mjs",
     "test:admin-form": "node tests/admin-form-check.mjs",
+    "test:public-ui": "node tests/public-ui-check.mjs",
     "test:motion": "node tests/product-motion-check.mjs",
     "preview:pages": "node scripts/serve-production.mjs",
     "import:photos": "node scripts/configure.mjs && node scripts/import-catalog-photos.mjs",
