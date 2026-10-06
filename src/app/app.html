@@ -1,0 +1,22 @@
+<a class="skip" href="#content">К содержанию</a>
+<header class="site-header">
+  <div class="header-inner">
+    <a class="brand" routerLink="/" aria-label="Выпечка у Миланы — главная">Выпечка <em>у Миланы</em></a>
+    <button class="menu-toggle" type="button" (click)="menu.set(!menu())" [attr.aria-expanded]="menu()" aria-controls="primary-nav">{{menu()?'Закрыть':'Меню'}}</button>
+    <nav id="primary-nav" class="nav" [class.open]="menu()" aria-label="Основная навигация">
+      <a routerLink="/catalog" [attr.aria-current]="isHome() ? null : 'page'" (click)="menu.set(false)">Каталог</a>
+      <button type="button" (click)="goSection('about')">О Милане</button>
+      <button type="button" (click)="goSection('order')">Как заказать</button>
+      <button type="button" (click)="goSection('contacts')">Контакты</button>
+    </nav>
+    @if(whatsapp()){<a class="header-contact" [href]="whatsapp()" target="_blank" rel="noopener noreferrer">Написать Милане ↗</a>}
+  </div>
+</header>
+<main id="content"><router-outlet /></main>
+<section class="contacts" id="contacts">
+  <div class="container contacts-grid">
+    <div><p class="eyebrow">Контакты</p><h2>Напишите мне —<br><span>обсудим ваш заказ</span></h2></div>
+    <div><p>{{catalog.settings()?.city || 'Москва'}} · Домашняя выпечка на заказ</p>@if(whatsapp()){<p>WhatsApp: <a [href]="whatsapp()" target="_blank" rel="noopener noreferrer">{{contactNumber()}}</a></p><a class="button light" [href]="whatsapp()" target="_blank" rel="noopener noreferrer">Написать в WhatsApp</a>}@if(telegram()){<p><a [href]="telegram()" target="_blank" rel="noopener noreferrer">Написать в Telegram</a></p>}@if(!whatsapp()&&!telegram()){<p>Контакты временно недоступны.</p>}<a class="text-link" routerLink="/catalog">К каталогу →</a></div>
+  </div>
+  <footer class="container footer"><span>© Выпечка у Миланы, Москва</span><span>{{delivery()}}</span></footer>
+</section>

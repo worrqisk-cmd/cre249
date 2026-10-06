@@ -1,41 +1,21 @@
-# figma-make-app
+# Repository Guidelines
 
-React + Vite + Tailwind CSS project running inside Figma Make.
+## Current application
 
-## Development Server
+This repository contains the public «Выпечка у Миланы» site on Angular 22.2.1. It uses standalone components, zoneless change detection, Signals, lazy hash routes, anime.js and static assets. The Supabase catalog and owner-only admin are developed on `feat/supabase-catalog-admin`. The React prototype remains in the untouched `../milana` folder and its `react-prototype-baseline.tar.gz` archive.
 
-A Vite development server is **already running** on `$PORT` (default 8443). You don't need to start it manually.
+## Structure
 
-- Preview URL: The user can access the running app through the preview panel
-- Hot reload: Changes to source files are reflected immediately
+`src/app/app.ts` is the shared shell. `home.ts`, `catalog.ts` and `product-dialog.ts` implement the public journey; `product-card.ts` is shared, `navigation-state.ts` restores focus and scroll. `catalog-store.ts` loads typed Supabase data, while `admin-panel.ts` and `admin-auth.ts` implement owner editing. `src/styles.css` defines the visual system. Selected real photos are in `public/photos/`; new uploads go to private Storage. `supabase/` holds the migration and initial import, and `SUPABASE_SETUP.md` explains setup. The source archive remains at `../milana/vypech.zip` and is excluded from the site build.
 
-## Project Structure
+## Commands
 
-This is the canonical project structure. Start with task-relevant files below. Only follow imports or inspect other files when required, when a documented path is missing, or when the repository contradicts this guide.
+Use Node 22.22.3 and pnpm 12.8.1 (`.mise.toml`). Run `pnpm install --frozen-lockfile`, `pnpm start --port 8446` for development, `pnpm test --watch=false` for unit checks, and `pnpm build` for the production build. Start/build generate the public runtime config from environment, `.env.local`, or `.env.example`. The production configuration sets `baseHref` to `/cre249/`; output is `dist/milana-angular/browser`. Run `pnpm preview:pages` to serve that output at `http://127.0.0.1:8447/cre249/`. `pnpm test:catalog-api` checks API states without media capture; `pnpm test:e2e` needs a seeded Supabase project. Install Chromium once with `pnpm exec playwright install chromium` if needed.
 
-- `src/main.tsx` - React entrypoint; imports `src/index.css` and mounts `src/App.tsx` into the `#root` element
-- `src/App.tsx` - Primary application component and the usual starting point for UI work
-- `src/index.css` - Global CSS entrypoint and Tailwind CSS v4 import
-- `index.html` - Vite HTML shell containing the `#root` element and loading `src/main.tsx`
-- `package.json` - Project dependencies and the Vite build, development, preview, and formatting scripts
-- `vite.config.ts` - Vite configuration with React, Tailwind CSS v4, and Figma Make plugins plus the `@` alias for `src`
-- `.mise.toml` - Toolchain versions for Node.js and pnpm
+## Design and content
 
-## Dependencies
+Follow `Milana_Figma_Make_Public_Brief.md` for approved content and flows. `guidelines/Guidelines.md` records prototype colors and motion; the Angular version omits decorative section numbers and simplifies typography. Keep semantic controls, visible focus, reduced-motion behavior and readable content without IntersectionObserver. Archive prices, availability and collection rules are unconfirmed. The owner confirmed WhatsApp +7 (964) 203-48-35 on 2026-10-06. Use real supplied photos or an explicit missing-photo placeholder; do not invent a personal Telegram contact.
 
-- Runtime: React 19 and React DOM 19
-- Styling: Tailwind CSS v4 with the `@tailwindcss/vite` plugin
-- Build tooling: Vite 8, TypeScript 5.7, and `@vitejs/plugin-react`
-- Formatting: oxfmt
+## Changes and review
 
-## Styling
-
-This project uses **Tailwind CSS v4** through the `@tailwindcss/vite` plugin configured in `vite.config.ts`. `src/index.css` imports Tailwind with `@import 'tailwindcss';`. Use Tailwind utility classes directly in JSX and put global CSS or Tailwind v4 theme customization in `src/index.css`. This scaffold does not need a Tailwind config file or PostCSS config.
-
-`src/main.tsx` imports `src/index.css`, so global font wiring belongs in `src/index.css`. Keep CSS `@import` statements first, then add any `@font-face` rules and font-family defaults there.
-
-## Code quality
-
-- Use double quotes for strings containing apostrophes (`"We're here to help"`), or escape them in single-quoted strings. An unescaped apostrophe in a single-quoted string breaks the build.
-- Ensure JSX tags are closed and braces are balanced.
-- Export components as default exports.
+Work on `feat/supabase-catalog-admin` for the catalog/admin task. Do not publish or push without authorization. Do not record video or create screenshots unless the user explicitly asks for them. Include affected routes and build/browser results. `.gitattributes` keeps ordinary site photos in Git; do not reintroduce broad LFS rules for those files. Keep `../milana` and its backup intact.

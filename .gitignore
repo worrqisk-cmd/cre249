@@ -3,6 +3,8 @@ dist/
 build/
 .cache/
 .env*
+!.env.example
+public/site-config.json
 .vite/
 vite.config.*.timestamp-*
 *.tsbuildinfo
@@ -19,3 +21,5 @@ logs/
 # beside it.
 /.plugins/
 /.opencode-skills/
+
+.angular/

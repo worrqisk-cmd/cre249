@@ -1,0 +1,29 @@
+<div class="design-preview" [class]="'design-preview variant-'+variant">
+  <nav class="preview-switch" aria-label="Варианты главной"><span>Эскизы главной</span><a routerLink="/design/a" [attr.aria-current]="variant==='a'?'page':null">А · Витрина</a><a routerLink="/design/b" [attr.aria-current]="variant==='b'?'page':null">Б · Кухня</a><a routerLink="/design/c" [attr.aria-current]="variant==='c'?'page':null">В · Фактура</a></nav>
+  @if(catalog.state()==='loading'){<p class="loading" role="status">Собираем витрину…</p>}
+  @if(catalog.state()==='error'){<div class="loading"><p>Не удалось загрузить выпечку.</p><button class="button outline" (click)="catalog.load(true)">Повторить</button></div>}
+  @switch(variant){
+    @case('a'){
+      <section class="shop-front">
+        <div class="shop-intro"><p>Домашняя выпечка в Москве</p><h1>Что к столу?</h1><p class="intro-text">Пирог на ужин, торт к чаю или десерт в подарок — выбирайте у Миланы.</p><a class="solid-link" routerLink="/catalog">Весь ассортимент <span>↗</span></a></div>
+        <div class="shop-window">@for(p of selected().slice(0,3);track p.slug){<app-product-card [product]="p"/>}</div>
+        <div class="category-shelf">@for(c of catalog.categories();track c.id){<a [routerLink]="'/catalog/'+c.id">{{c.label}} <span>→</span></a>}</div>
+      </section>
+      <section class="table-invite"><div><h2>Можно начать<br>с одного сообщения.</h2><p>Выберите выпечку — название изделия попадёт в сообщение Милане. Дату и детали обсудите лично.</p></div><div class="invite-action"><p>Уже знаете, чего хочется?</p>@if(whatsapp()){<a class="solid-link" [href]="whatsapp()" target="_blank" rel="noopener noreferrer">Написать Милане ↗</a>}<a class="plain-link" routerLink="/catalog/sweet">Посмотреть сладкие пироги →</a></div></section>
+    }
+    @case('b'){
+      <section class="kitchen-front">
+        <figure class="process-photo"><img src="photos/13_medovik_process.jpg" alt="Медовик в процессе сборки: коржи и крем на кухонной доске" width="960" height="1280" fetchpriority="high"><figcaption>Медовик в процессе сборки</figcaption></figure>
+        <div class="kitchen-copy"><p>На кухне у Миланы · Москва</p><h1>Вот так<br>начинается<br>выпечка.</h1><p class="intro-text">Меня зовут Милана. Готовлю дома пироги, торты и десерты на заказ.</p><a class="solid-link" routerLink="/catalog">Посмотреть, что я пеку ↗</a>@if(medovik();as p){<a class="finished-cake" [routerLink]="'/item/'+p.slug" (click)="open(p.slug)"><img [src]="p.photos[0]" alt="Готовый медовик" width="180" height="180"><span>А это — готовый медовик.<strong>Рассмотреть →</strong></span></a>}</div>
+      </section>
+      <section class="kitchen-table"><div class="table-heading"><h2>С кухни —<br>к вашему столу.</h2><p>Выберите изделие и напишите мне. Возможность приготовления, стоимость и дату согласуем в переписке.</p>@if(whatsapp()){<a class="plain-link" [href]="whatsapp()" target="_blank" rel="noopener noreferrer">Обсудить заказ ↗</a>}</div><div class="two-products">@for(p of selected().slice(0,2);track p.slug){<app-product-card [product]="p"/>}</div></section>
+    }
+    @case('c'){
+      <section class="texture-front">
+        @if(caramel();as p){<div class="texture-image"><img [src]="p.photos[0]" [alt]="p.title+' — крупный план поверхности и разреза'" width="1280" height="1280" fetchpriority="high"></div><div class="texture-copy"><p>Выпечка у Миланы · Москва</p><h1>Рассмотрите<br>поближе.</h1><h2>{{p.title}}</h2><p>Фотография из моей кухни. Откройте изделие, чтобы увидеть другие кадры и обсудить заказ.</p><a class="solid-link" [routerLink]="'/item/'+p.slug" (click)="open(p.slug)">Этот пирог — подробнее ↗</a><a class="plain-link" routerLink="/catalog">Выбрать другую выпечку →</a></div>}
+        @else if(catalog.state()==='ok'){<div class="texture-copy"><h1>Выберите свою выпечку.</h1><a class="solid-link" routerLink="/catalog">Открыть каталог →</a></div>}
+      </section>
+      <section class="other-textures"><div class="other-heading"><h2>А может,<br>что-то другое?</h2><p>Пироги, торты и десерты —<br>посмотрите, что вам по вкусу.</p></div><div class="texture-products">@for(p of selected().slice(1,4);track p.slug){<app-product-card [product]="p"/>}</div></section>
+    }
+  }
+</div>

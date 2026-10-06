@@ -1,0 +1,32 @@
+{
+  "existing": [
+    {"slug":"orehovy","photos":[4]},
+    {"slug":"molochnaya-devochka","photos":[22,69,77,78]},
+    {"slug":"assorti","photos":[63]},
+    {"slug":"merengovy-rulet","photos":[80,81]},
+    {"slug":"slivochno-karamelny","photos":[85]},
+    {"slug":"medovik","photos":[25,83,98,99]},
+    {"slug":"kurnik","photos":[39,60]},
+    {"slug":"zefirnye-tsvety","photos":[1,2]},
+    {"slug":"pechenochny","photos":[104,113]}
+  ],
+  "drafts": [
+    {"slug":"trehsloynyy-pirog","title":"Трёхслойный пирог с курагой и орехами","category":"sweet","photos":[6,7]},
+    {"slug":"fruktovyy-tort","title":"Фруктовый торт","category":"cakes","photos":[8]},
+    {"slug":"yagodno-fruktovyy-tort","title":"Ягодно-фруктовый торт","category":"cakes","photos":[11]},
+    {"slug":"pancho","title":"Торт «Панчо»","category":"cakes","photos":[24,58]},
+    {"slug":"brusletiki","title":"Слоёные рулетики «Бруслетики» с брусникой","category":"desserts","photos":[28]},
+    {"slug":"zefirnyy-sendvich","title":"Зефирный сэндвич","category":"desserts","photos":[30,42,43,50]},
+    {"slug":"semga-brokkoli","title":"Пирог с сёмгой и брокколи","category":"savory","photos":[36]},
+    {"slug":"zefirnaya-roza","title":"Зефирная роза в колбе","category":"desserts","photos":[41]},
+    {"slug":"spartak","title":"Торт «Спартак»","category":"cakes","photos":[61]},
+    {"slug":"nezhnost","title":"Торт «Нежность»","category":"cakes","photos":[72]},
+    {"slug":"shokoladnye-maffiny","title":"Шоколадные маффины с творожным кремом","category":"desserts","photos":[73]},
+    {"slug":"rafaello","title":"Торт «Рафаэлло»","category":"cakes","photos":[76]},
+    {"slug":"muchnaya-halva","title":"Мучная халва","category":"desserts","photos":[82]},
+    {"slug":"merengi","title":"Меренги","category":"desserts","photos":[86]},
+    {"slug":"biskvitno-fruktovyy-tort","title":"Бисквитно-фруктовый торт","category":"cakes","photos":[87,88]},
+    {"slug":"napoleon","title":"Торт «Наполеон» с ягодами","category":"cakes","photos":[114]},
+    {"slug":"shokoladnyy-tort-ananas","title":"Шоколадный торт с ананасом","category":"cakes","photos":[29]}
+  ]
+}
