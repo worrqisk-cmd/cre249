@@ -14,6 +14,10 @@ try {
   const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
   await page.goto(base, { waitUntil: "domcontentloaded" });
   await page.locator(".home-intro").waitFor();
+  await page.waitForFunction(() => {
+    const image = document.querySelector(".home-intro img");
+    return image?.complete && image.naturalWidth > 0;
+  });
   assert.equal(await page.locator(".home-intro").getAttribute("aria-hidden"), "true");
   assert.equal(await page.locator(".home-intro").evaluate((el) => getComputedStyle(el).pointerEvents), "none");
   assert.equal(await page.locator(".home-intro h1").count(), 0);
