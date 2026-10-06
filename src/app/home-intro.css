@@ -1,0 +1,113 @@
+:host {
+  display: contents;
+}
+
+.home-intro {
+  position: fixed;
+  z-index: 100;
+  inset: 0;
+  overflow: clip;
+  pointer-events: none;
+  background: #f7f1e5;
+  animation: home-intro-failsafe 1ms linear 2.1s forwards;
+}
+
+.home-intro--finished {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.home-intro__composition {
+  position: relative;
+  width: min(960px, 100vw);
+  height: 640px;
+  margin-inline: auto;
+  overflow: clip;
+  will-change: opacity;
+}
+
+.home-intro__cake {
+  position: absolute;
+  top: 163px;
+  left: 35.4167%;
+  width: 280px;
+  height: 220px;
+  opacity: 0;
+  will-change: opacity;
+}
+
+.home-intro__cake-rotation,
+.home-intro__cake-artwork,
+.home-intro__cake-artwork img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.home-intro__cake-rotation,
+.home-intro__cake-artwork {
+  will-change: transform;
+}
+
+.home-intro__brand {
+  position: absolute;
+  top: 385px;
+  left: 35%;
+  display: grid;
+  justify-items: center;
+  gap: 9px;
+  color: #4a3023;
+  font-family: "Yeseva One", serif;
+  font-size: 28px;
+  line-height: normal;
+  white-space: nowrap;
+  opacity: 0;
+  will-change: opacity, transform;
+}
+
+/* Pseudo-elements keep the decorative label out of the document text. */
+.home-intro__brand::before {
+  content: "Выпечка у Миланы";
+}
+
+.home-intro__brand::after {
+  content: "К вашему столу";
+  color: #806958;
+  font-family: "Golos Text", sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+}
+
+@keyframes home-intro-failsafe {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+@media (max-width: 600px) {
+  .home-intro__composition {
+    width: 100%;
+    height: 100dvh;
+  }
+
+  .home-intro__cake {
+    top: 31.3981%;
+    left: 14.1026%;
+    width: 71.7949%;
+    height: auto;
+    aspect-ratio: 14 / 11;
+  }
+
+  .home-intro__brand {
+    top: 57.7014%;
+    left: 19.6154%;
+    font-size: 23px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-intro {
+    display: none;
+  }
+}
