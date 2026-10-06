@@ -5,7 +5,7 @@ import { NavigationState } from './navigation-state';
 @Component({selector:'app-product-card', standalone:true, imports:[RouterLink], template:`
 <a class="product-card" [routerLink]="'/item/'+product().slug" [attr.data-product-slug]="product().slug" (click)="open($event)">
   <div class="product-image" [class.placeholder]="!product().photos.length">
-    @if (product().photos[0]) { <picture><source type="image/webp" [attr.srcset]="webpSet(product().photos[0])" sizes="(max-width: 700px) 50vw, (max-width: 1000px) 50vw, 25vw"><img [src]="product().photos[0]" [alt]="product().title" width="960" height="1280" loading="lazy" decoding="async" [style.--focus-mobile]="product().focus?.mobile || '50% 50%'" [style.--focus-desktop]="product().focus?.desktop || '50% 50%'"></picture> }
+    @if (product().photos[0]) { <picture><source type="image/webp" [attr.srcset]="webpSet(product().photos[0])" sizes="(max-width: 700px) 50vw, (max-width: 1000px) 50vw, 25vw"><img [src]="product().photos[0]" [alt]="product().title" width="960" height="1280" [attr.loading]="priority()?'eager':'lazy'" [attr.fetchpriority]="priority()?'high':null" decoding="async" [style.--focus-mobile]="product().focus?.mobile || '50% 50%'" [style.--focus-desktop]="product().focus?.desktop || '50% 50%'"></picture> }
     @else { <span>Фото изделия пока нет</span> }
     <span class="view-hint">Смотреть ↗</span>
   </div>
@@ -13,6 +13,7 @@ import { NavigationState } from './navigation-state';
 </a>`, changeDetection:ChangeDetectionStrategy.OnPush})
 export class ProductCard {
  readonly product = input.required<Product>();
+ readonly priority = input(false);
  readonly price = formatPrice;
  readonly webpSet = webpSet;
  private router = inject(Router);

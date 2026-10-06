@@ -4,7 +4,7 @@ import { animate } from 'animejs';
 import { CONTACT_MESSAGE, DEFAULT_DELIVERY, PHOTOS, PROTOTYPE_WHATSAPP, waLink, webpSet } from './data';
 import { CatalogStore } from './catalog-store';
 import { ProductCard } from './product-card';
-@Component({standalone:true, imports:[RouterLink,ProductCard], templateUrl:'./home.html', changeDetection:ChangeDetectionStrategy.OnPush})
+@Component({standalone:true, imports:[RouterLink,ProductCard], templateUrl:'./home.html', styleUrl:'./home.css', changeDetection:ChangeDetectionStrategy.OnPush})
 export class Home implements AfterViewInit {
  private host = inject<ElementRef<HTMLElement>>(ElementRef);
  private destroy = inject(DestroyRef);
@@ -12,7 +12,7 @@ export class Home implements AfterViewInit {
  private animations: ReturnType<typeof animate>[] = [];
  readonly photos=PHOTOS;
  readonly webpSet=webpSet;
- readonly products=this.catalog.featured;
+ readonly products=computed(()=>{const all=this.catalog.products();const preferred=['assorti','kurnik','milka'].flatMap(slug=>all.filter(p=>p.slug===slug));return [...preferred,...all.filter(p=>!preferred.includes(p))].slice(0,3);});
  readonly contactNumber=computed(()=>this.catalog.settings()?.whatsapp_number || (this.catalog.state()==='error'?PROTOTYPE_WHATSAPP:null));
  readonly whatsapp=computed(()=>this.contactNumber()?waLink(this.contactNumber()!,CONTACT_MESSAGE):null);
  readonly delivery=computed(()=>this.catalog.settings()?.delivery_text || DEFAULT_DELIVERY);
@@ -21,10 +21,8 @@ export class Home implements AfterViewInit {
    const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
    if (!reduced && !sessionStorage.getItem('milana-intro')) {
      sessionStorage.setItem('milana-intro','1');
-     const title=this.host.nativeElement.querySelector('.hero h1');
-     const photo=this.host.nativeElement.querySelector('.hero-photo');
+     const title=this.host.nativeElement.querySelector('.shop-intro h1');
      if(title) this.animations.push(animate(title,{opacity:[0,1],translateY:[15,0],duration:550,ease:'out(3)'}));
-     if(photo) this.animations.push(animate(photo,{opacity:[0,1],scale:[1.04,1],duration:800,ease:'out(3)'}));
    }
    this.destroy.onDestroy(()=>this.animations.forEach(animation=>animation.cancel()));
    if(reduced || typeof IntersectionObserver === 'undefined') return;
