@@ -5,7 +5,7 @@ import { resolve, extname, sep } from 'node:path';
 const root = resolve('dist/milana-angular/browser');
 const prefix = '/cre249/';
 const port = Number(process.env.PORT || 8447);
-const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.jpg': 'image/jpeg', '.png': 'image/png', '.ico': 'image/x-icon' };
+const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.jpg': 'image/jpeg', '.png': 'image/png', '.ico': 'image/x-icon', '.svg': 'image/svg+xml', '.webp': 'image/webp' };
 createServer(async (request, response) => {
   const pathname = new URL(request.url || '/', `http://${request.headers.host}`).pathname;
   if (!pathname.startsWith(prefix)) { response.writeHead(404).end(); return; }

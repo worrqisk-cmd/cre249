@@ -2,12 +2,15 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { Router, RouterLink, RouterOutlet, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs';
 import { NavigationState } from './navigation-state';
+import { HomeIntroState } from './home-intro-state';
 import { CONTACT_MESSAGE, DEFAULT_DELIVERY, PROTOTYPE_WHATSAPP, telegramLink, waLink } from './data';
 import { CatalogStore } from './catalog-store';
 @Component({selector:'app-root', standalone:true, imports:[RouterOutlet,RouterLink], templateUrl:'./app.html', styleUrl:'./app.css', changeDetection:ChangeDetectionStrategy.OnPush})
 export class App {
   private router = inject(Router);
   readonly nav = inject(NavigationState);
+  // Instantiate this before the first lazy route resolves.
+  private readonly homeIntro = inject(HomeIntroState);
   readonly catalog = inject(CatalogStore);
   readonly menu = signal(false);
   readonly isHome = signal(true);

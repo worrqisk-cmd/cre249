@@ -21,15 +21,18 @@ import {
 import { CatalogStore } from "./catalog-store";
 import { ProductCard } from "./product-card";
 import { NavigationState } from "./navigation-state";
+import { HomeIntro } from "./home-intro";
+import { HomeIntroState } from "./home-intro-state";
 @Component({
   standalone: true,
-  imports: [RouterLink, ProductCard],
+  imports: [RouterLink, ProductCard, HomeIntro],
   templateUrl: "./home.html",
   styleUrl: "./home.css",
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Home implements AfterViewInit {
   private nav = inject(NavigationState);
+  readonly intro = inject(HomeIntroState);
   private host = inject<ElementRef<HTMLElement>>(ElementRef);
   private destroy = inject(DestroyRef);
   readonly catalog = inject(CatalogStore);
@@ -79,19 +82,6 @@ export class Home implements AfterViewInit {
   ngAfterViewInit() {
     if (this.nav.itemOrigin()) setTimeout(() => this.nav.restoreFocus(), 50);
     const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (!reduced && !sessionStorage.getItem("milana-intro")) {
-      sessionStorage.setItem("milana-intro", "1");
-      const title = this.host.nativeElement.querySelector(".shop-intro h1");
-      if (title)
-        this.animations.push(
-          animate(title, {
-            opacity: [0, 1],
-            translateY: [15, 0],
-            duration: 550,
-            ease: "out(3)",
-          }),
-        );
-    }
     this.destroy.onDestroy(() =>
       this.animations.forEach((animation) => animation.cancel()),
     );
