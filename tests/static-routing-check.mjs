@@ -1,16 +1,19 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { chromium } from "playwright";
-const base = "http://127.0.0.1:8447/cre249/";
+import { usePublishedSnapshot } from "./catalog-fixture.mjs";
+const base = process.env.BASE_URL || "http://127.0.0.1:8447/";
 const paths = JSON.parse(await readFile(".static-paths.json", "utf8"));
 const titles = new Set();
 for (const path of paths) {
   const response = await fetch(base + path.slice(1));
   assert.equal(response.status, 200, path);
   const html = await response.text();
+  assert.match(html, /<base href="\/">/);
+  assert.ok(!html.includes("/cre249/"), `old base in ${path}`);
   assert.match(html, /<h1/);
   assert.match(html, /rel="canonical"/);
-  assert.ok(html.includes(`https://worrqisk-cmd.github.io/cre249${path}`));
+  assert.ok(html.includes(`https://milana-pechet.ru${path}`));
   const title = html.match(/<title>(.*?)<\/title>/)[1];
   assert.ok(!titles.has(title), `duplicate title: ${path}`); titles.add(title);
   if (path.startsWith("/item/")) assert.match(html, /Обсудить заказ/);
@@ -26,7 +29,12 @@ try {
       viewport: { width, height: 900 },
       reducedMotion: "reduce",
     });
+    if (process.env.CATALOG_SNAPSHOT) await usePublishedSnapshot(page);
     const errors = [];
+    page.on("response", (response) => {
+      if (response.url().startsWith(base) && response.status() >= 400)
+        errors.push(`${response.status()} ${response.url()}`);
+    });
     page.on("pageerror", (e) => errors.push(e.message));
     for (const path of [
       "catalog/",
@@ -108,10 +116,16 @@ try {
     await page.getByRole("dialog").waitFor();
     await page.goBack();
     await card.waitFor();
+    const images = await page.locator("img").evaluateAll((images) =>
+      images.filter((image) => image.getBoundingClientRect().width > 0)
+        .every((image) => image.complete && image.naturalWidth > 0),
+    );
+    assert.ok(images, "visible images loaded");
     assert.deepEqual(errors, []);
     await page.close();
   }
   const page = await browser.newPage();
+  if (process.env.CATALOG_SNAPSHOT) await usePublishedSnapshot(page);
   await page.goto(base);
   await page.locator("app-home-intro").waitFor();
   await page.goto(base + "catalog/");

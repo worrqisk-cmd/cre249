@@ -1,10 +1,12 @@
 import assert from "node:assert/strict";
 import { chromium } from "playwright";
-const base = process.env.BASE_URL || "http://127.0.0.1:8447/cre249/";
+import { usePublishedSnapshot } from "./catalog-fixture.mjs";
+const base = process.env.BASE_URL || "http://127.0.0.1:8447/";
 const browser = await chromium.launch({ headless: true });
 try {
   for (const width of [360, 390, 768, 1440]) {
     const page = await browser.newPage({ viewport: { width, height: 900 } });
+    if (process.env.CATALOG_SNAPSHOT) await usePublishedSnapshot(page);
     const errors = [];
     page.on("pageerror", (error) => errors.push(error.message));
     for (const route of ["", "#/catalog", "#/item/assorti", "#/item/milka"]) {
@@ -129,6 +131,7 @@ try {
     viewport: { width: 390, height: 844 },
     reducedMotion: "reduce",
   });
+  if (process.env.CATALOG_SNAPSHOT) await usePublishedSnapshot(page);
   await page.goto(base);
   await page.locator("#featured .product-card").first().waitFor();
   assert.equal(await page.locator(".table-invite").count(), 0);
@@ -157,6 +160,7 @@ try {
     /archive_063_assorti/,
   );
   assert.equal(await page.locator(".catalog-page").getAttribute("inert"), "");
+  await page.getByRole("button", { name: "Обсудить заказ", exact: true }).waitFor();
   await page.keyboard.press("Shift+Tab");
   assert.equal(
     await page.evaluate(() => document.activeElement.textContent.trim()),
@@ -187,6 +191,7 @@ try {
     viewport: { width: 720, height: 450 },
     deviceScaleFactor: 2,
   });
+  if (process.env.CATALOG_SNAPSHOT) await usePublishedSnapshot(zoom);
   for (const route of ["", "#/catalog", "#/item/assorti"]) {
     await zoom.goto(base + route);
     await zoom

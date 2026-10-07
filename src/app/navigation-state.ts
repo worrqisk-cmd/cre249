@@ -1,8 +1,15 @@
+import { PhotoFrame, photoFrame } from "./photo-frame";
 import { Injectable, signal } from "@angular/core";
 @Injectable({ providedIn: "root" })
 export class NavigationState {
   readonly openedSlugs = new Set<string>();
-  flight: { rect: DOMRect; src: string; photo?: string } | null = null;
+  returningPhoto: HTMLElement | null = null;
+  flight: {
+    frame: PhotoFrame;
+    restingFrame: PhotoFrame;
+    src: string;
+    photo?: string;
+  } | null = null;
   readonly category = signal("all");
   readonly scrollY = signal(0);
   readonly itemOrigin = signal<string | null>(null);
@@ -19,7 +26,8 @@ export class NavigationState {
     this.priorUrl.set(url);
     this.flight = image
       ? {
-          rect: image.getBoundingClientRect(),
+          frame: photoFrame(image),
+          restingFrame: photoFrame(image, true),
           src: image.currentSrc || image.src,
           photo,
         }
@@ -34,6 +42,11 @@ export class NavigationState {
         .querySelector<HTMLElement>(`[data-product-slug="${slug}"]`)
         ?.focus({ preventScroll: true });
       this.itemOrigin.set(null);
+      const returning = this.returningPhoto;
+      requestAnimationFrame(() => {
+        returning?.remove();
+        if (this.returningPhoto === returning) this.returningPhoto = null;
+      });
     });
   }
 }

@@ -20,7 +20,7 @@ for (const path of ["admin", "admin/login"]) {
 }
 await writeFile(
   `${root}/404.html`,
-  '<!doctype html><html lang="ru"><meta charset="utf-8"><meta name="robots" content="noindex"><title>Страница не найдена</title><h1>Страница не найдена</h1><a href="/cre249/catalog/">Перейти в каталог</a></html>',
+  '<!doctype html><html lang="ru"><meta charset="utf-8"><meta name="robots" content="noindex"><title>Страница не найдена</title><h1>Страница не найдена</h1><a href="/catalog/">Перейти в каталог</a></html>',
 );
 await writeFile(
   `${root}/sitemap.xml`,
@@ -28,7 +28,7 @@ await writeFile(
     paths
       .map(
         (path) =>
-          `<url><loc>https://worrqisk-cmd.github.io/cre249${path}</loc></url>`,
+          `<url><loc>https://milana-pechet.ru${path}</loc></url>`,
       )
       .join("") +
     "</urlset>",

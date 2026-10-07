@@ -59,7 +59,7 @@ export class Seo {
         link.rel = "canonical";
         this.document.head.appendChild(link);
       }
-      link.href = `https://worrqisk-cmd.github.io/cre249${path === "/" ? "/" : path + "/"}`;
+      link.href = `https://milana-pechet.ru${path === "/" ? "/" : path + "/"}`;
     });
   }
 }

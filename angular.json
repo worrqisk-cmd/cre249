@@ -43,7 +43,7 @@
                 }
               ],
               "outputHashing": "all",
-              "baseHref": "/cre249/",
+              "baseHref": "/",
               "server": "src/main.server.ts",
               "outputMode": "static"
             },

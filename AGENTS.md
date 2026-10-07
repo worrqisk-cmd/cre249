@@ -10,7 +10,7 @@ This repository contains the public «Выпечка у Миланы» site on A
 
 ## Commands
 
-Use Node 22.22.3 and pnpm 12.8.1 (`.mise.toml`). Run `pnpm install --frozen-lockfile`, `pnpm start --port 8446` for development, `pnpm test --watch=false` for unit checks, and `pnpm build` for the production build. Start/build generate the public runtime config from environment, `.env.local`, or `.env.example`. The production configuration sets `baseHref` to `/cre249/`; output is `dist/milana-angular/browser`. Run `pnpm preview:pages` to serve that output at `http://127.0.0.1:8447/cre249/`. `pnpm test:catalog-api` checks API states without media capture; `pnpm test:e2e` needs a seeded Supabase project. Install Chromium once with `pnpm exec playwright install chromium` if needed.
+Use Node 22.22.3 and pnpm 12.8.1 (`.mise.toml`). Run `pnpm install --frozen-lockfile`, `pnpm start --port 8446` for development, `pnpm test --watch=false` for unit checks, and `pnpm build` for the production build. Start/build generate the public runtime config from environment, `.env.local`, or `.env.example`. The production configuration sets `baseHref` to `/`; output is `dist/milana-angular/browser`. Run `pnpm preview:pages` to serve that output at `http://127.0.0.1:8447/`. `pnpm test:catalog-api` checks API states without media capture; `pnpm test:e2e` needs a seeded Supabase project. Install Chromium once with `pnpm exec playwright install chromium` if needed.
 
 ## Design and content
 

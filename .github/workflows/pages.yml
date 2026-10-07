@@ -34,7 +34,7 @@ jobs:
         run: |
           pnpm preview:pages > /tmp/pages-preview.log 2>&1 &
           for attempt in {1..30}; do
-            if curl --fail --silent http://127.0.0.1:8447/cre249/ > /dev/null; then break; fi
+            if curl --fail --silent http://127.0.0.1:8447/ > /dev/null; then break; fi
             sleep 1
           done
           pnpm test:catalog-api
