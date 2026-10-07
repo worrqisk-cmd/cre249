@@ -1,19 +1,19 @@
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DOCUMENT } from '@angular/common';
-import { effect, inject, Injectable } from '@angular/core';
+import { effect, inject, Injectable, signal } from '@angular/core';
 import { Title, Meta } from '@angular/platform-browser';
 import { NavigationEnd, Router } from '@angular/router';
-import { signal } from '@angular/core';
 import { CatalogStore } from './catalog-store';
 @Injectable({ providedIn: 'root' })
 export class Seo {
-  private router = inject(Router);
-  private catalog = inject(CatalogStore);
-  private document = inject(DOCUMENT);
-  private title = inject(Title);
-  private meta = inject(Meta);
+  private readonly router = inject(Router);
+  private readonly catalog = inject(CatalogStore);
+  private readonly document = inject(DOCUMENT);
+  private readonly title = inject(Title);
+  private readonly meta = inject(Meta);
   private url = signal('/');
   constructor() {
-    this.router.events.subscribe((event) => {
+    this.router.events.pipe(takeUntilDestroyed()).subscribe((event) => {
       if (event instanceof NavigationEnd) this.url.set(event.urlAfterRedirects);
     });
     effect(() => {

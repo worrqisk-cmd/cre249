@@ -1,7 +1,8 @@
 import { animate } from 'animejs';
 import { PhotoBox, PhotoFrame, fittedPhoto } from './photo-frame';
 
-/** Animate the clipping window and the bitmap separately; object-fit cannot interpolate. */
+/** Окно обрезки и bitmap движутся отдельно: object-fit не интерполируется.
+ * Копия живёт в body, вне encapsulation; её геометрия задаётся inline. */
 export class PhotoFlight {
   readonly element = document.createElement('div');
   readonly image = new Image();
@@ -46,9 +47,11 @@ export class PhotoFlight {
     });
   }
   move(end: PhotoFrame, duration: number, done: () => void, destinationSrc?: string) {
+    // При быстром закрытии продолжаем из текущего кадра, отменив прежний callback.
     this.animation?.cancel();
     const start = this.frame;
-    // A different selected gallery photo returns through a crossfade, at matching geometry.
+    // Если в галерее выбрали другой кадр, возвращаем исходное фото через crossfade
+    // с совпадающей рамкой: иначе подмена изображения будет заметна.
     const next = destinationSrc && destinationSrc !== this.image.src ? new Image() : null;
     if (next) {
       next.src = destinationSrc!;
@@ -120,10 +123,10 @@ export class PhotoFlight {
       },
     });
   }
-  cancel() {
+  cancel(): void {
     this.animation?.cancel();
   }
-  remove() {
+  remove(): void {
     this.cancel();
     this.element.remove();
   }

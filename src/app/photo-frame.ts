@@ -10,7 +10,7 @@ export interface PhotoFrame {
   radius: number;
 }
 
-/** Painted bitmap coordinates, including the crop caused by cover/object-position. */
+/** Координаты видимой фотографии с учётом обрезки cover и object-position. */
 export function fittedPhoto(
   box: PhotoBox,
   width: number,
@@ -34,7 +34,8 @@ export function photoFrame(image: HTMLImageElement, resting = false): PhotoFrame
   const style = getComputedStyle(image);
   const container = image.closest('.product-image, .dialog-image-link') || image;
   const visible = image.getBoundingClientRect();
-  // Hover zoom uses a centered transform. Return to the resting card, then let hover resume.
+  // Hover масштабирует изображение вокруг центра. Возвращаемся в рамку покоя,
+  // после передачи реальному img браузер снова применит hover.
   const width = resting ? parseFloat(style.width) : visible.width;
   const height = resting ? parseFloat(style.height) : visible.height;
   const rect = {

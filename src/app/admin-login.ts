@@ -12,11 +12,11 @@ import { AdminAuth } from './admin-auth';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AdminLogin {
-  private auth = inject(AdminAuth);
-  private router = inject(Router);
+  private readonly auth = inject(AdminAuth);
+  private readonly router = inject(Router);
   readonly model = signal({ login: '', password: '' });
   readonly loginForm = form(this.model, (p) => {
-    disabled(p, () => this.loginForm().submitting());
+    disabled(p, ({ state }) => state.submitting());
     required(p.login, { message: 'Введите логин.' });
     validate(p.login, ({ value }) =>
       !value() || value().trim() ? undefined : { kind: 'blank', message: 'Введите логин.' },
@@ -32,7 +32,7 @@ export class AdminLogin {
     });
   }
 
-  async submit(event: Event) {
+  async submit(event: Event): Promise<void> {
     event.preventDefault();
     if (this.busy()) return;
     await submit(this.loginForm, {

@@ -4,8 +4,8 @@ import { SupabaseService } from './supabase';
 
 @Injectable({ providedIn: 'root' })
 export class AdminAuth {
-  private supabase = inject(SupabaseService);
-  private router = inject(Router);
+  private readonly supabase = inject(SupabaseService);
+  private readonly router = inject(Router);
   readonly owner = signal(false);
   readonly checking = signal(true);
   private checked: Promise<boolean> | null = null;
@@ -37,7 +37,7 @@ export class AdminAuth {
     await this.router.navigateByUrl('/admin');
   }
 
-  async logout() {
+  async logout(): Promise<void> {
     await this.supabase.client.auth.signOut();
     this.owner.set(false);
     await this.router.navigateByUrl('/admin/login');

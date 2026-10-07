@@ -1,13 +1,11 @@
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Injectable, PLATFORM_ID, inject, signal } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs';
 
-/**
- * Decides once, during the application's initial navigation, whether the
- * decorative home intro belongs to this document load. Keeping this in a
- * root service prevents a later in-app visit to `/` from replaying it.
- */
+/** Интро определяется на первой навигации документа. Root-сервис не даёт
+ * повторить его при последующем переходе на главную внутри приложения. */
 @Injectable({ providedIn: 'root' })
 export class HomeIntroState {
   readonly shouldPlay = signal(false);
@@ -21,7 +19,10 @@ export class HomeIntroState {
 
   constructor() {
     this.router.events
-      .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
+      .pipe(
+        filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+        takeUntilDestroyed(),
+      )
       .subscribe((event) => {
         if (!this.firstNavigation) {
           this.shouldPlay.set(false);
@@ -40,11 +41,11 @@ export class HomeIntroState {
       });
   }
 
-  private isHomePath() {
+  private isHomePath(): boolean {
     return window.location.pathname === new URL(document.baseURI).pathname;
   }
 
-  private isDocumentLoad() {
+  private isDocumentLoad(): boolean {
     const navigation = performance.getEntriesByType('navigation').at(0) as
       PerformanceNavigationTiming | undefined;
     return !navigation || navigation.type === 'navigate' || navigation.type === 'reload';

@@ -1,0 +1,51 @@
+:host {
+  display: contents;
+}
+
+.composer {
+  background: var(--paper);
+  padding: 16px;
+  margin-top: 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+
+.composer label {
+  display: block;
+  font-weight: 600;
+}
+
+.composer textarea {
+  display: block;
+  width: 100%;
+  min-height: 9rem;
+  margin-top: 8px;
+  padding: 12px;
+  border: 1px solid #8b7460;
+  color: var(--cocoa);
+  background: var(--cream);
+  border-radius: 8px;
+  resize: vertical;
+  font-size: 1rem;
+  line-height: 1.5;
+  scroll-margin-block: 16px;
+}
+
+.composer .actions {
+  margin-top: 12px;
+}
+
+.composer .muted {
+  margin: 12px 0 0;
+}
+
+@media (max-width: 700px), (max-height: 500px) and (max-width: 1000px) {
+  .composer .actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    width: 100%;
+  }
+  .composer {
+    padding: 12px;
+  }
+}

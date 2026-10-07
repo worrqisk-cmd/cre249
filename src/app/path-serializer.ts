@@ -5,7 +5,7 @@ export class PathSerializer extends DefaultUrlSerializer {
       .serialize(tree)
       .replace(
         /^([^?#]*?)(\/?)([?#].*)?$/,
-        (_, path, slash, suffix = '') => (path || '') + '/' + suffix,
+        (_match: string, path: string, _slash: string, suffix = '') => (path || '') + '/' + suffix,
       );
   }
 }

@@ -16,8 +16,8 @@
       }
     </style>
     <script>
-      // Cover prerendered home before the deferred application can paint its intro.
-      // With JavaScript disabled or reduced motion, the static page stays visible.
+      // Cover устанавливается до отложенного bootstrap, иначе prerendered главная
+      // мелькнёт перед интро. Без JS и при reduced motion статический сайт виден.
       (() => {
         const navigation = performance.getEntriesByType('navigation')[0];
         const home = location.pathname === new URL(document.baseURI).pathname;
@@ -31,7 +31,7 @@
           return;
         const root = document.documentElement;
         root.dataset.homeIntro = 'pending';
-        // A stalled application must expose the page and skip any late intro.
+        // Зависший bootstrap должен открыть страницу и пропустить позднее интро.
         setTimeout(() => {
           if (root.dataset.homeIntro === 'pending') root.dataset.homeIntro = 'expired';
         }, 2100);
