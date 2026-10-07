@@ -9,6 +9,7 @@
     "test": "ng test",
     "test:e2e": "node tests/static-routing-check.mjs",
     "test:catalog-api": "node tests/catalog-api-check.mjs",
+    "test:order-form": "node tests/order-form-check.mjs",
     "test:admin-form": "node tests/admin-form-check.mjs",
     "test:public-ui": "node tests/public-ui-check.mjs",
     "test:intro": "node tests/home-intro-check.mjs && node tests/home-intro-first-paint-check.mjs",
