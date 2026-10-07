@@ -249,9 +249,10 @@ p {
   object-position: var(--focus-desktop, 50% 50%);
   transition: transform 0.45s;
 }
-.product-card:hover img {
+.product-card:not(.is-photo-origin):hover img {
   transform: scale(1.035);
 }
+.product-image.photo-contained.photo-overview picture { padding: 0; }
 .product-image.photo-contained picture {
   padding: 6%;
   background: var(--paper);
@@ -564,6 +565,12 @@ p {
   min-height: 0;
   background: var(--kraft);
 }
+.dialog-image-link {
+  position: relative;
+  display: block;
+  flex: 1;
+  min-height: 0;
+}
 .dialog-photo picture {
   flex: 1;
   min-height: 0;
@@ -827,49 +834,7 @@ p {
   .category-list {
     flex-wrap: wrap;
   }
-  .dialog-panel {
-    inset: var(--visual-top, 0px) 0 auto;
-    height: var(--visual-height, 100dvh);
-    border-radius: 0;
-  }
-  .dialog-grid {
-    display: block;
-    overflow-y: auto;
-    height: 100%;
-    padding-bottom: env(safe-area-inset-bottom, 0px);
-    scroll-padding-block: 16px;
-  }
-  .dialog-photo {
-    height: 38svh;
-    min-height: 240px;
-  }
-  .dialog-photo picture img {
-    object-position: var(--focus-mobile, 50% 50%);
-  }
-  .dialog-content {
-    overflow: visible;
-    padding: 24px 16px max(24px, env(safe-area-inset-bottom, 0px));
-  }
-  .dialog-close {
-    right: max(12px, env(safe-area-inset-right, 0px));
-    top: max(12px, env(safe-area-inset-top, 0px));
-  }
-  .dialog-missing {
-    padding: 100px 20px 32px;
-    max-height: 100%;
-    overflow: auto;
-  }
-  .composer .actions {
-    display: grid;
-    grid-template-columns: 1fr;
-    width: 100%;
-  }
-  .composer {
-    padding: 12px;
-  }
-  .fillings button {
-    padding-inline: 14px;
-  }
+
 }
 @media (prefers-reduced-motion: reduce) {
   html {
@@ -1155,3 +1120,85 @@ p {
 .item-page .dialog-content { overflow: visible; }
 .item-page .dialog-content h1 { font-size: clamp(1.75rem, 3vw, 2.5rem); margin-bottom: 12px; }
 .item-page .dialog-photo { max-height: 800px; }
+
+@media (max-width: 700px), (max-height: 500px) and (max-width: 1000px) {
+  .dialog-panel {
+    inset: var(--visual-top, 0px) 0 auto;
+    height: var(--visual-height, 100dvh);
+    border-radius: 0;
+  }
+  .dialog-grid {
+    display: block;
+    overflow-y: auto;
+    height: 100%;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    scroll-padding-block: 16px;
+  }
+  .dialog-photo {
+    height: auto;
+    min-height: 0;
+    background: var(--cream);
+  }
+  .dialog-image-link {
+    flex: none;
+    width: 100%;
+    aspect-ratio: var(--gallery-ratio, 0.75);
+  }
+  .dialog-thumbnails {
+    margin: 0;
+    padding: 10px 12px;
+    background: transparent;
+    border-radius: 0;
+  }
+  .dialog-thumbnails button {
+    width: 48px;
+    height: 48px;
+  }
+  .item-page .dialog-photo { max-height: none; }
+  .dialog-photo picture img {
+    object-position: var(--focus-mobile, 50% 50%);
+  }
+  .dialog-content {
+    overflow: visible;
+    padding: 24px 16px max(24px, env(safe-area-inset-bottom, 0px));
+  }
+  .dialog-close {
+    right: max(12px, env(safe-area-inset-right, 0px));
+    top: max(12px, env(safe-area-inset-top, 0px));
+  }
+  .dialog-missing {
+    padding: 100px 20px 32px;
+    max-height: 100%;
+    overflow: auto;
+  }
+  .composer .actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    width: 100%;
+  }
+  .composer {
+    padding: 12px;
+  }
+  .fillings button {
+    padding-inline: 14px;
+  }
+}
+
+.dialog-full-photo {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  padding: 5px 9px;
+  border-radius: 6px;
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 0.75rem;
+}
+
+.dialog-grid.is-gallery-loading { visibility: hidden; }
+.gallery-loading {
+  position: absolute;
+  inset: 90px 20px auto;
+  text-align: center;
+  color: var(--muted);
+}

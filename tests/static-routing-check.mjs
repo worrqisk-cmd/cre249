@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { chromium } from "playwright";
+import { usePublishedSnapshot } from "./catalog-fixture.mjs";
 const base = "http://127.0.0.1:8447/cre249/";
 const paths = JSON.parse(await readFile(".static-paths.json", "utf8"));
 const titles = new Set();
@@ -26,6 +27,7 @@ try {
       viewport: { width, height: 900 },
       reducedMotion: "reduce",
     });
+    if (process.env.CATALOG_SNAPSHOT) await usePublishedSnapshot(page);
     const errors = [];
     page.on("pageerror", (e) => errors.push(e.message));
     for (const path of [
@@ -112,6 +114,7 @@ try {
     await page.close();
   }
   const page = await browser.newPage();
+  if (process.env.CATALOG_SNAPSHOT) await usePublishedSnapshot(page);
   await page.goto(base);
   await page.locator("app-home-intro").waitFor();
   await page.goto(base + "catalog/");

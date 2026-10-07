@@ -14,6 +14,7 @@ import { NavigationState } from "./navigation-state";
   imports: [RouterLink],
   template: ` <a
     class="product-card"
+    [class.is-photo-origin]="nav.itemOrigin() === product().slug"
     [routerLink]="'/item/' + product().slug"
     [attr.data-product-slug]="product().slug"
     (click)="open($event)"
@@ -21,7 +22,9 @@ import { NavigationState } from "./navigation-state";
     <div
       class="product-image"
       [class.placeholder]="!photo()"
-      [class.photo-contained]="presentation()?.fit === 'contain'"
+      [class.photo-contained]="frame()?.fit === 'contain'"
+      [class.photo-overview]="!presentation() && !!catalogFrame()"
+      [style.--card-photo-ratio]="frame()?.ratio || null"
     >
       @if (photo()) {
         <picture
@@ -43,11 +46,14 @@ import { NavigationState } from "./navigation-state";
             [attr.loading]="priority() ? 'eager' : 'lazy'"
             [attr.fetchpriority]="priority() ? 'high' : null"
             decoding="async"
+            [style.visibility]="
+              nav.itemOrigin() === product().slug ? 'hidden' : null
+            "
             [style.--focus-mobile]="
-              presentation()?.mobile || product().focus?.mobile || '50% 50%'
+              frame()?.mobile || product().focus?.mobile || '50% 50%'
             "
             [style.--focus-desktop]="
-              presentation()?.desktop || product().focus?.desktop || '50% 50%'
+              frame()?.desktop || product().focus?.desktop || '50% 50%'
             "
         /></picture>
       } @else {
@@ -79,16 +85,48 @@ export class ProductCard {
     desktop: string;
     mobile: string;
     fit: string;
+    ratio?: number;
   }>();
+  readonly catalogFrame = computed(() => {
+    const p = this.product();
+    if (p.slug === "slivochno-karamelny") {
+      const photo = p.photos.find(
+        (src) => src === "photos/archive_085_slivochno-karamelny.jpg",
+      );
+      return {
+        photo,
+        desktop: "50% 50%",
+        mobile: "50% 50%",
+        fit: "contain",
+        ratio: 1,
+      };
+    }
+    if (p.slug === "kuraga-oreh")
+      return {
+        desktop: "50% 50%",
+        mobile: "50% 50%",
+        fit: "contain",
+        ratio: 1078 / 632,
+      };
+    return undefined;
+  });
+  readonly frame = computed(() => this.presentation() || this.catalogFrame());
   readonly photo = computed(
-    () => this.presentation()?.photo || this.product().photos[0] || "",
+    () => this.frame()?.photo || this.product().photos[0] || "",
   );
   readonly price = formatPrice;
   readonly webpSet = webpSet;
   private router = inject(Router);
-  private nav = inject(NavigationState);
+  readonly nav = inject(NavigationState);
   open(event: MouseEvent) {
-    if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey || event.button !== 0) return;
+    if (
+      event.ctrlKey ||
+      event.metaKey ||
+      event.shiftKey ||
+      event.altKey ||
+      event.button !== 0
+    )
+      return;
     this.nav.open(
       this.product().slug,
       this.router.url,

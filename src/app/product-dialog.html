@@ -14,6 +14,9 @@
   >
     ×
   </button>
+  @if(product()&&!standalone()&&!layoutReady()){
+    <p class="gallery-loading" role="status">Загружаем фотографии…</p>
+  }
   @if(missing()||!product()){
   <div class="dialog-missing">
     <p class="eyebrow">Изделие недоступно</p>
@@ -24,9 +27,9 @@
     </button>
   </div>
   } @else {
-  <div class="dialog-grid">
-    <div class="dialog-photo">
-      @if(currentPhoto()){<picture
+  <div class="dialog-grid" [class.is-gallery-loading]="!standalone()&&!layoutReady()">
+    <div class="dialog-photo" [style.--gallery-ratio]="galleryRatio()">
+      @if(currentPhoto()){<a class="dialog-image-link" [href]="currentPhoto()" target="_blank" rel="noopener" [attr.aria-label]="'Открыть полное фото: '+product()!.title+' (новая вкладка)'"><picture
         ><source
           type="image/webp"
           [attr.srcset]="webpSet(currentPhoto())"
@@ -34,12 +37,13 @@
         <img
           [src]="currentPhoto()"
           [alt]="product()!.title"
+          [style.visibility]="!standalone()&&!photoReady() ? 'hidden' : null"
           width="960"
           height="1280"
           [style.--focus-mobile]="currentFocus().mobile"
           [style.--focus-desktop]="currentFocus().desktop"
           decoding="async" /></picture
-      >@if(product()!.photos.length>1){
+      ><span class="dialog-full-photo" aria-hidden="true">Фото целиком ↗</span></a>@if(product()!.photos.length>1){
       <div
         class="dialog-thumbnails"
         role="group"

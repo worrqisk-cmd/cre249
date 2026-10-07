@@ -12,6 +12,8 @@ import {
   linkedSignal,
 } from "@angular/core";
 import { animate } from "animejs";
+import { photoFrame } from "./photo-frame";
+import { PhotoFlight } from "./photo-flight";
 import { buildMessage, formatPrice, Product, waLink, webpSet } from "./data";
 import { CatalogStore } from "./catalog-store";
 import { NavigationState } from "./navigation-state";
@@ -57,6 +59,9 @@ export class ProductDialog implements AfterViewInit {
       ? "Сладкий пирог. Выберите одну начинку для обращения; возможность сочетать несколько уточните у Миланы."
       : p?.description || "";
   });
+  // One frame per product, based on the tallest photo, independent of selection.
+  readonly galleryRatio = signal(0.75);
+  readonly layoutReady = signal(false);
   readonly photoReady = signal(false);
   readonly currentPhoto = computed(
     () => this.product()?.photos[this.selectedPhoto()] || "",
@@ -75,9 +80,10 @@ export class ProductDialog implements AfterViewInit {
   private destroy = inject(DestroyRef);
   private nav = inject(NavigationState);
   private closing = false;
-  private flyingImage: HTMLImageElement | null = null;
+  private flyingImage: PhotoFlight | null = null;
   private animations: ReturnType<typeof animate>[] = [];
-  private viewport = typeof window === "undefined" ? null : window.visualViewport;
+  private viewport =
+    typeof window === "undefined" ? null : window.visualViewport;
   private updateViewport = () => {
     const viewport = this.viewport;
     if (!viewport) return;
@@ -100,7 +106,11 @@ export class ProductDialog implements AfterViewInit {
         ...this.host.nativeElement.querySelectorAll<HTMLElement>(
           "button,a[href],textarea",
         ),
-      ].filter((x) => !x.hasAttribute("disabled"));
+      ].filter(
+        (x) =>
+          !x.hasAttribute("disabled") &&
+          getComputedStyle(x).visibility !== "hidden",
+      );
       if (!items.length) return;
       if (event.shiftKey && document.activeElement === items[0]) {
         event.preventDefault();
@@ -114,9 +124,14 @@ export class ProductDialog implements AfterViewInit {
   ngAfterViewInit() {
     if (typeof window === "undefined") return;
     if (this.standalone()) {
+      // Keep the prerendered page's reserved portrait frame stable before and after hydration.
+      // Modal galleries can measure their product-specific frame before revealing content.
+      this.layoutReady.set(true);
       this.photoReady.set(true);
       document.addEventListener("keydown", this.onKey);
-      this.destroy.onDestroy(() => document.removeEventListener("keydown", this.onKey));
+      this.destroy.onDestroy(() =>
+        document.removeEventListener("keydown", this.onKey),
+      );
       return;
     }
     document.body.style.overflow = "hidden";
@@ -130,84 +145,7 @@ export class ProductDialog implements AfterViewInit {
     this.host.nativeElement
       .querySelector<HTMLButtonElement>(".dialog-close")
       ?.focus();
-    if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      const backdrop =
-        this.host.nativeElement.querySelector<HTMLElement>(".dialog-backdrop");
-      const panel =
-        this.host.nativeElement.querySelector<HTMLElement>(".dialog-panel");
-      const content = this.host.nativeElement.querySelector<HTMLElement>(
-        ".dialog-content, .dialog-missing",
-      );
-      const closeButton =
-        this.host.nativeElement.querySelector<HTMLElement>(".dialog-close");
-      const origin = this.nav.flight;
-      const target =
-        this.host.nativeElement.querySelector<HTMLImageElement>(
-          ".dialog-photo img",
-        );
-      if (backdrop)
-        this.animations.push(
-          animate(backdrop, { opacity: [0, 1], duration: 360, ease: "out(2)" }),
-        );
-      // Keep the image's destination fixed while the panel and its content emerge.
-      if (panel)
-        this.animations.push(
-          animate(panel, { opacity: [0, 1], duration: 340, ease: "out(2)" }),
-        );
-      if (content)
-        this.animations.push(
-          animate(content, {
-            opacity: [0, 1],
-            translateX: [10, 0],
-            duration: 340,
-            delay: 70,
-            ease: "out(2)",
-          }),
-        );
-      if (closeButton)
-        this.animations.push(
-          animate(closeButton, {
-            opacity: [0, 1],
-            duration: 280,
-            delay: 100,
-            ease: "out(2)",
-          }),
-        );
-      if (origin && target) {
-        const end = target.getBoundingClientRect();
-        const image = new Image();
-        image.src = origin.src;
-        image.alt = "";
-        Object.assign(image.style, {
-          position: "fixed",
-          zIndex: "100",
-          left: `${origin.rect.left}px`,
-          top: `${origin.rect.top}px`,
-          width: `${origin.rect.width}px`,
-          height: `${origin.rect.height}px`,
-          objectFit: getComputedStyle(target).objectFit,
-          objectPosition: getComputedStyle(target).objectPosition,
-          borderRadius: "14px",
-          pointerEvents: "none",
-        });
-        document.body.append(image);
-        this.flyingImage = image;
-        target.style.visibility = "hidden";
-        this.animations.push(
-          animate(image, {
-            left: end.left,
-            top: end.top,
-            width: end.width,
-            height: end.height,
-            duration: 410,
-            ease: "out(2)",
-            onComplete: () => {
-              void this.finishOpen(target, image);
-            },
-          }),
-        );
-      } else this.photoReady.set(true);
-    } else this.photoReady.set(true);
+    void this.openGallery();
     this.destroy.onDestroy(() => {
       this.viewport?.removeEventListener("resize", this.updateViewport);
       this.viewport?.removeEventListener("scroll", this.updateViewport);
@@ -225,22 +163,115 @@ export class ProductDialog implements AfterViewInit {
       if (target) target.style.visibility = "";
     });
   }
-  private async finishOpen(target: HTMLImageElement, image: HTMLImageElement) {
-    // Let the selected responsive source decode before exposing it under the copy.
-    try {
-      await target.decode();
-    } catch {
-      /* A failed source still needs the normal image fallback. */
+  private async prepareGallery() {
+    const photos = this.product()?.photos || [];
+    const ratios = await Promise.all(
+      photos.map(
+        (src) =>
+          new Promise<number>((resolve) => {
+            const image = new Image();
+            // A secondary request must never indefinitely block the decoded primary photo.
+            // Unknown dimensions reserve the maximum allowed portrait frame and stay frozen.
+            const timeout = setTimeout(() => finish(0.5), 1500);
+            const finish = (ratio: number) => {
+              clearTimeout(timeout);
+              image.onload = image.onerror = null;
+              resolve(ratio);
+            };
+            image.onload = () =>
+              finish(image.naturalWidth / image.naturalHeight);
+            image.onerror = () => finish(0.5);
+            image.src = webpSet(src) ? src.replace(/\.jpg$/, "-480.webp") : src;
+          }),
+      ),
+    );
+    if (this.destroy.destroyed || this.closing) return;
+    if (ratios.length)
+      this.galleryRatio.set(Math.max(0.5, Math.min(...ratios)));
+    // Apply the product's fixed frame before measuring the flight destination.
+    await new Promise<void>((resolve) =>
+      requestAnimationFrame(() => resolve()),
+    );
+  }
+  private async openGallery() {
+    const panel =
+      this.host.nativeElement.querySelector<HTMLElement>(".dialog-panel");
+    const backdrop =
+      this.host.nativeElement.querySelector<HTMLElement>(".dialog-backdrop");
+    const content = this.host.nativeElement.querySelector<HTMLElement>(
+      ".dialog-content, .dialog-missing",
+    );
+    const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    // Start the shell entrance immediately; do not replay it after photo downloads.
+    if (!reduced) {
+      if (panel)
+        this.animations.push(
+          animate(panel, { opacity: [0, 1], duration: 340, ease: "out(2)" }),
+        );
+      if (backdrop)
+        this.animations.push(
+          animate(backdrop, { opacity: [0, 1], duration: 360, ease: "out(2)" }),
+        );
     }
-    if (this.closing || this.destroy.destroyed || this.flyingImage !== image)
-      return;
-    target.style.visibility = "";
-    requestAnimationFrame(() => {
-      if (this.closing || this.destroy.destroyed || this.flyingImage !== image)
-        return;
-      image.remove();
-      this.flyingImage = null;
+    await this.prepareGallery();
+    if (this.destroy.destroyed || this.closing) return;
+    const target = this.host.nativeElement.querySelector<HTMLImageElement>(
+      ".dialog-photo picture img",
+    );
+    if (target) {
+      let timer: ReturnType<typeof setTimeout> | undefined;
+      try {
+        await Promise.race([
+          target.decode(),
+          new Promise<void>((resolve) => {
+            timer = setTimeout(resolve, 1500);
+          }),
+        ]);
+      } catch {
+        /* Preserve the browser's failed-image state. */
+      } finally {
+        clearTimeout(timer);
+      }
+    }
+    if (this.destroy.destroyed || this.closing) return;
+    this.layoutReady.set(true);
+    if (reduced) {
       this.photoReady.set(true);
+      return;
+    }
+    if (content)
+      this.animations.push(
+        animate(content, {
+          opacity: [0, 1],
+          translateX: [10, 0],
+          duration: 340,
+          ease: "out(2)",
+        }),
+      );
+    const origin = this.nav.flight;
+    if (!origin || !target?.naturalWidth) {
+      this.photoReady.set(true);
+      return;
+    }
+    const flight = new PhotoFlight(origin.src, origin.frame);
+    this.flyingImage = flight;
+    target.style.visibility = "hidden";
+    flight.move(photoFrame(target), 410, () => {
+      if (this.closing || this.destroy.destroyed || this.flyingImage !== flight)
+        return;
+      target.style.visibility = "";
+      // The decoded real image and the copy now have identical clip and bitmap geometry.
+      requestAnimationFrame(() => {
+        if (
+          this.closing ||
+          this.destroy.destroyed ||
+          this.flyingImage !== flight
+        )
+          return;
+        flight.remove();
+        this.flyingImage = null;
+        this.photoReady.set(true);
+      });
     });
   }
   requestClose() {
@@ -251,84 +282,40 @@ export class ProductDialog implements AfterViewInit {
       done();
       return;
     }
-    const backdrop =
-      this.host.nativeElement.querySelector<HTMLElement>(".dialog-backdrop");
     const panel =
       this.host.nativeElement.querySelector<HTMLElement>(".dialog-panel");
-    const content = this.host.nativeElement.querySelector<HTMLElement>(
-      ".dialog-content, .dialog-missing",
+    const backdrop =
+      this.host.nativeElement.querySelector<HTMLElement>(".dialog-backdrop");
+    const target = this.host.nativeElement.querySelector<HTMLImageElement>(
+      ".dialog-photo picture img",
     );
-    const closeButton =
-      this.host.nativeElement.querySelector<HTMLElement>(".dialog-close");
     const origin = this.nav.flight;
-    const target =
-      this.host.nativeElement.querySelector<HTMLImageElement>(
-        ".dialog-photo img",
-      );
-    const activeCopy = this.flyingImage;
-    const start = (activeCopy || target)?.getBoundingClientRect();
-    const source = activeCopy?.src || target?.currentSrc || origin?.src;
-    const position =
-      activeCopy || target
-        ? getComputedStyle(activeCopy || target!).objectPosition
-        : "50% 50%";
     this.animations.forEach((animation) => animation.cancel());
     this.animations = [];
-    if (content)
-      this.animations.push(
-        animate(content, {
-          opacity: 0,
-          translateX: 8,
-          duration: 230,
-          ease: "in(2)",
-        }),
-      );
-    if (closeButton)
-      this.animations.push(
-        animate(closeButton, { opacity: 0, duration: 180, ease: "in(2)" }),
-      );
-    if (panel && origin && target)
-      this.animations.push(
-        animate(panel, { opacity: 0, duration: 310, ease: "inOut(2)" }),
-      );
     if (backdrop)
       this.animations.push(
         animate(backdrop, { opacity: 0, duration: 330, ease: "inOut(2)" }),
       );
-    if (origin && target) {
-      const image = new Image();
-      image.src = source || origin.src;
-      image.alt = "";
-      Object.assign(image.style, {
-        position: "fixed",
-        zIndex: "100",
-        left: `${start!.left}px`,
-        top: `${start!.top}px`,
-        width: `${start!.width}px`,
-        height: `${start!.height}px`,
-        objectFit: getComputedStyle(activeCopy || target!).objectFit,
-        objectPosition: position,
-        borderRadius: "14px",
-        pointerEvents: "none",
-      });
-      document.body.append(image);
-      this.flyingImage = image;
+    if (origin && target?.naturalWidth) {
+      const flight =
+        this.flyingImage ||
+        new PhotoFlight(target.currentSrc || target.src, photoFrame(target));
+      this.flyingImage = flight;
       target.style.visibility = "hidden";
-      activeCopy?.remove();
-      this.animations.push(
-        animate(image, {
-          left: origin.rect.left,
-          top: origin.rect.top,
-          width: origin.rect.width,
-          height: origin.rect.height,
-          duration: 330,
-          ease: "inOut(2)",
-          onComplete: () => {
-            image.remove();
-            this.flyingImage = null;
-            done();
-          },
-        }),
+      if (panel)
+        this.animations.push(
+          animate(panel, { opacity: 0, duration: 310, ease: "inOut(2)" }),
+        );
+      flight.move(
+        origin.restingFrame,
+        330,
+        () => {
+          // Keep the matched copy above the restored catalog until scroll/focus restoration renders.
+          this.nav.returningPhoto = flight.element;
+          this.flyingImage = null;
+          done();
+        },
+        this.currentPhoto() === origin.photo ? undefined : origin.src,
       );
     } else if (panel)
       this.animations.push(
