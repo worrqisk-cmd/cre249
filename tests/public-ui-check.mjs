@@ -15,6 +15,11 @@ try {
         .locator(route.includes("item") ? ".dialog-content" : ".product-card")
         .first()
         .waitFor();
+      assert.equal(
+        await page.locator(".footer-credit").count(),
+        route.includes("item") ? 0 : 1,
+        `footer credit visibility: ${width} ${route}`,
+      );
       await page.evaluate(() => document.fonts.ready);
       const fonts = await page
         .locator("h1,h2,h3,.product-meta p,.dialog-content p")
@@ -95,6 +100,21 @@ try {
           await page.setViewportSize({ width, height: 900 });
         }
       }
+      if (route === "") {
+        const credit = page.locator(".footer-credit");
+        assert.equal(await credit.innerText(), "Сайт создан в Waystroke");
+        const link = credit.locator("a");
+        assert.equal(await link.getAttribute("href"), "https://waystroke.online");
+        assert.equal(await link.getAttribute("target"), null);
+        assert.equal(await link.evaluate((el) => getComputedStyle(el).textDecorationLine), "underline");
+        assert.equal(await credit.evaluate((el) => getComputedStyle(el).fontSize), "13px");
+        assert.equal(await credit.evaluate((el) => el.parentElement.lastElementChild === el), true);
+        const creditBox = await credit.boundingBox();
+        const footerBox = await credit.evaluate((el) => el.parentElement.getBoundingClientRect().toJSON());
+        assert.ok(creditBox.x >= footerBox.x && creditBox.x + creditBox.width <= footerBox.right, "credit remains within footer padding");
+        await link.focus();
+        assert.equal(await link.evaluate((el) => getComputedStyle(el).outlineStyle), "solid", "visible keyboard focus");
+      }
       // Text enlargement is separate from browser zoom.
       await page.evaluate(
         () => (document.documentElement.style.fontSize = "200%"),
@@ -127,6 +147,11 @@ try {
     assert.deepEqual(errors, []);
     await page.close();
   }
+  const admin = await browser.newPage({ viewport: { width: 390, height: 844 } });
+  await admin.goto(base + "#/admin/login");
+  await admin.locator(".admin-login form").waitFor();
+  assert.equal(await admin.locator(".footer-credit").count(), 0);
+  await admin.close();
   const page = await browser.newPage({
     viewport: { width: 390, height: 844 },
     reducedMotion: "reduce",

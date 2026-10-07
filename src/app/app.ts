@@ -6,6 +6,12 @@ import { NavigationState } from './navigation-state';
 import { HomeIntroState } from './home-intro-state';
 import { CONTACT_MESSAGE, DEFAULT_DELIVERY, PROTOTYPE_WHATSAPP, telegramLink, waLink } from './data';
 import { CatalogStore } from './catalog-store';
+
+export function shouldShowSiteCredit(url: string): boolean {
+  const path = url.split(/[?#]/, 1)[0];
+  return !path.startsWith('/admin') && !path.startsWith('/item/');
+}
+
 @Component({selector:'app-root', standalone:true, imports:[RouterOutlet,RouterLink], templateUrl:'./app.html', styleUrl:'./app.css', changeDetection:ChangeDetectionStrategy.OnPush})
 export class App {
   private seo = inject(Seo);
@@ -16,6 +22,7 @@ export class App {
   readonly catalog = inject(CatalogStore);
   readonly menu = signal(false);
   readonly isHome = signal(true);
+  readonly showSiteCredit = signal(shouldShowSiteCredit(this.router.url));
   readonly contactNumber = computed(() => this.catalog.settings()?.whatsapp_number || (this.catalog.state() === 'error' ? PROTOTYPE_WHATSAPP : null));
   readonly whatsapp = computed(() => this.contactNumber() ? waLink(this.contactNumber()!, CONTACT_MESSAGE) : null);
   readonly telegram = computed(() => this.catalog.settings()?.telegram_username ? telegramLink(this.catalog.settings()!.telegram_username!) : null);
@@ -24,6 +31,7 @@ export class App {
     void this.catalog.load();
     this.router.events.pipe(filter(e => e instanceof NavigationEnd)).subscribe(() => {
       this.isHome.set(this.router.url === '/');
+      this.showSiteCredit.set(shouldShowSiteCredit(this.router.url));
       this.menu.set(false);
       if (!this.router.url.startsWith('/item/')) this.nav.restoreFocus();
     });

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { routes } from './app.routes';
+import { shouldShowSiteCredit } from './app';
 import { buildMessage, formatPrice, Product, waLink, webpSet } from './data';
 
 const assorti: Product = {
@@ -8,6 +9,13 @@ const assorti: Product = {
 };
 
 describe('catalog behavior', () => {
+  it('shows the site credit only on public pages, not admin or product dialogs', () => {
+    expect(shouldShowSiteCredit('/')).toBe(true);
+    expect(shouldShowSiteCredit('/catalog/sweet')).toBe(true);
+    expect(shouldShowSiteCredit('/admin/login')).toBe(false);
+    expect(shouldShowSiteCredit('/admin')).toBe(false);
+    expect(shouldShowSiteCredit('/item/kurnik')).toBe(false);
+  });
   it('keeps public and admin routes lazy', () => {
     expect(routes.map(route => route.path)).toContain('admin/login');
     expect(routes.find(route => route.path === 'admin')?.canActivate?.length).toBe(1);
