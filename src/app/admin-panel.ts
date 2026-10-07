@@ -102,7 +102,7 @@ export class AdminPanel {
     if (!this.canDiscard()) return;
     const copy: ProductDraft = {
       id: crypto.randomUUID(), slug: '', title: '', description: '', category_id: this.categories()[0]?.id || '',
-      fillings: [], price: null, price_unit: null, photos: [], primary_photo: 0, sort_order: this.rows().length * 10 + 10,
+      fillings: [], price: null, price_unit: null, photos: [], primary_photo: 0, sort_order: Math.max(0, ...this.rows().map(row => row.sort_order)) + 10,
       featured: false, published: false, availability: 'unconfirmed', updated_at: '',
     };
     this.draft.set(copy);this.original = JSON.stringify(copy);this.isNew.set(true);this.previews.set([]);

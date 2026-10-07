@@ -25,6 +25,8 @@ export class HomeIntro implements AfterViewInit {
   ngAfterViewInit() {
     const layer = this.host.nativeElement.querySelector<HTMLElement>(".home-intro");
     if (!layer) return;
+    // The real opaque layer now exists; replace the early cover in the same render.
+    document.documentElement.removeAttribute("data-home-intro");
 
     // The timer removes the layer independently of anime.js; CSS also makes it
     // transparent after 2.1 s if JavaScript is interrupted altogether.

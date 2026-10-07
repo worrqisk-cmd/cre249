@@ -3,12 +3,14 @@ import {
   ApplicationConfig,
   provideZonelessChangeDetection,
 } from "@angular/core";
-import { provideRouter, UrlSerializer } from "@angular/router";
+import { provideRouter, RouteReuseStrategy, UrlSerializer } from "@angular/router";
+import { CatalogRouteReuse } from "./catalog-route-reuse";
 import { routes } from "./app.routes";
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZonelessChangeDetection(),
     provideRouter(routes),
+    { provide: RouteReuseStrategy, useClass: CatalogRouteReuse },
     { provide: UrlSerializer, useClass: PathSerializer },
   ],
 };

@@ -33,9 +33,12 @@ export class HomeIntroState {
         this.shouldPlay.set(
           this.startedOnHome &&
             this.fullPageLoad &&
+            document.documentElement.dataset["homeIntro"] === "pending" &&
             !this.reducedMotion &&
             event.urlAfterRedirects === "/",
         );
+        if (this.isBrowser && !this.shouldPlay())
+          document.documentElement.removeAttribute("data-home-intro");
       });
   }
 

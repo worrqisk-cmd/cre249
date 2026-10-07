@@ -1,4 +1,4 @@
-@if(!slug() || !standalone || state()!=='ok'){
+@if(!slug() || !standalone() || state()!=='ok'){
 <section class="section container catalog-page">
   <div class="catalog-top">
     <div>
@@ -52,7 +52,7 @@
 }
 @if(slug()&&state()==='ok'){<app-product-dialog
   [product]="dialog()"
-  [standalone]="standalone"
+  [standalone]="standalone()"
   [missing]="missing()"
   (closeRequested)="close()"
 />}
