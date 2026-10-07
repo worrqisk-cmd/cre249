@@ -24,5 +24,6 @@ async function start() {
 }
 
 start().catch(() => {
+  document.documentElement.removeAttribute('data-home-intro');
   document.querySelector('app-root')!.textContent = 'Не удалось загрузить настройки сайта. Обновите страницу позже.';
 });

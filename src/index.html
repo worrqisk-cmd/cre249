@@ -8,6 +8,39 @@
       name="viewport"
       content="width=device-width, initial-scale=1, viewport-fit=cover"
     />
+    <style>
+      html[data-home-intro="pending"]::after {
+        content: "";
+        position: fixed;
+        inset: 0;
+        z-index: 100;
+        background: #f7f1e5;
+        pointer-events: none;
+      }
+    </style>
+    <script>
+      // Cover prerendered home before the deferred application can paint its intro.
+      // With JavaScript disabled or reduced motion, the static page stays visible.
+      (() => {
+        const navigation = performance.getEntriesByType("navigation")[0];
+        const home = location.pathname === new URL(document.baseURI).pathname;
+        const homeHash = !location.hash || location.hash === "#/";
+        if (
+          !home ||
+          !homeHash ||
+          navigation?.type === "back_forward" ||
+          matchMedia("(prefers-reduced-motion: reduce)").matches
+        )
+          return;
+        const root = document.documentElement;
+        root.dataset.homeIntro = "pending";
+        // A stalled application must expose the page and skip any late intro.
+        setTimeout(() => {
+          if (root.dataset.homeIntro === "pending")
+            root.dataset.homeIntro = "expired";
+        }, 2100);
+      })();
+    </script>
     <link rel="icon" type="image/svg+xml" href="favicon.svg" />
     <meta
       name="description"

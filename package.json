@@ -11,7 +11,7 @@
     "test:catalog-api": "node tests/catalog-api-check.mjs",
     "test:admin-form": "node tests/admin-form-check.mjs",
     "test:public-ui": "node tests/public-ui-check.mjs",
-    "test:intro": "node tests/home-intro-check.mjs",
+    "test:intro": "node tests/home-intro-check.mjs && node tests/home-intro-first-paint-check.mjs",
     "test:dialog-position": "node tests/dialog-position-check.mjs",
     "test:motion": "node tests/product-motion-check.mjs",
     "preview:pages": "node scripts/serve-production.mjs",
