@@ -18,5 +18,5 @@
     <div><p class="eyebrow">Контакты</p><h2>Напишите мне —<br><span>обсудим ваш заказ</span></h2></div>
     <div><p>{{catalog.settings()?.city || 'Москва'}} · Домашняя выпечка на заказ</p>@if(whatsapp()){<p>WhatsApp: <a [href]="whatsapp()" target="_blank" rel="noopener noreferrer">{{contactNumber()}}</a></p><a class="button light" [href]="whatsapp()" target="_blank" rel="noopener noreferrer">Написать в WhatsApp</a>}@if(telegram()){<p><a [href]="telegram()" target="_blank" rel="noopener noreferrer">Написать в Telegram</a></p>}@if(!whatsapp()&&!telegram()){<p>Контакты временно недоступны.</p>}<a class="text-link" routerLink="/catalog">К каталогу →</a></div>
   </div>
-  <footer class="container footer"><span>© Выпечка у Миланы, Москва</span><span>{{delivery()}}</span>@if(showSiteCredit()){<span class="footer-credit">Сайт создан в <a href="https://waystroke.online">Waystroke</a></span>}</footer>
+  <footer class="container footer"><span>© Выпечка у Миланы, Москва</span><span>{{delivery()}}</span>@if(showSiteCredit()){<span class="footer-credit">Разработка сайта — <a href="https://waystroke.online">Waystroke</a></span>}</footer>
 </section>

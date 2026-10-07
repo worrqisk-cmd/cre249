@@ -102,7 +102,7 @@ try {
       }
       if (route === "") {
         const credit = page.locator(".footer-credit");
-        assert.equal(await credit.innerText(), "Сайт создан в Waystroke");
+        assert.equal(await credit.innerText(), "Разработка сайта — Waystroke");
         const link = credit.locator("a");
         assert.equal(await link.getAttribute("href"), "https://waystroke.online");
         assert.equal(await link.getAttribute("target"), null);
