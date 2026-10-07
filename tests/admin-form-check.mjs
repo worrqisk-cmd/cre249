@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { chromium } from 'playwright';
 
-const base = process.env.BASE_URL || 'http://127.0.0.1:8447/cre249/';
+const base = process.env.BASE_URL || 'http://127.0.0.1:8447/';
 const uid = '7ff37aab-19f3-46c0-8842-a28381902bca';
 const user = { id: uid, email: 'mind.style11@gmail.com', aud: 'authenticated', role: 'authenticated' };
 const jwt = ['eyJhbGciOiJIUzI1NiJ9', Buffer.from(JSON.stringify({ sub: uid, role: 'authenticated', exp: Math.floor(Date.now()/1000)+3600 })).toString('base64url'), 'signature'].join('.');

@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { chromium } from 'playwright';
 import { mkdir } from 'node:fs/promises';
 
-const base = process.env.BASE_URL || 'http://127.0.0.1:8447/cre249/';
+const base = process.env.BASE_URL || 'http://127.0.0.1:8447/';
 const captureScreenshots = process.env.CAPTURE_SCREENSHOTS === '1';
 if (captureScreenshots) await mkdir('artifacts/angular', { recursive: true });
 const browser = await chromium.launch({ headless: true });
