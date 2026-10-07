@@ -11,6 +11,8 @@ import {
   signal,
   linkedSignal,
 } from "@angular/core";
+import { form, FormField, required, validate, submit } from "@angular/forms/signals";
+import { FieldErrors } from "./field-errors";
 import { animate } from "animejs";
 import { photoFrame } from "./photo-frame";
 import { PhotoFlight } from "./photo-flight";
@@ -20,6 +22,7 @@ import { NavigationState } from "./navigation-state";
 @Component({
   selector: "app-product-dialog",
   standalone: true,
+  imports: [FormField, FieldErrors],
   templateUrl: "./product-dialog.html",
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -36,10 +39,16 @@ export class ProductDialog implements AfterViewInit {
     this.product();
     return false;
   });
-  readonly message = linkedSignal(() => {
+  readonly messageModel = linkedSignal(() => {
     this.product();
-    return "";
+    return {text: ""};
   });
+  readonly messageForm = form(this.messageModel, p => {
+    required(p.text, {message: "Введите сообщение."});
+    validate(p.text, ({value}) => !value() || value().trim() ? undefined : {kind: "blank", message: "Введите сообщение."});
+  });
+  readonly message = computed(() => this.messageModel().text);
+  readonly copyError = signal("");
   readonly copied = linkedSignal(() => {
     this.product();
     return false;
@@ -335,7 +344,8 @@ export class ProductDialog implements AfterViewInit {
   compose() {
     const p = this.product();
     if (!p) return;
-    this.message.set(buildMessage(p, this.variant() || undefined));
+    this.messageForm().reset({text: buildMessage(p, this.variant() || undefined)});
+    this.copyError.set("");
     this.composing.set(true);
     setTimeout(() => {
       const textarea = this.host.nativeElement.querySelector("textarea");
@@ -353,9 +363,7 @@ export class ProductDialog implements AfterViewInit {
       const nextContext =
         p.title +
         (this.variant() ? ` (начинка: ${this.variant()!.toLowerCase()})` : "");
-      this.message.update((message) =>
-        message.replace(oldContext, nextContext),
-      );
+      this.messageModel.update(model => ({text: model.text.replace(oldContext, nextContext)}));
       this.copied.set(false);
     }
   }
@@ -364,15 +372,19 @@ export class ProductDialog implements AfterViewInit {
   }
   link() {
     const number = this.catalog.settings()?.whatsapp_number;
-    return number ? waLink(number, this.message()) : null;
+    return number && this.messageForm().valid() ? waLink(number, this.message()) : null;
   }
   async copy() {
+    await submit(this.messageForm, async () => {
+    this.copyError.set("");
     try {
       await navigator.clipboard.writeText(this.message());
       this.copied.set(true);
       setTimeout(() => this.copied.set(false), 1800);
     } catch {
+      this.copyError.set("Не удалось скопировать. Выделите сообщение и скопируйте его вручную.");
       this.host.nativeElement.querySelector("textarea")?.select();
     }
+    });
   }
 }

@@ -112,9 +112,12 @@
         ><textarea
           id="order-message"
           rows="5"
-          [value]="message()"
-          (input)="message.set($any($event.target).value); copied.set(false)"
+          [formField]="messageForm.text"
+          aria-describedby="message-error-0"
+          (input)="copied.set(false); copyError.set('')"
         ></textarea>
+        <app-field-errors id="message-error" [state]="messageForm.text()" />
+        @if(copyError()){<p class="form-error" role="alert">{{copyError()}}</p>}
         <div class="actions">
           @if(link()){<a
             class="button primary"
@@ -126,6 +129,7 @@
             class="button outline"
             type="button"
             (click)="copy()"
+            [disabled]="messageForm().submitting()"
             aria-live="polite"
           >
             {{copied()?'Скопировано ✓':'Скопировать'}}
