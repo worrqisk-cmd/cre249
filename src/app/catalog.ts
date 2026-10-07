@@ -38,7 +38,9 @@ export class Catalog implements AfterViewInit {
       this.catalog.products().find((product) => product.slug === this.slug()) ||
       null,
   );
-  readonly standalone = !this.nav.openedSlugs.has(this.route.snapshot.paramMap.get("slug") || "");
+  readonly standalone = computed(
+    () => !!this.slug() && !this.nav.openedSlugs.has(this.slug()!),
+  );
   readonly missing = computed(() => !!this.slug() && !this.dialog());
   readonly state = this.catalog.state;
   readonly indicator = signal({ left: 0, top: 0, width: 0 });
@@ -53,9 +55,14 @@ export class Catalog implements AfterViewInit {
   private sub = this.route.paramMap.subscribe((params) => {
     const c = params.get("category");
     const slug = params.get("slug");
+    if (c) this.nav.category.set(c);
     this.category.set(c || this.nav.category());
     this.slug.set(slug);
     if (slug && this.nav.openedSlugs.has(slug)) this.nav.itemOrigin.set(slug);
+    if (typeof window !== "undefined")
+      requestAnimationFrame(() => {
+        if (!this.destroy.destroyed) this.moveIndicator();
+      });
   });
   constructor() {
     void this.catalog.load();
@@ -69,12 +76,6 @@ export class Catalog implements AfterViewInit {
       const resize = new ResizeObserver(() => this.moveIndicator());
       resize.observe(categories);
       this.destroy.onDestroy(() => resize.disconnect());
-    }
-    if (this.slug() && !this.standalone) {
-      document.body.style.overflow = "hidden";
-      this.destroy.onDestroy(() => (document.body.style.overflow = ""));
-    } else if (this.nav.itemOrigin()) {
-      setTimeout(() => this.nav.restoreFocus(), 50);
     }
   }
   choose(c: CategoryId) {
@@ -95,7 +96,7 @@ export class Catalog implements AfterViewInit {
       });
   }
   close() {
-    if (!this.standalone) {
+    if (!this.standalone()) {
       this.nav.priorUrl.set(null);
       history.back();
     } else

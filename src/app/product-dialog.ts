@@ -134,6 +134,7 @@ export class ProductDialog implements AfterViewInit {
       );
       return;
     }
+    const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     this.updateViewport();
     this.viewport?.addEventListener("resize", this.updateViewport);
@@ -144,14 +145,14 @@ export class ProductDialog implements AfterViewInit {
     document.addEventListener("keydown", this.onKey);
     this.host.nativeElement
       .querySelector<HTMLButtonElement>(".dialog-close")
-      ?.focus();
+      ?.focus({ preventScroll: true });
     void this.openGallery();
     this.destroy.onDestroy(() => {
       this.viewport?.removeEventListener("resize", this.updateViewport);
       this.viewport?.removeEventListener("scroll", this.updateViewport);
       document.querySelector(".catalog-page")?.removeAttribute("inert");
       document.removeEventListener("keydown", this.onKey);
-      document.body.style.overflow = "";
+      document.body.style.overflow = previousOverflow;
       document.querySelector("header")?.removeAttribute("inert");
       document.querySelector(".contacts")?.removeAttribute("inert");
       this.animations.forEach((animation) => animation.cancel());
@@ -306,8 +307,11 @@ export class ProductDialog implements AfterViewInit {
         this.animations.push(
           animate(panel, { opacity: 0, duration: 310, ease: "inOut(2)" }),
         );
+      const cardImage = document.querySelector<HTMLImageElement>(
+        `[data-product-slug="${this.nav.itemOrigin()}"] img`,
+      );
       flight.move(
-        origin.restingFrame,
+        cardImage ? photoFrame(cardImage, true) : origin.restingFrame,
         330,
         () => {
           // Keep the matched copy above the restored catalog until scroll/focus restoration renders.

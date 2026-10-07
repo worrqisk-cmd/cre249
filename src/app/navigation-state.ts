@@ -36,8 +36,12 @@ export class NavigationState {
   restoreFocus() {
     const slug = this.itemOrigin();
     if (!slug) return;
+    const flight = this.flight;
     requestAnimationFrame(() => {
-      window.scrollTo({ top: this.scrollY(), behavior: "instant" });
+      if (this.itemOrigin() !== slug || this.flight !== flight) return;
+      // Catalog routes retain their DOM and scroll. Other origins (home) still need restoration.
+      if (window.scrollY !== this.scrollY())
+        window.scrollTo({ top: this.scrollY(), behavior: "instant" });
       document
         .querySelector<HTMLElement>(`[data-product-slug="${slug}"]`)
         ?.focus({ preventScroll: true });
