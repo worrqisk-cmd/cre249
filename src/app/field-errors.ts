@@ -6,7 +6,6 @@ import { ChangeDetectionStrategy, Component, input, Signal } from '@angular/core
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './field-errors.html',
-  styleUrl: './field-errors.scss',
 })
 export class FieldErrors {
   readonly id = input.required<string>();

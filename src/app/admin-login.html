@@ -20,11 +20,11 @@
         id="password-error"
         [state]="loginForm.password()"
     /></label>
-    @if(error()){
-    <p class="form-error" role="alert">{{error()}}</p>
+    @if (error()) {
+      <p class="form-error" role="alert">{{ error() }}</p>
     }
     <button class="button primary" type="submit" [disabled]="busy()">
-      {{busy()?'Проверяем…':'Войти'}}
+      {{ busy() ? 'Проверяем…' : 'Войти' }}
     </button>
   </form>
   <a class="text-link" routerLink="/catalog">← Вернуться в каталог</a>

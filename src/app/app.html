@@ -11,7 +11,7 @@
       [attr.aria-expanded]="menu()"
       aria-controls="primary-nav"
     >
-      {{menu()?'Закрыть':'Меню'}}
+      {{ menu() ? 'Закрыть' : 'Меню' }}
     </button>
     <nav id="primary-nav" class="nav" [class.open]="menu()" aria-label="Основная навигация">
       <a
@@ -24,13 +24,11 @@
       <button type="button" (click)="goSection('order')">Как заказать</button>
       <button type="button" (click)="goSection('contacts')">Контакты</button>
     </nav>
-    @if(whatsapp()){<a
-      class="header-contact"
-      [href]="whatsapp()"
-      target="_blank"
-      rel="noopener noreferrer"
-      >Написать Милане ↗</a
-    >}
+    @if (whatsapp()) {
+      <a class="header-contact" [href]="whatsapp()" target="_blank" rel="noopener noreferrer"
+        >Написать Милане ↗</a
+      >
+    }
   </div>
 </header>
 <main id="content"><router-outlet /></main>
@@ -41,27 +39,33 @@
       <h2>Напишите мне —<br /><span>обсудим ваш заказ</span></h2>
     </div>
     <div>
-      <p>{{catalog.settings()?.city || 'Москва'}} · Домашняя выпечка на заказ</p>
-      @if(whatsapp()){
-      <p>
-        WhatsApp:
-        <a [href]="whatsapp()" target="_blank" rel="noopener noreferrer">{{contactNumber()}}</a>
-      </p>
-      <a class="button light" [href]="whatsapp()" target="_blank" rel="noopener noreferrer"
-        >Написать в WhatsApp</a
-      >}@if(telegram()){
-      <p>
-        <a [href]="telegram()" target="_blank" rel="noopener noreferrer">Написать в Telegram</a>
-      </p>
-      }@if(!whatsapp()&&!telegram()){
-      <p>Контакты временно недоступны.</p>
-      }<a class="text-link" routerLink="/catalog">К каталогу →</a>
+      <p>{{ catalog.settings()?.city || 'Москва' }} · Домашняя выпечка на заказ</p>
+      @if (whatsapp()) {
+        <p>
+          WhatsApp:
+          <a [href]="whatsapp()" target="_blank" rel="noopener noreferrer">{{ contactNumber() }}</a>
+        </p>
+        <a class="button light" [href]="whatsapp()" target="_blank" rel="noopener noreferrer"
+          >Написать в WhatsApp</a
+        >
+      }
+      @if (telegram()) {
+        <p>
+          <a [href]="telegram()" target="_blank" rel="noopener noreferrer">Написать в Telegram</a>
+        </p>
+      }
+      @if (!whatsapp() && !telegram()) {
+        <p>Контакты временно недоступны.</p>
+      }
+      <a class="text-link" routerLink="/catalog">К каталогу →</a>
     </div>
   </div>
   <footer class="container footer">
-    <span>© Выпечка у Миланы, Москва</span><span>{{delivery()}}</span>@if(showSiteCredit()){<span
-      class="footer-credit"
-      >Разработка сайта — <a href="https://waystroke.online">Waystroke</a></span
-    >}
+    <span>© Выпечка у Миланы, Москва</span><span>{{ delivery() }}</span>
+    @if (showSiteCredit()) {
+      <span class="footer-credit"
+        >Разработка сайта — <a href="https://waystroke.online">Waystroke</a></span
+      >
+    }
   </footer>
 </section>

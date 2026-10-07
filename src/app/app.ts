@@ -66,10 +66,8 @@ export class App {
         .navigateByUrl('/')
         .then(() => setTimeout(() => document.getElementById(id)?.scrollIntoView(), 0));
     else
-      document
-        .getElementById(id)
-        ?.scrollIntoView({
-          behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth',
-        });
+      document.getElementById(id)?.scrollIntoView({
+        behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth',
+      });
   }
 }

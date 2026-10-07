@@ -1,55 +1,63 @@
-@if(!slug() || !standalone() || state()!=='ok'){
-<section class="section container catalog-page">
-  <div class="catalog-top">
-    <div>
-      <p class="eyebrow">Домашняя выпечка</p>
-      <h1>Вся выпечка</h1>
-      <p>Выберите то, что хочется обсудить с Миланой.</p>
+@if (!slug() || !standalone() || state() !== 'ok') {
+  <section class="section container catalog-page">
+    <div class="catalog-top">
+      <div>
+        <p class="eyebrow">Домашняя выпечка</p>
+        <h1>Вся выпечка</h1>
+        <p>Выберите то, что хочется обсудить с Миланой.</p>
+      </div>
+      <a class="text-link" routerLink="/">← На главную</a>
     </div>
-    <a class="text-link" routerLink="/">← На главную</a>
-  </div>
-  <div class="category-list" role="group" aria-label="Категории">
-    @for(c of categories();track c.id){<button
-      type="button"
-      [class.active]="category()===c.id"
-      [attr.aria-pressed]="category()===c.id"
-      (click)="choose(c.id)"
-    >
-      {{c.label}}</button
-    >}<span
-      class="category-indicator"
-      aria-hidden="true"
-      [style.width.px]="indicator().width"
-      [style.top.px]="indicator().top"
-      [style.transform]="'translateX('+indicator().left+'px)'"
-    ></span>
-  </div>
-  @if(state()==='loading'||state()==='idle'){
-  <div class="catalog-grid" aria-busy="true">
-    @for(n of [1,2,3,4];track n){
-    <div class="skeleton"></div>
+    <div class="category-list" role="group" aria-label="Категории">
+      @for (c of categories(); track c.id) {
+        <button
+          type="button"
+          [class.active]="category() === c.id"
+          [attr.aria-pressed]="category() === c.id"
+          (click)="choose(c.id)"
+        >
+          {{ c.label }}
+        </button>
+      }
+      <span
+        class="category-indicator"
+        aria-hidden="true"
+        [style.width.px]="indicator().width"
+        [style.top.px]="indicator().top"
+        [style.transform]="'translateX(' + indicator().left + 'px)'"
+      ></span>
+    </div>
+    @if (state() === 'loading' || state() === 'idle') {
+      <div class="catalog-grid" aria-busy="true">
+        @for (n of [1, 2, 3, 4]; track n) {
+          <div class="skeleton"></div>
+        }
+      </div>
+    } @else if (state() === 'error') {
+      <div class="message-state">
+        <h2>Каталог сейчас не загрузился</h2>
+        <p>Попробуйте ещё раз или напишите Милане через контакты ниже.</p>
+        <button class="button primary" (click)="retry()">Повторить</button>
+      </div>
+    } @else if (products().length === 0) {
+      <div class="message-state">
+        <h2>В этой категории пока пусто</h2>
+        <button class="button outline" (click)="choose('all')">Посмотреть всё</button>
+      </div>
+    } @else {
+      <div class="catalog-grid" aria-live="polite">
+        @for (p of products(); track p.slug) {
+          <app-product-card [product]="p" />
+        }
+      </div>
     }
-  </div>
-  } @else if(state()==='error'){
-  <div class="message-state">
-    <h2>Каталог сейчас не загрузился</h2>
-    <p>Попробуйте ещё раз или напишите Милане через контакты ниже.</p>
-    <button class="button primary" (click)="retry()">Повторить</button>
-  </div>
-  } @else if(products().length===0){
-  <div class="message-state">
-    <h2>В этой категории пока пусто</h2>
-    <button class="button outline" (click)="choose('all')">Посмотреть всё</button>
-  </div>
-  } @else {
-  <div class="catalog-grid" aria-live="polite">
-    @for(p of products();track p.slug){<app-product-card [product]="p" />}
-  </div>
-  }
-</section>
-} @if(slug()&&state()==='ok'){<app-product-dialog
-  [product]="dialog()"
-  [standalone]="standalone()"
-  [missing]="missing()"
-  (closeRequested)="close()"
-/>}
+  </section>
+}
+@if (slug() && state() === 'ok') {
+  <app-product-dialog
+    [product]="dialog()"
+    [standalone]="standalone()"
+    [missing]="missing()"
+    (closeRequested)="close()"
+  />
+}

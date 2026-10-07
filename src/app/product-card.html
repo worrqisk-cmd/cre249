@@ -13,37 +13,31 @@
     [style.--card-photo-ratio]="frame()?.ratio || null"
   >
     @if (photo()) {
-    <picture
-      ><source
-        type="image/webp"
-        [attr.srcset]="webpSet(photo())"
-        [attr.sizes]="
-              presentation()
-                ? priority()
-                  ? '(max-width: 600px) calc(100vw - 32px), (max-width: 1000px) 33vw, 25vw'
-                  : '(max-width: 600px) 50vw, (max-width: 1000px) 33vw, 25vw'
-                : '(max-width: 1000px) 50vw, 25vw'
-            " />
-      <img
-        [src]="photo()"
-        [alt]="product().title"
-        width="960"
-        height="1280"
-        [attr.loading]="priority() ? 'eager' : 'lazy'"
-        [attr.fetchpriority]="priority() ? 'high' : null"
-        decoding="async"
-        [style.visibility]="
-              nav.itemOrigin() === product().slug ? 'hidden' : null
-            "
-        [style.--focus-mobile]="
-              frame()?.mobile || product().focus?.mobile || '50% 50%'
-            "
-        [style.--focus-desktop]="
-              frame()?.desktop || product().focus?.desktop || '50% 50%'
-            "
-    /></picture>
+      <picture
+        ><source
+          type="image/webp"
+          [attr.srcset]="webpSet(photo())"
+          [attr.sizes]="
+            presentation()
+              ? priority()
+                ? '(max-width: 600px) calc(100vw - 32px), (max-width: 1000px) 33vw, 25vw'
+                : '(max-width: 600px) 50vw, (max-width: 1000px) 33vw, 25vw'
+              : '(max-width: 1000px) 50vw, 25vw'
+          " />
+        <img
+          [src]="photo()"
+          [alt]="product().title"
+          width="960"
+          height="1280"
+          [attr.loading]="priority() ? 'eager' : 'lazy'"
+          [attr.fetchpriority]="priority() ? 'high' : null"
+          decoding="async"
+          [style.visibility]="nav.itemOrigin() === product().slug ? 'hidden' : null"
+          [style.--focus-mobile]="frame()?.mobile || product().focus?.mobile || '50% 50%'"
+          [style.--focus-desktop]="frame()?.desktop || product().focus?.desktop || '50% 50%'"
+      /></picture>
     } @else {
-    <span class="placeholder-copy"><span aria-hidden="true">◇</span>Фото изделия пока нет</span>
+      <span class="placeholder-copy"><span aria-hidden="true">◇</span>Фото изделия пока нет</span>
     }
     <span class="view-hint">Смотреть ↗</span>
   </div>
@@ -51,9 +45,7 @@
     <h3>{{ product().title }}</h3>
     <p
       class="product-price"
-      [class.price-confirmed]="
-          product().price !== null && !!product().priceUnit
-        "
+      [class.price-confirmed]="product().price !== null && !!product().priceUnit"
     >
       {{ price(product()) }}
     </p>

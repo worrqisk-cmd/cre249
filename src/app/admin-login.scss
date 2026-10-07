@@ -1,1 +1,36 @@
-/* Стили компонента переносятся из глобального файла на следующем этапе. */
+.admin-login {
+  padding-block: 64px 90px;
+}
+
+.admin-login {
+  max-width: 520px;
+}
+
+.admin-login h1 {
+  font-size: clamp(2.5rem, 5vw, 4.5rem);
+}
+
+.admin-login form {
+  display: grid;
+  gap: 20px;
+}
+
+.admin-login form {
+  margin: 30px 0;
+}
+
+.admin-login label {
+  display: grid;
+  gap: 7px;
+  font-weight: 600;
+}
+
+.admin-login input {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid #9d8976;
+  border-radius: 9px;
+  background: var(--paper);
+  color: var(--cocoa);
+}
