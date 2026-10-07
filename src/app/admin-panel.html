@@ -270,7 +270,7 @@
           }
         </div>
       </div>
-    } @else if (settings(); as config) {
+    } @else if (settingsModel()) {
       <form novalidate class="admin-settings" (submit)="$event.preventDefault(); saveSettings()">
         <h2>Публичные настройки</h2>
         <label
