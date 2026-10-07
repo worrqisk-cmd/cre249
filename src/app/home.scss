@@ -20,15 +20,16 @@
   border-radius: 16px;
   overflow: hidden;
   background: var(--kraft);
-  aspect-ratio: 4/3;
-  max-height: 420px;
+  aspect-ratio: 1;
+  max-height: none;
+  max-width: 420px;
 }
 
 .about-photo img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  object-position: 50% 60%;
+  object-fit: contain;
+  object-position: 50% 50%;
 }
 
 .about-copy h2 {
@@ -287,12 +288,3 @@ app-product-card {
 }
 
 /* The complete square archive photo stays uncropped on both layouts. */
-.about-photo {
-  aspect-ratio: 1;
-  max-width: 420px;
-  max-height: none;
-}
-.about-photo img {
-  object-fit: contain;
-  object-position: 50% 50%;
-}

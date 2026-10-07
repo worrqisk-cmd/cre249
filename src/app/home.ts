@@ -9,20 +9,13 @@ import {
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { animate } from 'animejs';
-import {
-  CONTACT_MESSAGE,
-  DEFAULT_DELIVERY,
-  PHOTOS,
-  Product,
-  PROTOTYPE_WHATSAPP,
-  waLink,
-  webpSet,
-} from './data';
+import { PHOTOS, webpSet } from './data';
 import { CatalogStore } from './catalog-store';
 import { ProductCard } from './product-card';
 import { NavigationState } from './navigation-state';
 import { HomeIntro } from './home-intro';
 import { HomeIntroState } from './home-intro-state';
+import { homePresentation } from './product-presentation';
 @Component({
   standalone: true,
   imports: [RouterLink, ProductCard, HomeIntro],
@@ -31,23 +24,15 @@ import { HomeIntroState } from './home-intro-state';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Home implements AfterViewInit {
-  private nav = inject(NavigationState);
+  private readonly nav = inject(NavigationState);
   readonly intro = inject(HomeIntroState);
-  private host = inject<ElementRef<HTMLElement>>(ElementRef);
-  private destroy = inject(DestroyRef);
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly destroy = inject(DestroyRef);
   readonly catalog = inject(CatalogStore);
   private animations: ReturnType<typeof animate>[] = [];
   readonly photos = PHOTOS;
   readonly webpSet = webpSet;
-  showcase(product: Product) {
-    if (product.slug === 'assorti') {
-      const photo = product.photos.find((photo) => photo === 'photos/archive_063_assorti.jpg');
-      if (photo) return { photo, desktop: '50% 55%', mobile: '50% 65%', fit: 'cover' };
-    }
-    if (product.slug === 'kurnik') return { desktop: '50% 100%', mobile: '50% 90%', fit: 'cover' };
-    if (product.slug === 'milka') return { desktop: '50% 50%', mobile: '50% 55%', fit: 'contain' };
-    return undefined;
-  }
+  readonly showcase = homePresentation;
   readonly products = computed(() => {
     const all = this.catalog.products();
     const preferred = ['assorti', 'kurnik', 'milka'].flatMap((slug) =>
@@ -55,19 +40,12 @@ export class Home implements AfterViewInit {
     );
     return [...preferred, ...all.filter((p) => !preferred.includes(p))].slice(0, 3);
   });
-  readonly contactNumber = computed(
-    () =>
-      this.catalog.settings()?.whatsapp_number ||
-      (this.catalog.state() === 'error' ? PROTOTYPE_WHATSAPP : null),
-  );
-  readonly whatsapp = computed(() =>
-    this.contactNumber() ? waLink(this.contactNumber()!, CONTACT_MESSAGE) : null,
-  );
-  readonly delivery = computed(() => this.catalog.settings()?.delivery_text || DEFAULT_DELIVERY);
+  readonly whatsapp = this.catalog.whatsapp;
+  readonly delivery = this.catalog.delivery;
   constructor() {
     void this.catalog.load();
   }
-  ngAfterViewInit() {
+  ngAfterViewInit(): void {
     if (typeof window === 'undefined') return;
     if (this.nav.itemOrigin()) setTimeout(() => this.nav.restoreFocus(), 50);
     const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;

@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { NavigationState } from '../navigation-state';
 import { CatalogStore } from '../catalog-store';
 import { ProductCard } from '../product-card';
@@ -13,9 +13,8 @@ import { CONTACT_MESSAGE, waLink } from '../data';
 })
 export class HomePreview {
   private readonly navigation = inject(NavigationState);
-  private readonly router = inject(Router);
   open(slug: string) {
-    this.navigation.open(slug, this.router.url);
+    this.navigation.open(slug);
   }
   readonly catalog = inject(CatalogStore);
   readonly variant = inject(ActivatedRoute).snapshot.data['variant'] as string;

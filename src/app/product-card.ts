@@ -1,7 +1,8 @@
 import { ChangeDetectionStrategy, Component, input, inject, computed } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { Product, formatPrice, webpSet } from './data';
 import { NavigationState } from './navigation-state';
+import { CardPresentation, catalogPresentation } from './product-presentation';
 @Component({
   selector: 'app-product-card',
   standalone: true,
@@ -13,48 +14,24 @@ import { NavigationState } from './navigation-state';
 export class ProductCard {
   readonly product = input.required<Product>();
   readonly priority = input(false);
-  readonly presentation = input<{
-    photo?: string;
-    desktop: string;
-    mobile: string;
-    fit: string;
-    ratio?: number;
-  }>();
-  readonly catalogFrame = computed(() => {
-    const p = this.product();
-    if (p.slug === 'slivochno-karamelny') {
-      const photo = p.photos.find((src) => src === 'photos/archive_085_slivochno-karamelny.jpg');
-      return {
-        photo,
-        desktop: '50% 50%',
-        mobile: '50% 50%',
-        fit: 'contain',
-        ratio: 1,
-      };
-    }
-    if (p.slug === 'kuraga-oreh')
-      return {
-        desktop: '50% 50%',
-        mobile: '50% 50%',
-        fit: 'contain',
-        ratio: 1078 / 632,
-      };
-    return undefined;
+  readonly presentation = input<CardPresentation>();
+  readonly catalogFrame = computed(() => catalogPresentation(this.product()));
+  readonly imageSizes = computed(() => {
+    if (!this.presentation()) return '(max-width: 1000px) 50vw, 25vw';
+    return this.priority()
+      ? '(max-width: 600px) calc(100vw - 32px), (max-width: 1000px) 33vw, 25vw'
+      : '(max-width: 600px) 50vw, (max-width: 1000px) 33vw, 25vw';
   });
+  readonly isPhotoOrigin = computed(() => this.nav.itemOrigin() === this.product().slug);
   readonly frame = computed(() => this.presentation() || this.catalogFrame());
   readonly photo = computed(() => this.frame()?.photo || this.product().photos[0] || '');
   readonly price = formatPrice;
   readonly webpSet = webpSet;
-  private router = inject(Router);
   readonly nav = inject(NavigationState);
-  open(event: MouseEvent) {
+  open(event: MouseEvent): void {
     if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey || event.button !== 0)
       return;
-    this.nav.open(
-      this.product().slug,
-      this.router.url,
-      (event.currentTarget as HTMLElement).querySelector('img'),
-      this.photo(),
-    );
+    if (!(event.currentTarget instanceof HTMLElement)) return;
+    this.nav.open(this.product().slug, event.currentTarget.querySelector('img'), this.photo());
   }
 }

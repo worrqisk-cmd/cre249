@@ -3,7 +3,9 @@ import { ActivatedRouteSnapshot, BaseRouteReuseStrategy } from '@angular/router'
 
 import { NavigationState } from './navigation-state';
 
-/** A product opened from the catalog is an overlay on the same catalog DOM. */
+/** Каталог и открытое из него изделие используют один DOM: иначе scrollbar,
+ * фокус и исходная рамка фотографии потеряются во время закрытия оверлея.
+ * Прямой URL изделия остаётся отдельной prerender-страницей. */
 @Injectable()
 export class CatalogRouteReuse extends BaseRouteReuseStrategy {
   private readonly nav = inject(NavigationState);
