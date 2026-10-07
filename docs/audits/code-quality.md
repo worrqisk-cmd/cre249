@@ -38,3 +38,63 @@ Angular и зависимости остаются прежними; SCSS уже
 Не вводятся NgRx, generic repositories/base components или UI service для каждого простого метода. Guard/auth, query predicates/updated_at, публикация и Storage policies сохраняются. Крупные классы разделяются по реальным жизненным циклам, не по количеству строк.
 
 Результаты этапов, локальные коммиты и остаточные ограничения добавляются ниже после выполнения.
+
+## Выполненные этапы
+
+- `d95ffcf`: аудит/план, перенос отчёта форм с читаемой Markdown-таблицей, конфигурация форматирования.
+- `d0dd895`: external HTML для login/card/errors/not-found, отдельные SCSS, Angular CLI defaults для новых SCSS-компонентов, читабельные TS/HTML/SCSS.
+- `f100cbf`: global foundations/shared/reduced-motion и Emulated SCSS компонентов. Селекторы разных владельцев разделены; mobile overrides сохранены в исходном порядке. Без ViewEncapsulation.None, ::ng-deep и повышения style budgets.
+- `2c4f09c`: typed Supabase client, конкретный AdminCatalogApi, схемы/маппинг форм и отдельный scoped lifecycle фото. Snapshot стал типизированным сигналом вместо JSON.parse; успешный save принимает серверную запись. Старая фотография удаляется после записи photos; сбой очистки не отменяет уже успешное сохранение.
+- `e95ecda`: PublicCatalogApi, чистые product-mapping/product-presentation, общий contact state в store; удалены неиспользуемые featured/priorUrl. Store больше не зависит от CSS-класса открытого диалога. Сквозные контракты, публикация и порядок сохранены.
+- `720eef4`: ProductDialog сокращён до 98 строк; modal environment (66), gallery motion (182) и order message (96) имеют самостоятельные lifecycles. Cleanup подписок/таймеров, короткие русские комментарии, strict TS/noUnused/Angular templates. AdminPanel после форматирования и разделения — 283 строки вместо 480; число строк не было критерием само по себе.
+
+После возобновления сессии каталоги в /tmp исчезли. Коммиты сохранились; последние незакоммиченные изменения восстановлены из выполненного этапа, остальные сессии не изменялись. Постоянный worktree: `/media/aozaki/ssd2/projects/cre249-refactor`, ветка `refactor/angular-maintainability`. Main не изменялся. Оригинальные Signal Forms 2663efb/f1aef5c присутствуют как cherry-pick c216476/9105ec2. Интро/каталог b1e2e55 уже в базе через 9257139; дополнительная интеграция с известным коммитом не нужна. Любые новые незавершённые изменения другой сессии остаются за пределами этой ветки.
+
+## Текущая структура
+
+| Обязанность                   | Основные файлы                                                                                                                   |
+| :---------------------------- | :------------------------------------------------------------------------------------------------------------------------------- |
+| Shell, lazy routes, public UI | `app.*`, `app.routes.ts`, `home.*`, `catalog.*`, `product-card.*`                                                                |
+| State и Supabase              | `catalog-store.ts`, `public-catalog-api.ts`, `admin-catalog-api.ts`, `catalog-photos.ts`, `supabase.ts`, `database.types.ts`     |
+| Преобразование и presentation | `product-mapping.ts`, `product-presentation.ts`, `data.ts`                                                                       |
+| Admin и формы                 | `admin-panel.*`, `admin-forms.ts`, `admin-photos.ts`, `admin-login.*`, `admin-auth.ts`, `admin-guards.ts`, `field-errors.*`      |
+| Изделие/сообщение/галерея     | `product-dialog.*`, `product-dialog-environment.ts`, `product-gallery-motion.ts`, `order-message.*`                              |
+| Navigation и движение         | `catalog-route-reuse.ts`, `navigation-state.ts`, `photo-frame.ts`, `photo-flight.ts`, `home-intro-state.ts`, `home-intro.*`      |
+| Стили                         | `src/styles.scss`, `src/styles/_foundations.scss`, `_shared.scss`, `_motion.scss`; scoped SCSS рядом с компонентами              |
+| Static/SEO                    | `main.server.ts`, `seo.ts`, `scripts/prepare-static.mjs`, `finalize-static.mjs`, неизменённые `public` verification/robots файлы |
+
+Компоненты без собственных стилевых правил (`field-errors`, `not-found`) используют общий CSS; пустые SCSS не добавлялись. PhotoFlight по-прежнему создаёт body-элемент с inline геометрией, не зависящий от scoped стилей. Объединены подтверждённые unconditional CSS-дубликаты about-photo и dialog-photo picture; h1/h2 с идентичными свойствами объединены без изменения responsive каскада.
+
+## Итоговая проверка
+
+Node 22.22.3, pnpm 12.8.1, Angular 22.2.1, production build, Chromium/Playwright 1.63.0 headless. Preview `http://127.0.0.1:8458/` обслуживает output без SPA fallback. API/browser записи и auth/session подменяются; build читает опубликованный каталог. Медиа не записывается.
+
+| Команда (browser: BASE_URL=http://127.0.0.1:8458/) | Результат                                                                                                                                                                                                     |
+| :------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `pnpm build`                                       | Успех; 23 prerender маршрута, admin shells и sitemap; initial raw bundle 489.16 kB на проверенной сборке.                                                                                                     |
+| `pnpm test --watch=false`                          | 2 файла, 7 тестов, pass.                                                                                                                                                                                      |
+| `pnpm format:check`                                | Все TS/HTML/SCSS в src соответствуют Prettier.                                                                                                                                                                |
+| `pnpm test:admin-form`                             | Validation, login/settings/product error/retry, duplicate submit, edit/new/reset/dirty guard, hidden product, photo focus, current updated_at, JPEG upload error/retry/unlock — pass.                         |
+| `pnpm test:order-form`                             | Generated/custom message, filling, invalid input, WhatsApp encoding, clipboard error/retry на 390/1440 — pass.                                                                                                |
+| `pnpm test:catalog-api`                            | Empty/error/published query/hidden direct URL и unknown login без password endpoint — pass.                                                                                                                   |
+| `node tests/style-geometry-check.mjs`              | Computed CSS и geometry 144 элементов 390/1440 совпадают, допуск <1px. Baseline в ignored `.tmp-refactor/styles-baseline.json`; до переноса CSS также было подтверждено совпадение с исходной миграцией форм. |
+| `CATALOG_SNAPSHOT=1 pnpm test:public-ui`           | 360/390/768/1440, typography, gallery continuity, порядок, 200% text, reduced viewport, keyboard/focus/scroll/message/clipboard — pass.                                                                       |
+| `CATALOG_SNAPSHOT=1 pnpm test:motion`              | 390/1440: crop при входе/выходе, interrupted flight, повторное закрытие, Back/scroll/focus — pass.                                                                                                            |
+| `pnpm test:bootstrap`                              | 390/1440, public/admin routes и anonymous guard; no pageerror или console Angular/hydration error diagnostics — pass.                                                                                         |
+| `CATALOG_SNAPSHOT=1 pnpm test:routing`             | 23 HTTP документа, reload/legacy/guard/dialog history/focus/scroll/fillings/WhatsApp/intro — pass.                                                                                                            |
+| `CATALOG_SNAPSHOT=1 pnpm test:dialog-position`     | Mobile/desktop, normal/reduced motion: scrollY и рамки каталога сохраняются, deviations 0.                                                                                                                    |
+| `CATALOG_SNAPSHOT=1 pnpm test:intro`               | First visit/reload/internal return, reduced motion, failsafe, JS disabled, cover до Angular и handoff, stalled/failed boot — pass.                                                                            |
+| `pnpm test:seo`                                    | 23 public HTML, unique title/description, canonical, robots, index/noindex, sitemap — pass.                                                                                                                   |
+
+TypeScript strict/noUnused и Angular strictTemplates проходят production/unit compilation. Production stylesheet warning остаётся: `product-dialog.scss` 4.06 kB, на 60 байт выше warning budget 4 kB. Это результат локализации уже существовавших стилей; error budget 8 kB не превышен. Порог не повышен, геометрия не изменена ради экономии байтов. Исправление не требует нового architectural слоя.
+
+## Границы и остаточные вопросы
+
+- `provideClientHydration` в appConfig отсутствует. Проверены фактические prerender→bootstrap и Angular console diagnostics; полноценная hydration не включалась и не объявляется проверенной. При её отдельном внедрении нужен новый набор consistency проверок.
+- Real auth/Supabase writes/Storage/WhatsApp send не выполнялись. RLS/migrations и public verification файлы имеют нулевой diff относительно main. Код private Storage lifecycle и его mock сценарии не доказывают реальных серверных прав доступа.
+- Firefox, Safari и screen readers не проверялись. Geometry/CSS measurements и browser assertions не являются полной визуальной/WCAG оценкой.
+- Database типы описывают используемый контракт таблиц из локальной SQL-миграции; при изменении схемы их нужно синхронизировать. Внедрение автоматической генерации типов не требуется для текущего scope.
+- Удаление файлов при отказе от несохранённых изменений остаётся best effort, как до рефакторинга: при сетевом отказе в private Storage возможны неиспользуемые файлы. Универсальная очередь очистки не добавлена; это отдельная операционная задача.
+- Архитектурных этапов плана, требующих интеграции известного b1e2e55, не осталось. Для новых изменений параллельной сессии потребуется обычное сравнение после её фиксации.
+
+Никаких скриншотов, видео, push, merge в main, публикации или отправки сообщений.

@@ -23,7 +23,8 @@
     "test:routing": "node tests/static-routing-check.mjs",
     "test:seo": "node tests/seo-check.mjs",
     "format": "prettier --write \"src/**/*.{ts,html,scss}\"",
-    "format:check": "prettier --check \"src/**/*.{ts,html,scss}\""
+    "format:check": "prettier --check \"src/**/*.{ts,html,scss}\"",
+    "test:bootstrap": "node tests/bootstrap-check.mjs"
   },
   "private": true,
   "packageManager": "pnpm@12.8.1",
