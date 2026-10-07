@@ -9,6 +9,7 @@ const browser = await chromium.launch({ headless: true });
 const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
 let saves = 0;
 let settingsSave;
+let savedProduct;
 try {
   await page.route('**/auth/v1/**', route => {
     const url = new URL(route.request().url());
@@ -24,6 +25,7 @@ try {
     if (table === 'products' && route.request().method() !== 'GET') {
       saves++;
       const record = JSON.parse(route.request().postData());
+      savedProduct = record;
       await new Promise(resolve => setTimeout(resolve, 180));
       return route.fulfill({ status: 201, contentType: 'application/json', body: JSON.stringify([{ ...record, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }]) });
     }
@@ -31,7 +33,8 @@ try {
       settingsSave = JSON.parse(route.request().postData());
       return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([settingsSave]) });
     }
-    const body = table === 'products' ? [] : table === 'categories'
+    const existing = [10, 55, 40].map((sort_order, i) => ({ id: `existing-${i}`, slug: `existing-${i}`, title: `Существующее изделие ${i}`, description: '', category_id: 'cakes', fillings: [], price: null, price_unit: null, photos: [], primary_photo: 0, sort_order, featured: false, published: true, availability: 'unconfirmed', updated_at: '2026-10-08T00:00:00Z' }));
+    const body = table === 'products' ? existing : table === 'categories'
       ? [{ id: 'cakes', label: 'Торты', sort_order: 1, is_public: true }]
       : { id: true, city: 'Москва', whatsapp_number: '+7 (964) 203-48-35', telegram_username: null, delivery_text: 'По договорённости' };
     return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(body) });
@@ -51,11 +54,16 @@ try {
   assert.equal(settingsSave.delivery_text, 'По договорённости');
   await page.getByRole('button', { name: 'Изделия' }).click();
   await page.getByRole('button', { name: 'Добавить' }).click();
+  const order = page.getByLabel('Порядок показа');
+  assert.equal(await order.inputValue(), '65', 'new product starts 10 after maximum current order');
+  assert.equal(await page.getByText('Меньшее число — раньше в каталоге. Изделия с фото показываются первыми').count(), 1);
+  await order.fill('7');
   await page.getByLabel('Название').fill('Тестовый торт');
   await page.getByLabel('Slug').fill('test-cake');
   await page.getByRole('button', { name: 'Сохранить изделие' }).dblclick();
   await page.getByText('Изделие сохранено.').waitFor();
   assert.equal(saves, 1, 'double save must issue one mutation');
+  assert.equal(savedProduct.sort_order, 7, 'manual order is retained');
   await page.getByLabel('Описание').fill('Несохранённый текст');
   page.once('dialog', dialog => dialog.dismiss());
   await page.getByRole('link', { name: /Посмотреть каталог/ }).click();
