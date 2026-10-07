@@ -18,7 +18,8 @@
     "check:owner-photos": "node scripts/configure.mjs && node scripts/check-owner-photos.mjs",
     "check:access": "node scripts/configure.mjs && node scripts/check-supabase-access.mjs",
     "preview:design": "node scripts/configure.mjs && ng serve --configuration design --host 127.0.0.1 --port 8450",
-    "test:routing": "node tests/static-routing-check.mjs"
+    "test:routing": "node tests/static-routing-check.mjs",
+    "test:seo": "node tests/seo-check.mjs"
   },
   "private": true,
   "packageManager": "pnpm@12.8.1",

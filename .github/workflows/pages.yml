@@ -29,6 +29,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm test --watch=false
       - run: pnpm build
+      - run: pnpm test:seo
       - run: pnpm exec playwright install --with-deps chromium
       - name: Check production journeys without media capture
         run: |
