@@ -1,0 +1,31 @@
+<section class="admin-login container">
+  <p class="eyebrow">Управление каталогом</p>
+  <h1>Вход для Миланы</h1>
+  <form novalidate (submit)="submit($event)">
+    <label
+      >Логин<input
+        type="text"
+        autocomplete="username"
+        [formField]="loginForm.login"
+        aria-describedby="login-error-0" /><app-field-errors
+        id="login-error"
+        [state]="loginForm.login()"
+    /></label>
+    <label
+      >Пароль<input
+        type="password"
+        autocomplete="current-password"
+        [formField]="loginForm.password"
+        aria-describedby="password-error-0" /><app-field-errors
+        id="password-error"
+        [state]="loginForm.password()"
+    /></label>
+    @if(error()){
+    <p class="form-error" role="alert">{{error()}}</p>
+    }
+    <button class="button primary" type="submit" [disabled]="busy()">
+      {{busy()?'Проверяем…':'Войти'}}
+    </button>
+  </form>
+  <a class="text-link" routerLink="/catalog">← Вернуться в каталог</a>
+</section>

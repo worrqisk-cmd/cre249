@@ -1,0 +1,5 @@
+@if (state().touched()) { @for (error of state().errors(); track $index) {
+<small class="form-error" [id]="id() + '-' + $index"
+  >{{error.message || 'Проверьте значение поля.'}}</small
+>
+} }

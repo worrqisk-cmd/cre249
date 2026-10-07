@@ -5,11 +5,13 @@ import { ChangeDetectionStrategy, Component, input, Signal } from '@angular/core
   selector: 'app-field-errors',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `@if (state().touched()) { @for (error of state().errors(); track $index) {
-    <small class="form-error" [id]="id() + '-' + $index">{{error.message || 'Проверьте значение поля.'}}</small>
-  } }`,
+  templateUrl: './field-errors.html',
+  styleUrl: './field-errors.scss',
 })
 export class FieldErrors {
   readonly id = input.required<string>();
-  readonly state = input.required<{ touched: Signal<boolean>; errors: Signal<readonly {message?: string}[]> }>();
+  readonly state = input.required<{
+    touched: Signal<boolean>;
+    errors: Signal<readonly { message?: string }[]>;
+  }>();
 }

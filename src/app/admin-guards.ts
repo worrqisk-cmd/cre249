@@ -6,7 +6,7 @@ import type { AdminPanel } from './admin-panel';
 export const adminGuard: CanActivateFn = async () => {
   const auth = inject(AdminAuth);
   const router = inject(Router);
-  return await auth.isOwner() ? true : router.createUrlTree(['/admin/login']);
+  return (await auth.isOwner()) ? true : router.createUrlTree(['/admin/login']);
 };
 
-export const unsavedGuard: CanDeactivateFn<AdminPanel> = component => component.canLeave();
+export const unsavedGuard: CanDeactivateFn<AdminPanel> = (component) => component.canLeave();

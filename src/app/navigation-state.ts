@@ -1,6 +1,6 @@
-import { PhotoFrame, photoFrame } from "./photo-frame";
-import { Injectable, signal } from "@angular/core";
-@Injectable({ providedIn: "root" })
+import { PhotoFrame, photoFrame } from './photo-frame';
+import { Injectable, signal } from '@angular/core';
+@Injectable({ providedIn: 'root' })
 export class NavigationState {
   readonly openedSlugs = new Set<string>();
   returningPhoto: HTMLElement | null = null;
@@ -10,16 +10,11 @@ export class NavigationState {
     src: string;
     photo?: string;
   } | null = null;
-  readonly category = signal("all");
+  readonly category = signal('all');
   readonly scrollY = signal(0);
   readonly itemOrigin = signal<string | null>(null);
   readonly priorUrl = signal<string | null>(null);
-  open(
-    slug: string,
-    url: string,
-    image?: HTMLImageElement | null,
-    photo?: string,
-  ) {
+  open(slug: string, url: string, image?: HTMLImageElement | null, photo?: string) {
     this.openedSlugs.add(slug);
     this.scrollY.set(window.scrollY);
     this.itemOrigin.set(slug);
@@ -41,7 +36,7 @@ export class NavigationState {
       if (this.itemOrigin() !== slug || this.flight !== flight) return;
       // Catalog routes retain their DOM and scroll. Other origins (home) still need restoration.
       if (window.scrollY !== this.scrollY())
-        window.scrollTo({ top: this.scrollY(), behavior: "instant" });
+        window.scrollTo({ top: this.scrollY(), behavior: 'instant' });
       document
         .querySelector<HTMLElement>(`[data-product-slug="${slug}"]`)
         ?.focus({ preventScroll: true });

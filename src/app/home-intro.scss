@@ -57,7 +57,7 @@
   justify-items: center;
   gap: 9px;
   color: #4a3023;
-  font-family: "Yeseva One", serif;
+  font-family: 'Yeseva One', serif;
   font-size: 28px;
   line-height: normal;
   white-space: nowrap;
@@ -67,13 +67,13 @@
 
 /* Pseudo-elements keep the decorative label out of the document text. */
 .home-intro__brand::before {
-  content: "Выпечка у Миланы";
+  content: 'Выпечка у Миланы';
 }
 
 .home-intro__brand::after {
-  content: "К вашему столу";
+  content: 'К вашему столу';
   color: #806958;
-  font-family: "Golos Text", sans-serif;
+  font-family: 'Golos Text', sans-serif;
   font-size: 14px;
   font-weight: 400;
 }

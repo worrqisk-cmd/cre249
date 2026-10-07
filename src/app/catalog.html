@@ -39,9 +39,7 @@
   } @else if(products().length===0){
   <div class="message-state">
     <h2>В этой категории пока пусто</h2>
-    <button class="button outline" (click)="choose('all')">
-      Посмотреть всё
-    </button>
+    <button class="button outline" (click)="choose('all')">Посмотреть всё</button>
   </div>
   } @else {
   <div class="catalog-grid" aria-live="polite">
@@ -49,8 +47,7 @@
   </div>
   }
 </section>
-}
-@if(slug()&&state()==='ok'){<app-product-dialog
+} @if(slug()&&state()==='ok'){<app-product-dialog
   [product]="dialog()"
   [standalone]="standalone()"
   [missing]="missing()"

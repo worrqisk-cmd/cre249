@@ -61,19 +61,25 @@ export interface SiteSettings {
 }
 
 export const DEFAULT_DELIVERY = 'Способ получения и удобное время согласуем при заказе.';
-export const webpSet = (photo: string) => photo.startsWith('photos/') && photo.endsWith('.jpg')
-  ? photo.replace(/\.jpg$/, '-480.webp') + ' 480w, ' + photo.replace(/\.jpg$/, '-960.webp') + ' 960w'
-  : null;
+export const webpSet = (photo: string) =>
+  photo.startsWith('photos/') && photo.endsWith('.jpg')
+    ? photo.replace(/\.jpg$/, '-480.webp') +
+      ' 480w, ' +
+      photo.replace(/\.jpg$/, '-960.webp') +
+      ' 960w'
+    : null;
 
-export const formatPrice = (product: Product) => product.price !== null && product.priceUnit
-  ? `${new Intl.NumberFormat('ru-RU').format(product.price)} ₽/${product.priceUnit}`
-  : 'Стоимость уточняйте';
+export const formatPrice = (product: Product) =>
+  product.price !== null && product.priceUnit
+    ? `${new Intl.NumberFormat('ru-RU').format(product.price)} ₽/${product.priceUnit}`
+    : 'Стоимость уточняйте';
 
 export const buildMessage = (product: Product, variant?: string) =>
   `Здравствуйте, Милана! Хочу обсудить заказ: ${product.title}${variant ? ` (начинка: ${variant.toLowerCase()})` : ''}. ` +
   'Подскажите, пожалуйста, возможность приготовления, стоимость и удобную дату.';
 
-export const CONTACT_MESSAGE = 'Здравствуйте, Милана! Хочу обсудить заказ выпечки. Подскажите, пожалуйста, что можно заказать сейчас.';
+export const CONTACT_MESSAGE =
+  'Здравствуйте, Милана! Хочу обсудить заказ выпечки. Подскажите, пожалуйста, что можно заказать сейчас.';
 // From the source archive; the owner confirmed the number on 2026-10-06.
 export const PROTOTYPE_WHATSAPP = '+7 (964) 203-48-35';
 

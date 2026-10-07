@@ -10,20 +10,21 @@ import {
   output,
   signal,
   linkedSignal,
-} from "@angular/core";
-import { form, FormField, required, validate, submit } from "@angular/forms/signals";
-import { FieldErrors } from "./field-errors";
-import { animate } from "animejs";
-import { photoFrame } from "./photo-frame";
-import { PhotoFlight } from "./photo-flight";
-import { buildMessage, formatPrice, Product, waLink, webpSet } from "./data";
-import { CatalogStore } from "./catalog-store";
-import { NavigationState } from "./navigation-state";
+} from '@angular/core';
+import { form, FormField, required, validate, submit } from '@angular/forms/signals';
+import { FieldErrors } from './field-errors';
+import { animate } from 'animejs';
+import { photoFrame } from './photo-frame';
+import { PhotoFlight } from './photo-flight';
+import { buildMessage, formatPrice, Product, waLink, webpSet } from './data';
+import { CatalogStore } from './catalog-store';
+import { NavigationState } from './navigation-state';
 @Component({
-  selector: "app-product-dialog",
+  selector: 'app-product-dialog',
   standalone: true,
   imports: [FormField, FieldErrors],
-  templateUrl: "./product-dialog.html",
+  templateUrl: './product-dialog.html',
+  styleUrl: './product-dialog.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProductDialog implements AfterViewInit {
@@ -41,45 +42,41 @@ export class ProductDialog implements AfterViewInit {
   });
   readonly messageModel = linkedSignal(() => {
     this.product();
-    return {text: ""};
+    return { text: '' };
   });
-  readonly messageForm = form(this.messageModel, p => {
-    required(p.text, {message: "Введите сообщение."});
-    validate(p.text, ({value}) => !value() || value().trim() ? undefined : {kind: "blank", message: "Введите сообщение."});
+  readonly messageForm = form(this.messageModel, (p) => {
+    required(p.text, { message: 'Введите сообщение.' });
+    validate(p.text, ({ value }) =>
+      !value() || value().trim() ? undefined : { kind: 'blank', message: 'Введите сообщение.' },
+    );
   });
   readonly message = computed(() => this.messageModel().text);
-  readonly copyError = signal("");
+  readonly copyError = signal('');
   readonly copied = linkedSignal(() => {
     this.product();
     return false;
   });
   readonly selectedPhoto = linkedSignal(() =>
-    Math.max(
-      0,
-      this.product()?.photos.indexOf(this.nav.flight?.photo || "") ?? 0,
-    ),
+    Math.max(0, this.product()?.photos.indexOf(this.nav.flight?.photo || '') ?? 0),
   );
   readonly description = computed(() => {
     const p = this.product();
     // Replace only the unsupported archive promise, preserving subsequent owner edits.
-    return p?.slug === "assorti" &&
-      p.description ===
-        "Сладкий пирог, в котором можно сочетать разные начинки."
-      ? "Сладкий пирог. Выберите одну начинку для обращения; возможность сочетать несколько уточните у Миланы."
-      : p?.description || "";
+    return p?.slug === 'assorti' &&
+      p.description === 'Сладкий пирог, в котором можно сочетать разные начинки.'
+      ? 'Сладкий пирог. Выберите одну начинку для обращения; возможность сочетать несколько уточните у Миланы.'
+      : p?.description || '';
   });
   // One frame per product, based on the tallest photo, independent of selection.
   readonly galleryRatio = signal(0.75);
   readonly layoutReady = signal(false);
   readonly photoReady = signal(false);
-  readonly currentPhoto = computed(
-    () => this.product()?.photos[this.selectedPhoto()] || "",
-  );
+  readonly currentPhoto = computed(() => this.product()?.photos[this.selectedPhoto()] || '');
   readonly currentFocus = computed(
     () =>
       this.product()?.photoFocus[this.selectedPhoto()] || {
-        desktop: "50% 50%",
-        mobile: "50% 50%",
+        desktop: '50% 50%',
+        mobile: '50% 50%',
       },
   );
   private catalog = inject(CatalogStore);
@@ -91,35 +88,22 @@ export class ProductDialog implements AfterViewInit {
   private closing = false;
   private flyingImage: PhotoFlight | null = null;
   private animations: ReturnType<typeof animate>[] = [];
-  private viewport =
-    typeof window === "undefined" ? null : window.visualViewport;
+  private viewport = typeof window === 'undefined' ? null : window.visualViewport;
   private updateViewport = () => {
     const viewport = this.viewport;
     if (!viewport) return;
-    this.host.nativeElement.style.setProperty(
-      "--visual-height",
-      `${viewport.height}px`,
-    );
-    this.host.nativeElement.style.setProperty(
-      "--visual-top",
-      `${viewport.offsetTop}px`,
-    );
+    this.host.nativeElement.style.setProperty('--visual-height', `${viewport.height}px`);
+    this.host.nativeElement.style.setProperty('--visual-top', `${viewport.offsetTop}px`);
   };
   private onKey = (event: KeyboardEvent) => {
-    if (event.key === "Escape") {
+    if (event.key === 'Escape') {
       event.preventDefault();
       this.requestClose();
     }
-    if (event.key === "Tab" && !this.standalone()) {
+    if (event.key === 'Tab' && !this.standalone()) {
       const items = [
-        ...this.host.nativeElement.querySelectorAll<HTMLElement>(
-          "button,a[href],textarea",
-        ),
-      ].filter(
-        (x) =>
-          !x.hasAttribute("disabled") &&
-          getComputedStyle(x).visibility !== "hidden",
-      );
+        ...this.host.nativeElement.querySelectorAll<HTMLElement>('button,a[href],textarea'),
+      ].filter((x) => !x.hasAttribute('disabled') && getComputedStyle(x).visibility !== 'hidden');
       if (!items.length) return;
       if (event.shiftKey && document.activeElement === items[0]) {
         event.preventDefault();
@@ -131,46 +115,41 @@ export class ProductDialog implements AfterViewInit {
     }
   };
   ngAfterViewInit() {
-    if (typeof window === "undefined") return;
+    if (typeof window === 'undefined') return;
     if (this.standalone()) {
       // Keep the prerendered page's reserved portrait frame stable before and after hydration.
       // Modal galleries can measure their product-specific frame before revealing content.
       this.layoutReady.set(true);
       this.photoReady.set(true);
-      document.addEventListener("keydown", this.onKey);
-      this.destroy.onDestroy(() =>
-        document.removeEventListener("keydown", this.onKey),
-      );
+      document.addEventListener('keydown', this.onKey);
+      this.destroy.onDestroy(() => document.removeEventListener('keydown', this.onKey));
       return;
     }
     const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    document.body.style.overflow = 'hidden';
     this.updateViewport();
-    this.viewport?.addEventListener("resize", this.updateViewport);
-    this.viewport?.addEventListener("scroll", this.updateViewport);
-    document.querySelector(".catalog-page")?.setAttribute("inert", "");
-    document.querySelector("header")?.setAttribute("inert", "");
-    document.querySelector(".contacts")?.setAttribute("inert", "");
-    document.addEventListener("keydown", this.onKey);
+    this.viewport?.addEventListener('resize', this.updateViewport);
+    this.viewport?.addEventListener('scroll', this.updateViewport);
+    document.querySelector('.catalog-page')?.setAttribute('inert', '');
+    document.querySelector('header')?.setAttribute('inert', '');
+    document.querySelector('.contacts')?.setAttribute('inert', '');
+    document.addEventListener('keydown', this.onKey);
     this.host.nativeElement
-      .querySelector<HTMLButtonElement>(".dialog-close")
+      .querySelector<HTMLButtonElement>('.dialog-close')
       ?.focus({ preventScroll: true });
     void this.openGallery();
     this.destroy.onDestroy(() => {
-      this.viewport?.removeEventListener("resize", this.updateViewport);
-      this.viewport?.removeEventListener("scroll", this.updateViewport);
-      document.querySelector(".catalog-page")?.removeAttribute("inert");
-      document.removeEventListener("keydown", this.onKey);
+      this.viewport?.removeEventListener('resize', this.updateViewport);
+      this.viewport?.removeEventListener('scroll', this.updateViewport);
+      document.querySelector('.catalog-page')?.removeAttribute('inert');
+      document.removeEventListener('keydown', this.onKey);
       document.body.style.overflow = previousOverflow;
-      document.querySelector("header")?.removeAttribute("inert");
-      document.querySelector(".contacts")?.removeAttribute("inert");
+      document.querySelector('header')?.removeAttribute('inert');
+      document.querySelector('.contacts')?.removeAttribute('inert');
       this.animations.forEach((animation) => animation.cancel());
       this.flyingImage?.remove();
-      const target =
-        this.host.nativeElement.querySelector<HTMLImageElement>(
-          ".dialog-photo img",
-        );
-      if (target) target.style.visibility = "";
+      const target = this.host.nativeElement.querySelector<HTMLImageElement>('.dialog-photo img');
+      if (target) target.style.visibility = '';
     });
   }
   private async prepareGallery() {
@@ -188,45 +167,35 @@ export class ProductDialog implements AfterViewInit {
               image.onload = image.onerror = null;
               resolve(ratio);
             };
-            image.onload = () =>
-              finish(image.naturalWidth / image.naturalHeight);
+            image.onload = () => finish(image.naturalWidth / image.naturalHeight);
             image.onerror = () => finish(0.5);
-            image.src = webpSet(src) ? src.replace(/\.jpg$/, "-480.webp") : src;
+            image.src = webpSet(src) ? src.replace(/\.jpg$/, '-480.webp') : src;
           }),
       ),
     );
     if (this.destroy.destroyed || this.closing) return;
-    if (ratios.length)
-      this.galleryRatio.set(Math.max(0.5, Math.min(...ratios)));
+    if (ratios.length) this.galleryRatio.set(Math.max(0.5, Math.min(...ratios)));
     // Apply the product's fixed frame before measuring the flight destination.
-    await new Promise<void>((resolve) =>
-      requestAnimationFrame(() => resolve()),
-    );
+    await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
   }
   private async openGallery() {
-    const panel =
-      this.host.nativeElement.querySelector<HTMLElement>(".dialog-panel");
-    const backdrop =
-      this.host.nativeElement.querySelector<HTMLElement>(".dialog-backdrop");
+    const panel = this.host.nativeElement.querySelector<HTMLElement>('.dialog-panel');
+    const backdrop = this.host.nativeElement.querySelector<HTMLElement>('.dialog-backdrop');
     const content = this.host.nativeElement.querySelector<HTMLElement>(
-      ".dialog-content, .dialog-missing",
+      '.dialog-content, .dialog-missing',
     );
-    const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
     // Start the shell entrance immediately; do not replay it after photo downloads.
     if (!reduced) {
       if (panel)
-        this.animations.push(
-          animate(panel, { opacity: [0, 1], duration: 340, ease: "out(2)" }),
-        );
+        this.animations.push(animate(panel, { opacity: [0, 1], duration: 340, ease: 'out(2)' }));
       if (backdrop)
-        this.animations.push(
-          animate(backdrop, { opacity: [0, 1], duration: 360, ease: "out(2)" }),
-        );
+        this.animations.push(animate(backdrop, { opacity: [0, 1], duration: 360, ease: 'out(2)' }));
     }
     await this.prepareGallery();
     if (this.destroy.destroyed || this.closing) return;
     const target = this.host.nativeElement.querySelector<HTMLImageElement>(
-      ".dialog-photo picture img",
+      '.dialog-photo picture img',
     );
     if (target) {
       let timer: ReturnType<typeof setTimeout> | undefined;
@@ -255,7 +224,7 @@ export class ProductDialog implements AfterViewInit {
           opacity: [0, 1],
           translateX: [10, 0],
           duration: 340,
-          ease: "out(2)",
+          ease: 'out(2)',
         }),
       );
     const origin = this.nav.flight;
@@ -265,19 +234,13 @@ export class ProductDialog implements AfterViewInit {
     }
     const flight = new PhotoFlight(origin.src, origin.frame);
     this.flyingImage = flight;
-    target.style.visibility = "hidden";
+    target.style.visibility = 'hidden';
     flight.move(photoFrame(target), 410, () => {
-      if (this.closing || this.destroy.destroyed || this.flyingImage !== flight)
-        return;
-      target.style.visibility = "";
+      if (this.closing || this.destroy.destroyed || this.flyingImage !== flight) return;
+      target.style.visibility = '';
       // The decoded real image and the copy now have identical clip and bitmap geometry.
       requestAnimationFrame(() => {
-        if (
-          this.closing ||
-          this.destroy.destroyed ||
-          this.flyingImage !== flight
-        )
-          return;
+        if (this.closing || this.destroy.destroyed || this.flyingImage !== flight) return;
         flight.remove();
         this.flyingImage = null;
         this.photoReady.set(true);
@@ -288,34 +251,27 @@ export class ProductDialog implements AfterViewInit {
     if (this.closing) return;
     this.closing = true;
     const done = () => this.closeRequested.emit();
-    if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
       done();
       return;
     }
-    const panel =
-      this.host.nativeElement.querySelector<HTMLElement>(".dialog-panel");
-    const backdrop =
-      this.host.nativeElement.querySelector<HTMLElement>(".dialog-backdrop");
+    const panel = this.host.nativeElement.querySelector<HTMLElement>('.dialog-panel');
+    const backdrop = this.host.nativeElement.querySelector<HTMLElement>('.dialog-backdrop');
     const target = this.host.nativeElement.querySelector<HTMLImageElement>(
-      ".dialog-photo picture img",
+      '.dialog-photo picture img',
     );
     const origin = this.nav.flight;
     this.animations.forEach((animation) => animation.cancel());
     this.animations = [];
     if (backdrop)
-      this.animations.push(
-        animate(backdrop, { opacity: 0, duration: 330, ease: "inOut(2)" }),
-      );
+      this.animations.push(animate(backdrop, { opacity: 0, duration: 330, ease: 'inOut(2)' }));
     if (origin && target?.naturalWidth) {
       const flight =
-        this.flyingImage ||
-        new PhotoFlight(target.currentSrc || target.src, photoFrame(target));
+        this.flyingImage || new PhotoFlight(target.currentSrc || target.src, photoFrame(target));
       this.flyingImage = flight;
-      target.style.visibility = "hidden";
+      target.style.visibility = 'hidden';
       if (panel)
-        this.animations.push(
-          animate(panel, { opacity: 0, duration: 310, ease: "inOut(2)" }),
-        );
+        this.animations.push(animate(panel, { opacity: 0, duration: 310, ease: 'inOut(2)' }));
       const cardImage = document.querySelector<HTMLImageElement>(
         `[data-product-slug="${this.nav.itemOrigin()}"] img`,
       );
@@ -335,7 +291,7 @@ export class ProductDialog implements AfterViewInit {
         animate(panel, {
           opacity: 0,
           duration: 310,
-          ease: "inOut(2)",
+          ease: 'inOut(2)',
           onComplete: done,
         }),
       );
@@ -344,13 +300,13 @@ export class ProductDialog implements AfterViewInit {
   compose() {
     const p = this.product();
     if (!p) return;
-    this.messageForm().reset({text: buildMessage(p, this.variant() || undefined)});
-    this.copyError.set("");
+    this.messageForm().reset({ text: buildMessage(p, this.variant() || undefined) });
+    this.copyError.set('');
     this.composing.set(true);
     setTimeout(() => {
-      const textarea = this.host.nativeElement.querySelector("textarea");
+      const textarea = this.host.nativeElement.querySelector('textarea');
       textarea?.focus({ preventScroll: true });
-      textarea?.scrollIntoView({ block: "nearest", behavior: "instant" });
+      textarea?.scrollIntoView({ block: 'nearest', behavior: 'instant' });
     }, 0);
   }
   select(v: string) {
@@ -358,12 +314,10 @@ export class ProductDialog implements AfterViewInit {
     const previous = this.variant();
     this.variant.set(previous === v ? null : v);
     if (this.composing() && p) {
-      const oldContext =
-        p.title + (previous ? ` (начинка: ${previous.toLowerCase()})` : "");
+      const oldContext = p.title + (previous ? ` (начинка: ${previous.toLowerCase()})` : '');
       const nextContext =
-        p.title +
-        (this.variant() ? ` (начинка: ${this.variant()!.toLowerCase()})` : "");
-      this.messageModel.update(model => ({text: model.text.replace(oldContext, nextContext)}));
+        p.title + (this.variant() ? ` (начинка: ${this.variant()!.toLowerCase()})` : '');
+      this.messageModel.update((model) => ({ text: model.text.replace(oldContext, nextContext) }));
       this.copied.set(false);
     }
   }
@@ -376,15 +330,15 @@ export class ProductDialog implements AfterViewInit {
   }
   async copy() {
     await submit(this.messageForm, async () => {
-    this.copyError.set("");
-    try {
-      await navigator.clipboard.writeText(this.message());
-      this.copied.set(true);
-      setTimeout(() => this.copied.set(false), 1800);
-    } catch {
-      this.copyError.set("Не удалось скопировать. Выделите сообщение и скопируйте его вручную.");
-      this.host.nativeElement.querySelector("textarea")?.select();
-    }
+      this.copyError.set('');
+      try {
+        await navigator.clipboard.writeText(this.message());
+        this.copied.set(true);
+        setTimeout(() => this.copied.set(false), 1800);
+      } catch {
+        this.copyError.set('Не удалось скопировать. Выделите сообщение и скопируйте его вручную.');
+        this.host.nativeElement.querySelector('textarea')?.select();
+      }
     });
   }
 }

@@ -18,14 +18,16 @@ export class AdminAuth {
       this.owner.set(owner);
       this.checking.set(false);
       return owner;
-    })().finally(() => this.checked = null);
+    })().finally(() => (this.checked = null));
     return this.checked;
   }
 
   async login(login: string, password: string): Promise<void> {
-    if (login.trim().toLowerCase() !== this.supabase.config.adminLogin.toLowerCase()) throw new Error('Неверный логин или пароль.');
+    if (login.trim().toLowerCase() !== this.supabase.config.adminLogin.toLowerCase())
+      throw new Error('Неверный логин или пароль.');
     const { data, error } = await this.supabase.client.auth.signInWithPassword({
-      email: this.supabase.config.adminEmail, password,
+      email: this.supabase.config.adminEmail,
+      password,
     });
     if (error || data.user?.id !== this.supabase.config.adminUserId) {
       if (data.user) await this.supabase.client.auth.signOut();

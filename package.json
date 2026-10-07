@@ -21,7 +21,9 @@
     "check:access": "node scripts/configure.mjs && node scripts/check-supabase-access.mjs",
     "preview:design": "node scripts/configure.mjs && ng serve --configuration design --host 127.0.0.1 --port 8450",
     "test:routing": "node tests/static-routing-check.mjs",
-    "test:seo": "node tests/seo-check.mjs"
+    "test:seo": "node tests/seo-check.mjs",
+    "format": "prettier --write \"src/**/*.{ts,html,scss}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,html,scss}\""
   },
   "private": true,
   "packageManager": "pnpm@12.8.1",
