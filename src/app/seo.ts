@@ -45,7 +45,11 @@ export class Seo {
       });
       this.meta.updateTag({
         name: 'robots',
-        content: service ? 'noindex, nofollow' : 'index, follow',
+        // Клиентский fallback не превращает ответ Pages 404 в индексируемый HTTP 200.
+        content:
+          service || this.document.querySelector('meta[name="app-http-status"][content="404"]')
+            ? 'noindex, nofollow'
+            : 'index, follow',
       });
       let link = this.document.querySelector<HTMLLinkElement>('link[rel="canonical"]');
       if (!link) {
