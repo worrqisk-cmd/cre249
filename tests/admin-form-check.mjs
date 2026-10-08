@@ -288,7 +288,24 @@ try {
   releaseUpload = undefined;
   await page.waitForFunction(() => document.querySelectorAll('.admin-photo-row').length === 2);
   assert.equal(uploadAttempts, 2);
+  const currentSave = page.waitForResponse(
+    (response) =>
+      new URL(response.url()).pathname.endsWith('/products') &&
+      response.request().method() === 'PATCH',
+  );
   await page.getByRole('button', { name: 'Сохранить изделие' }).click();
+  await currentSave;
+  // Прежний success-текст может ещё быть виден: ждём завершение текущей записи
+  // и обновление UI, а не совпадение сообщения от предыдущего сохранения.
+  await page.waitForFunction(() => {
+    const save = document.querySelector('.admin-save');
+    const button = save?.querySelector('button');
+    return (
+      button?.disabled &&
+      button.textContent.trim() === 'Сохранить изделие' &&
+      !save.querySelector('span')
+    );
+  });
   await page.getByText('Изделие сохранено.', { exact: true }).waitFor();
   assert.equal(versions[1], 'eq.' + firstSavedVersion, 'second save uses the returned updated_at');
   assert.equal(savedProduct.photos.length, 2);
