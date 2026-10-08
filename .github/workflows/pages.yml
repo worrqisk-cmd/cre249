@@ -1,4 +1,5 @@
 name: Publish Angular to GitHub Pages
+run-name: ${{ inputs.catalog_sync_attempt && format('Catalog sync {0} ({1})', inputs.catalog_sync_revision, inputs.catalog_sync_attempt) || github.event.head_commit.message || 'Publish Angular' }}
 
 on:
   push:
@@ -6,6 +7,15 @@ on:
   pull_request:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      catalog_sync_attempt:
+        description: Server queue attempt identifier
+        required: false
+        type: string
+      catalog_sync_revision:
+        description: Server queue catalog revision
+        required: false
+        type: string
 
 permissions:
   contents: read
@@ -15,6 +25,28 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  catalog-sync-check:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_PASSWORD: local-ci-only
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22.22.3
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.9.7
+      - run: deno test supabase/functions/catalog-static-sync/worker_test.ts
+      - run: node scripts/test-catalog-sync-db.mjs
+        env:
+          CATALOG_SYNC_TEST_CONTAINER: ${{ job.services.postgres.id }}
   build:
     runs-on: ubuntu-latest
     steps:
@@ -27,6 +59,7 @@ jobs:
           node-version: 22.22.3
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - run: pnpm test:static-empty
       - run: pnpm test --watch=false
       - run: pnpm build
       - run: pnpm test:seo
@@ -41,6 +74,7 @@ jobs:
           pnpm test:catalog-api
           pnpm test:admin-form
           pnpm test:routing
+          pnpm test:catalog-fallback
         env:
           CAPTURE_SCREENSHOTS: '0'
       - uses: actions/upload-pages-artifact@v4
@@ -48,7 +82,7 @@ jobs:
           path: dist/milana-angular/browser
   deploy:
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
-    needs: build
+    needs: [build, catalog-sync-check]
     runs-on: ubuntu-latest
     permissions:
       pages: write

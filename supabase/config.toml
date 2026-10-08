@@ -1,0 +1,5 @@
+project_id = "milana"
+
+[functions.catalog-static-sync]
+# Endpoint использует отдельный серверный shared secret, а не JWT пользователя.
+verify_jwt = false
