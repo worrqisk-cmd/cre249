@@ -2,7 +2,9 @@
 
 ## Проверенное состояние и ограничения
 
-08.10.2026 официальный Supabase MCP, ограниченный `project_ref=bvlcyhcuneaphuletnqz&read_only=true`, подтвердил URL проекта milana, таблицы products/categories/site_settings с RLS, публичные фильтры published/is_public и owner-only запись. Из функций public есть set_catalog_updated_at, BEFORE UPDATE triggers products_updated_at и site_settings_updated_at. Edge Functions отсутствуют. Vault 0.3.1 установлен; pg_net 0.20.4 и pg_cron 1.6.4 доступны для установки, но не установлены. Секреты не читались. Это наблюдение, не применение миграций.
+Автоматизация подключена к проекту **milana** (`bvlcyhcuneaphuletnqz`) 08.10.2026. Edge Function `catalog-static-sync` активна (`verify_jwt=false`, отдельный shared secret обязателен). Установлены pg_net 0.20.4, pg_cron 1.6.4 и Vault 0.3.1; единственное задание `catalog-static-sync` активно с расписанием `* * * * *`. Очередь включена.
+
+Таблицы products/categories/site_settings, их данные и прежние RLS сохранены. Новые очередь и журнал закрыты для PUBLIC/anon/authenticated; серверные RPC вызываются Edge Function. Существующие before-update triggers updated_at сохранены. После настройки официальным MCP выполнялись только проверки чтения; значения секретов в документацию и отчёт не попадают.
 
 Angular 22.2.1 остаётся без обновлений; static prerender без hydration. Существующий Pages workflow собирает и проверяет main, concurrency `pages-${{ github.ref }}`, cancel-in-progress=false сохранены. Добавлены независимые проверки очереди/Edge Function, проверка пустого каталога и браузерного fallback. Deployment зависит от успешных существующих и новых проверок.
 
@@ -13,6 +15,28 @@ Angular 22.2.1 остаётся без обновлений; static prerender б
 - [Edge limits](https://supabase.com/docs/guides/functions/limits): время/CPU ограничены; функция не спит ради debounce и не ждёт завершения GitHub build.
 - [GitHub dispatch](https://docs.github.com/en/rest/actions/workflows#create-a-workflow-dispatch-event): Actions:write, ref=main; API 2026-03-10 возвращает workflow_run_id в ответе HTTP 200.
 - [Concurrency](https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency): новый pending run может вытеснить прежний даже при cancel-in-progress=false. Очередь проверяет conclusion и повторяет отменённый запуск.
+
+## Итог подключения 08.10.2026
+
+Код автоматизации опубликован через [PR #14](https://github.com/worrqisk-cmd/cre249/pull/14); права настройки уточнены в [PR #15](https://github.com/worrqisk-cmd/cre249/pull/15). Реальный цикл выполнялся на main SHA `d4c9269b73a8f407b756c07c79dba58677af34b0`.
+
+| Проверка | Результат |
+| --- | --- |
+| Служебная ревизия 1, контролируемый отказ до dispatch | Попытка записана как failed; событие осталось в очереди и было автоматически повторено после backoff |
+| Повтор ревизии 1 | [Workflow 37762555988](https://github.com/worrqisk-cmd/cre249/actions/runs/37762555988): build, проверки и deploy успешны; очередь подтвердила deployed=1 |
+| Служебная ревизия 2 во время активной первой сборки | Событие сохранено; после первой сборки запущена отдельная завершающая сборка |
+| Ревизия 2 | [Workflow 37762991334](https://github.com/worrqisk-cmd/cre249/actions/runs/37762991334): build, проверки и deploy успешны; очередь подтвердила deployed=2 |
+| Завершение | requested=2, deployed=2, attempt=NULL, failures=0, last_error=NULL; ещё 75 секунд очередь оставалась пустой без новых запусков |
+| Сохранность данных | Полные fingerprints строк products/categories/site_settings до и после миграций совпали; для проверки товары и настройки не изменялись |
+| Очистка | setup: ok, cleanup: ok, exit: ok в 13:25:24 МСК; временный файл и пустая папка отсутствуют |
+
+После сохранения изменений публичного каталога в админке **ручной deploy не требуется**. Работает описанная ниже очередь с debounce и повторами. Ручной `workflow_dispatch` Pages на main сохранён для восстановления и самостоятельных запусков.
+
+GitHub PAT **mil2** действует **до 7 ноября 2026 года** по сведениям владельца. Его следует заменить заранее, например до 6 ноября; точное время истечения здесь не подтверждено. Значение хранится только в серверных secrets: `CATALOG_GITHUB_TOKEN` в Supabase Edge Function Secrets и одноимённом GitHub repository Actions secret. Рабочий dispatch читает Supabase secret; Pages workflow не читает repository-копию. В Vault хранится только общий webhook secret, а не PAT.
+
+Временный Supabase PAT использовался локально для настройки и удалён из временной копии; его можно отозвать. Это не затронет работу функции: runtime использует встроенный Supabase service-role key. Удаление локального файла само по себе не отзывает PAT у сервиса.
+
+Безопасный локальный отчёт: `/home/aozaki/.local/share/milana-catalog-sync/setup-report.jsonl` (файл 600, папка 700). Он хранит этапы, HTTP-статусы, безопасные категории ошибок и результат очистки; Authorization, SQL-параметры и значения secrets не сохраняются. Локальные setup helpers находятся вне Git и не являются переносимым инструментом репозитория. Проверка полного цикла имеет тайм-аут 25 минут, опрос каждые 15 секунд и заключительные 75 секунд ожидания пустой очереди.
 
 ## Механизм
 
@@ -34,9 +58,11 @@ Database Webhook реализован SQL AFTER UPDATE trigger на агреги
 
 Пустой публичный каталог теперь допустим при точном count=0; усечённый ответ по-прежнему останавливает сборку. Это необходимо для скрытия последнего товара. Удаление всех site_settings или публичной категории, на которую ссылается опубликованный товар, остаётся ошибкой целостности: исправить данные владельцем, затем повторить сборку.
 
-## Подключение — только после отдельного разрешения на remote changes
+## Первичная настройка нового окружения
 
-1. Провести обычный PR/CI/merge этой ветки в main и дождаться Pages deploy с новым workflow и fallback. Сейчас push/merge/deploy НЕ выполнены.
+Текущее production-окружение уже подключено. Эти шаги описывают первичную настройку; для замены токена используйте раздел ниже. Перед повторным запуском проверяйте существующие именованные ресурсы, чтобы не повторять миграции и не создавать второе задание Cron.
+
+1. Опубликовать код через обычный PR/CI/merge в main и дождаться Pages deploy с workflow и fallback.
 2. В GitHub Settings → Developer settings → Personal access tokens → Fine-grained tokens создать токен только для worrqisk-cmd/cre249 с Repository permissions **Actions: Read and write** и **Secrets: Read and write**, без Contents write, Administration и широкого classic repo. Actions нужно для `workflow_dispatch`; отдельное право Secrets нужно для чтения ключа шифрования и записи `CATALOG_GITHUB_TOKEN` в repository Actions secrets. GitHub требует Secrets permission для endpoint создания секрета. Metadata read добавляется автоматически. Установить срок действия и напоминание о замене. Не помещать токен в браузер, site-config, Git или чат.
 3. Создать случайный общий секрет не короче 32 символов (например, `openssl rand -hex 32` в своём терминале). Через Supabase Dashboard → Edge Functions → Secrets сохранить `CATALOG_GITHUB_TOKEN` и `CATALOG_WEBHOOK_SECRET`. SUPABASE_URL и SUPABASE_SERVICE_ROLE_KEY предоставляет runtime; их не копировать в frontend.
 4. В Dashboard → Vault добавить secret с именем `catalog_sync_webhook_secret`, значением точно того же CATALOG_WEBHOOK_SECRET. Не выводить decrypted_secrets в отчётах/чат. GitHub-токен в Vault не нужен.
@@ -46,7 +72,7 @@ Database Webhook реализован SQL AFTER UPDATE trigger на агреги
    pnpm dlx supabase functions deploy catalog-static-sync --project-ref bvlcyhcuneaphuletnqz --no-verify-jwt
    ```
    config.toml отключает JWT только для этой функции; POST требует x-catalog-sync-secret, GET и посторонний POST отклоняются. Не включать CORS/вызовы из админки. Вызов без секрета должен дать 401; GET — 405. Не вставлять secret в команды, сохраняемые в истории; для пробного POST использовать локальный защищённый curl config либо Dashboard.
-6. Проверить историю миграций и применить **только два новых файла** в указанном порядке через SQL Editor, каждый целиком в транзакции BEGIN/COMMIT: `20261008120000_catalog_static_sync.sql`, затем `20261008121000_catalog_static_sync_wakeup.sql`. Не выполнять слепой db push всех исторических файлов: исходная схема уже существует. Второй файл устанавливает pg_net/pg_cron и минутное задание; enabled=false предотвращает сетевые вызовы до включения. Эти операции меняют удалённую конфигурацию и сейчас не выполнялись.
+6. Проверить историю миграций и применить **только два новых файла** в указанном порядке через SQL Editor, каждый целиком в транзакции BEGIN/COMMIT: `20261008120000_catalog_static_sync.sql`, затем `20261008121000_catalog_static_sync_wakeup.sql`. Не выполнять слепой db push всех исторических файлов: исходная схема уже существует. Второй файл устанавливает pg_net/pg_cron и минутное задание; enabled=false предотвращает сетевые вызовы до включения. В production эти два файла уже применены через Management API SQL отдельно в транзакциях. Повторять их DDL для замены PAT не требуется.
 7. Проверить extensions, cron.job, функции, privileges и единственный queue webhook trigger. В SQL Editor под postgres выполнить `select public.catalog_sync_enable(true);`. Включение само ставит первую сборку в очередь — тестовые товары не нужны.
 8. Проверить состояние и журнал без секретов:
    ```sql
@@ -60,8 +86,18 @@ Database Webhook реализован SQL AFTER UPDATE trigger на агреги
 9. Повторы автоматические. После исправления токена/ошибки можно ускорить следующую попытку под postgres: `update public.catalog_sync_state set retry_at=now() where id and attempt is null; select public.catalog_sync_wake();`. Для зависшего run сначала отменить его в GitHub и дождаться фиксации failure. Не подтверждать deployed вручную.
 10. Пауза: `select public.catalog_sync_enable(false);` — перестаёт создавать новые вызовы, но уже запущенный workflow не отменяется. События сохраняются; повторное true ставит актуальную сборку. Для полного отключения отдельно отключить Cron и отменить активные workflow; frontend fallback остаётся.
 
+## Замена GitHub PAT до истечения срока
+
+1. До 7 ноября 2026 (рекомендуется до 6 ноября) создать новый fine-grained PAT только для `worrqisk-cmd/cre249`. Права: Actions — Read and write, Secrets — Read and write, Metadata — Read-only; без Contents write и Administration. Actions требуется для dispatch/опроса; Secrets — для обновления repository secret. Установить новый срок действия и записать дату следующей замены. Старый mil2 пока оставить действующим.
+2. В GitHub repository Settings → Secrets and variables → Actions обновить существующий `CATALOG_GITHUB_TOKEN` новым значением. Затем в Supabase Dashboard проекта milana → Edge Functions → Secrets обновить существующий `CATALOG_GITHUB_TOKEN` тем же новым PAT. Вводить значение только в защищённые формы настроек или скрытый локальный ввод; не передавать в чат, argv, shell history, Git или site-config. Именованные secrets обновляются, а не создаются под новыми именами.
+3. `CATALOG_WEBHOOK_SECRET` и `catalog_sync_webhook_secret` в Vault для замены GitHub PAT не менять. Очередь/Cron не переустанавливать, миграции не повторять. [Supabase применяет новые production secrets без повторного deploy функции](https://supabase.com/docs/guides/functions/secrets#production-secrets).
+4. Для проверки нового токена под postgres **один раз** выполнить `select public.catalog_sync_enable(true);`. Даже для уже включённой очереди этот вызов создаёт служебную ревизию; многократный вызов создаёт дополнительные задания. Товары не менять. Дождаться debounce, реального workflow_dispatch и успешных build/deploy, затем requested=deployed, attempt IS NULL, failures=0, last_error IS NULL. Проверить run_id по журналу attempts; ручной запуск Pages сам по себе не проверяет токен Edge Function.
+5. Только после успешного цикла с новой ревизией отозвать прежний mil2 в GitHub Settings → Developer settings → Personal access tokens. При ошибке новый токен/его права исправить до отзыва старого и повторить проверку очереди. Временные локальные копии обоих токенов удалить; временный Supabase PAT после операций настройки также отозвать, если он создавался для этой задачи.
+
+Если PAT истёк, публичные API-запросы каталога продолжают работать, но prerender/sitemap не обновятся до восстановления dispatch. Ошибка запуска сохраняется в state.last_error и attempts.error; событие не теряется, повтор выполняется с backoff. После замены можно ускорить повтор командой из пункта 9 первичной настройки. Не выставлять deployed вручную.
+
 ## Локальные проверки и границы
 
 `deno test --no-config --no-npm supabase/functions/catalog-static-sync/worker_test.ts`; `deno check .../index.ts`; `node scripts/test-catalog-sync-db.mjs` на одноразовом Docker PostgreSQL 17; `pnpm test:static-empty`; `pnpm test --watch=false`; production `pnpm build`, `pnpm test:seo`, `pnpm test:routing`, `pnpm test:catalog-api`, `pnpm test:catalog-fallback`.
 
-SQL-тесты проверяют реальные транзакции/функции core migration, RLS privileges и SQL wiring с локальными doubles net/cron/Vault (включая отказ без секрета и адрес/headers/body webhook). Реальные расширения pg_net/pg_cron не запускались в hosted Supabase. GitHub HTTP в Edge unit tests подменён; реальный dispatch/deploy специально не запускался. После разрешённого подключения нужен один начальный end-to-end run без изменения товаров. Дальнейшие миграции схемы должны учитывать фильтрацию trigger и статический snapshot. Журнал attempts пока без автоматической чистки: при редких сохранениях рост мал; чистить по согласованному сроку хранения позже, не теряя активные попытки.
+SQL-тесты проверяют реальные транзакции/функции core migration, RLS privileges и SQL wiring с локальными doubles net/cron/Vault (включая отказ без секрета и адрес/headers/body webhook). После локальных проверок выполнен реальный hosted Supabase → GitHub → Pages цикл, описанный выше. Контролируемый отказ проверяет долговечность очереди и backoff до dispatch; реальный отказ GitHub API специально не вызывался. Ошибки GitHub HTTP и отмены workflow покрыты подменёнными ответами Edge unit tests. Дальнейшие миграции схемы должны учитывать фильтрацию trigger и статический snapshot. Журнал attempts пока без автоматической чистки: при редких сохранениях рост мал; чистить по согласованному сроку хранения позже, не теряя активные попытки.
