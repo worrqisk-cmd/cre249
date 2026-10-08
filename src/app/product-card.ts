@@ -1,4 +1,11 @@
-import { ChangeDetectionStrategy, Component, input, inject, computed } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  input,
+  inject,
+  computed,
+  linkedSignal,
+} from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Product, formatPrice, webpSet } from './data';
 import { NavigationState } from './navigation-state';
@@ -25,6 +32,10 @@ export class ProductCard {
   readonly isPhotoOrigin = computed(() => this.nav.itemOrigin() === this.product().slug);
   readonly frame = computed(() => this.presentation() || this.catalogFrame());
   readonly photo = computed(() => this.frame()?.photo || this.product().photos[0] || '');
+  readonly photoFailed = linkedSignal(() => {
+    this.photo();
+    return false;
+  });
   readonly price = formatPrice;
   readonly webpSet = webpSet;
   readonly nav = inject(NavigationState);

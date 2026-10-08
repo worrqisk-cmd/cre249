@@ -87,6 +87,8 @@
 }
 
 .missing-photo {
+  flex: 1;
+  min-height: 0;
   width: 100%;
   height: 100%;
   display: grid;
@@ -238,7 +240,8 @@
     min-height: 0;
     background: var(--cream);
   }
-  .dialog-image-link {
+  .dialog-image-link,
+  .dialog-photo > .missing-photo {
     flex: none;
     width: 100%;
     aspect-ratio: var(--gallery-ratio, 0.75);

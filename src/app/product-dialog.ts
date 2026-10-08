@@ -37,9 +37,11 @@ export class ProductDialog implements AfterViewInit {
     this.product();
     return false;
   });
-  readonly selectedPhoto = linkedSignal(() =>
-    Math.max(0, this.product()?.photos.indexOf(this.nav.flight?.photo || '') ?? 0),
-  );
+  readonly selectedPhoto = linkedSignal(() => {
+    const origin = this.nav.flight?.photo;
+    // Without an origin, start with the cover, not the first unavailable URL slot.
+    return origin ? Math.max(0, this.product()?.photos.indexOf(origin) ?? 0) : 0;
+  });
   readonly description = computed(() => {
     const p = this.product();
     // Исправляем только неподтверждённую фразу архива, сохраняя новые правки владельца.
@@ -54,6 +56,16 @@ export class ProductDialog implements AfterViewInit {
   readonly layoutReady = this.gallery.layoutReady;
   readonly photoReady = this.gallery.photoReady;
   readonly currentPhoto = computed(() => this.product()?.photos[this.selectedPhoto()] || '');
+  readonly failedPhotos = linkedSignal(() => {
+    this.product();
+    return new Set<string>();
+  });
+  photoUnavailable(photo: string): boolean {
+    return !photo || this.failedPhotos().has(photo);
+  }
+  markPhotoUnavailable(photo: string): void {
+    this.failedPhotos.update((failed) => new Set(failed).add(photo));
+  }
   readonly currentFocus = computed(
     () =>
       this.product()?.photoFocus[this.selectedPhoto()] || {
