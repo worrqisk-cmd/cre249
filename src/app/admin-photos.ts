@@ -8,6 +8,21 @@ export function validUpload(file: File): boolean {
   );
 }
 
+/** Keep the same file after removal; a deleted cover falls back to the first remaining photo. */
+export function primaryPhotoIndex(
+  photos: ProductPhoto[],
+  primary: ProductPhoto | undefined,
+): number {
+  if (!primary) return 0;
+  const index = photos.findIndex(
+    (photo) =>
+      photo === primary ||
+      (!!primary.path && photo.path === primary.path) ||
+      (!!primary.static && photo.static === primary.static),
+  );
+  return Math.max(0, index);
+}
+
 /** Жизненный цикл файлов одного редактора; состояние не разделяется между страницами. */
 @Injectable()
 export class AdminPhotos {

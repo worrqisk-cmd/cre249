@@ -73,6 +73,7 @@ jobs:
           done
           pnpm test:catalog-api
           pnpm test:admin-form
+          pnpm test:release-readiness
           pnpm test:routing
           pnpm test:catalog-fallback
         env:

@@ -7,16 +7,17 @@
 >
   <div
     class="product-image"
-    [class.placeholder]="!photo()"
+    [class.placeholder]="!photo() || photoFailed()"
     [class.photo-contained]="frame()?.fit === 'contain'"
     [class.photo-overview]="!presentation() && !!catalogFrame()"
     [style.--card-photo-ratio]="frame()?.ratio || null"
   >
-    @if (photo()) {
+    @if (photo() && !photoFailed()) {
       <picture
         ><source type="image/webp" [attr.srcset]="webpSet(photo())" [attr.sizes]="imageSizes()" />
         <img
           [src]="photo()"
+          (error)="photoFailed.set(true)"
           [alt]="product().title"
           width="960"
           height="1280"
@@ -28,7 +29,10 @@
           [style.--focus-desktop]="frame()?.desktop || product().focus?.desktop || '50% 50%'"
       /></picture>
     } @else {
-      <span class="placeholder-copy"><span aria-hidden="true">◇</span>Фото изделия пока нет</span>
+      <span class="placeholder-copy"
+        ><span aria-hidden="true">◇</span
+        >{{ product().photos.length ? 'Фото временно недоступно' : 'Фото изделия пока нет' }}</span
+      >
     }
     <span class="view-hint">Смотреть ↗</span>
   </div>

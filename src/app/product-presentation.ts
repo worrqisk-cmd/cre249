@@ -8,6 +8,14 @@ export interface CardPresentation {
   ratio?: number;
 }
 
+/** Three existing showcase slots; unselected products never fill empty slots. */
+export function showcaseProducts(products: Product[]): Product[] {
+  return products
+    .filter((product) => product.featured)
+    .sort((a, b) => a.sortOrder - b.sortOrder || (a.slug < b.slug ? -1 : a.slug > b.slug ? 1 : 0))
+    .slice(0, 3);
+}
+
 export function homePresentation(product: Product): CardPresentation | undefined {
   if (product.slug === 'assorti') {
     const photo = product.photos.find((source) => source === 'photos/archive_063_assorti.jpg');

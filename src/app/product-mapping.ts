@@ -21,7 +21,8 @@ export function publicProduct(row: ProductRow, photos: ProductPhoto[], urls: str
     fillings: row.fillings || [],
     price: row.price,
     priceUnit: row.price_unit,
-    photos: urls.filter(Boolean),
+    // Preserve slots so a failed URL cannot shift the cover or another photo's focus.
+    photos: urls,
     focus: main
       ? { desktop: main.desktop || '50% 50%', mobile: main.mobile || '50% 50%' }
       : undefined,
@@ -29,6 +30,7 @@ export function publicProduct(row: ProductRow, photos: ProductPhoto[], urls: str
       desktop: photo.desktop || '50% 50%',
       mobile: photo.mobile || '50% 50%',
     })),
+    sortOrder: row.sort_order,
     featured: row.featured,
     availability: row.availability,
   };

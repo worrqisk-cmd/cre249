@@ -35,7 +35,7 @@ export class ProductGalleryMotion {
   }
   private async prepareGallery(photos: string[]): Promise<void> {
     const ratios = await Promise.all(
-      photos.map(
+      photos.filter(Boolean).map(
         (src) =>
           new Promise<number>((resolve) => {
             const image = new Image();

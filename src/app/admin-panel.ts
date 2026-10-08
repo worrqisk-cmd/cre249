@@ -14,7 +14,7 @@ import { catalogPresentation } from './product-presentation';
 import { FieldErrors } from './field-errors';
 import { AdminAuth } from './admin-auth';
 import { AdminCatalogApi, ProductConflict } from './admin-catalog-api';
-import { AdminPhotos, validUpload } from './admin-photos';
+import { AdminPhotos, primaryPhotoIndex, validUpload } from './admin-photos';
 import { CatalogStore } from './catalog-store';
 import {
   createProductForm,
@@ -209,7 +209,7 @@ export class AdminPanel {
     const photos = this.photos.remove(draft.photos, index);
     this.patchPhotos({
       photos,
-      primary_photo: Math.min(draft.primary_photo, Math.max(0, photos.length - 1)),
+      primary_photo: primaryPhotoIndex(photos, draft.photos[draft.primary_photo]),
     });
   }
 

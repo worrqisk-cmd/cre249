@@ -29,7 +29,7 @@
   } @else {
     <div class="dialog-grid" [class.is-gallery-loading]="!standalone() && !layoutReady()">
       <div class="dialog-photo" [style.--gallery-ratio]="galleryRatio()">
-        @if (currentPhoto()) {
+        @if (!photoUnavailable(currentPhoto())) {
           <a
             class="dialog-image-link"
             [href]="currentPhoto()"
@@ -43,6 +43,7 @@
                 sizes="(max-width: 700px) 100vw, 50vw" />
               <img
                 [src]="currentPhoto()"
+                (error)="markPhotoUnavailable(currentPhoto())"
                 [alt]="product()!.title"
                 [style.visibility]="!standalone() && !photoReady() ? 'hidden' : null"
                 width="960"
@@ -52,23 +53,31 @@
                 decoding="async" /></picture
             ><span class="dialog-full-photo" aria-hidden="true">Фото целиком ↗</span></a
           >
-          @if (product()!.photos.length > 1) {
-            <div class="dialog-thumbnails" role="group" aria-label="Фотографии изделия">
-              @for (photo of product()!.photos; track $index; let i = $index) {
-                <button
-                  type="button"
-                  [disabled]="!photoReady()"
-                  [attr.aria-label]="'Фото ' + (i + 1)"
-                  [attr.aria-pressed]="selectedPhoto() === i"
-                  (click)="selectPhoto(i)"
-                >
-                  <img [src]="photo" alt="" loading="lazy" />
-                </button>
-              }
-            </div>
-          }
         } @else {
-          <div class="missing-photo">Фото изделия пока нет</div>
+          <div class="missing-photo">
+            {{ product()!.photos.length ? 'Фото временно недоступно' : 'Фото изделия пока нет' }}
+          </div>
+        }
+        @if (product()!.photos.length > 1) {
+          <div class="dialog-thumbnails" role="group" aria-label="Фотографии изделия">
+            @for (photo of product()!.photos; track $index; let i = $index) {
+              <button
+                type="button"
+                [disabled]="!photoReady()"
+                [attr.aria-label]="
+                  'Фото ' + (i + 1) + (photoUnavailable(photo) ? ' — недоступно' : '')
+                "
+                [attr.aria-pressed]="selectedPhoto() === i"
+                (click)="selectPhoto(i)"
+              >
+                @if (!photoUnavailable(photo)) {
+                  <img [src]="photo" alt="" loading="lazy" (error)="markPhotoUnavailable(photo)" />
+                } @else {
+                  <span class="missing-photo" aria-hidden="true">◇</span>
+                }
+              </button>
+            }
+          </div>
         }
       </div>
       <div class="dialog-content" [class.is-composing]="composing()">

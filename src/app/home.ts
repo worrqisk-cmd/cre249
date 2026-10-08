@@ -15,7 +15,7 @@ import { ProductCard } from './product-card';
 import { NavigationState } from './navigation-state';
 import { HomeIntro } from './home-intro';
 import { HomeIntroState } from './home-intro-state';
-import { homePresentation } from './product-presentation';
+import { homePresentation, showcaseProducts } from './product-presentation';
 @Component({
   standalone: true,
   imports: [RouterLink, ProductCard, HomeIntro],
@@ -33,13 +33,7 @@ export class Home implements AfterViewInit {
   readonly photos = PHOTOS;
   readonly webpSet = webpSet;
   readonly showcase = homePresentation;
-  readonly products = computed(() => {
-    const all = this.catalog.products();
-    const preferred = ['assorti', 'kurnik', 'milka'].flatMap((slug) =>
-      all.filter((p) => p.slug === slug),
-    );
-    return [...preferred, ...all.filter((p) => !preferred.includes(p))].slice(0, 3);
-  });
+  readonly products = computed(() => showcaseProducts(this.catalog.products()));
   readonly whatsapp = this.catalog.whatsapp;
   readonly delivery = this.catalog.delivery;
   constructor() {

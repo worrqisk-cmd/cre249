@@ -45,9 +45,11 @@ export interface Product {
   fillings: string[];
   price: number | null;
   priceUnit: string | null;
+  /** Ordered gallery slots; an empty URL denotes a temporarily unavailable photo. */
   photos: string[];
   focus?: { mobile: string; desktop: string };
   photoFocus: { mobile: string; desktop: string }[];
+  sortOrder: number;
   featured: boolean;
   availability: ProductRow['availability'];
 }
