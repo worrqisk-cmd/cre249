@@ -1,0 +1,54 @@
+<fieldset>
+  <legend>{{ label() }}</legend>
+  <p [id]="id() + '-help'">
+    Нажмите на важную часть фото. Стрелки перемещают фокус, Shift ускоряет шаг. По умолчанию —
+    центр.
+  </p>
+  @if (src() && !failed()) {
+    <button
+      #source
+      type="button"
+      class="source"
+      [disabled]="disabled() || !loaded()"
+      [attr.aria-label]="'Выбрать точку фокуса: ' + label()"
+      [attr.aria-describedby]="id() + '-help'"
+      (click)="pick($event)"
+      (keydown)="move($event)"
+      (blur)="touched.set(true)"
+    >
+      <img [src]="src()" alt="" (load)="loaded.set(true)" (error)="failed.set(true)" />
+      <span
+        class="marker"
+        aria-hidden="true"
+        [style.left.%]="point()[0]"
+        [style.top.%]="point()[1]"
+      ></span>
+    </button>
+    <p class="status" role="status">
+      {{ location()
+      }}<span class="sr-only">
+        Горизонталь {{ point()[0] }} процентов, вертикаль {{ point()[1] }} процентов.</span
+      >
+    </p>
+    <button type="button" class="button outline" [disabled]="disabled()" (click)="reset()">
+      Сбросить по центру
+    </button>
+    <figure>
+      <div class="crop" [style.aspect-ratio]="ratio()">
+        <img
+          [src]="previewSrc() || src()"
+          alt="Кадрирование карточки каталога"
+          [style.object-fit]="fit()"
+          [style.object-position]="fixed() ? '50% 50%' : value() || '50% 50%'"
+        />
+      </div>
+      <figcaption>
+        Карточка каталога · {{ label() }}{{ fixed() ? ' · фото целиком, фокус не влияет' : '' }}
+      </figcaption>
+    </figure>
+  } @else {
+    <p role="status">
+      Фото не загрузилось. Сохранённый фокус сохранится; попробуйте открыть изделие снова.
+    </p>
+  }
+</fieldset>
