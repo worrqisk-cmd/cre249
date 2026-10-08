@@ -62,6 +62,6 @@ Database Webhook реализован SQL AFTER UPDATE trigger на агреги
 
 ## Локальные проверки и границы
 
-`deno test supabase/functions/catalog-static-sync/worker_test.ts`; `deno check .../index.ts`; `node scripts/test-catalog-sync-db.mjs` на одноразовом Docker PostgreSQL 17; `pnpm test:static-empty`; `pnpm test --watch=false`; production `pnpm build`, `pnpm test:seo`, `pnpm test:routing`, `pnpm test:catalog-api`, `pnpm test:catalog-fallback`.
+`deno test --no-config --no-npm supabase/functions/catalog-static-sync/worker_test.ts`; `deno check .../index.ts`; `node scripts/test-catalog-sync-db.mjs` на одноразовом Docker PostgreSQL 17; `pnpm test:static-empty`; `pnpm test --watch=false`; production `pnpm build`, `pnpm test:seo`, `pnpm test:routing`, `pnpm test:catalog-api`, `pnpm test:catalog-fallback`.
 
 SQL-тесты проверяют реальные транзакции/функции core migration, RLS privileges и SQL wiring с локальными doubles net/cron/Vault (включая отказ без секрета и адрес/headers/body webhook). Реальные расширения pg_net/pg_cron не запускались в hosted Supabase. GitHub HTTP в Edge unit tests подменён; реальный dispatch/deploy специально не запускался. После разрешённого подключения нужен один начальный end-to-end run без изменения товаров. Дальнейшие миграции схемы должны учитывать фильтрацию trigger и статический snapshot. Журнал attempts пока без автоматической чистки: при редких сохранениях рост мал; чистить по согласованному сроку хранения позже, не теряя активные попытки.

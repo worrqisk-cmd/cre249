@@ -26,7 +26,7 @@ create table public.catalog_sync_attempts (
 );
 alter table public.catalog_sync_state enable row level security;
 alter table public.catalog_sync_attempts enable row level security;
-revoke all on public.catalog_sync_state, public.catalog_sync_attempts from anon, authenticated;
+revoke all on public.catalog_sync_state, public.catalog_sync_attempts from public, anon, authenticated;
 
 create function public.catalog_sync_changed() returns trigger
 language plpgsql security definer set search_path = '' as $$

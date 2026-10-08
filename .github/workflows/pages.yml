@@ -43,7 +43,7 @@ jobs:
       - uses: denoland/setup-deno@v2
         with:
           deno-version: v2.9.7
-      - run: deno test supabase/functions/catalog-static-sync/worker_test.ts
+      - run: deno test --no-config --no-npm supabase/functions/catalog-static-sync/worker_test.ts
       - run: node scripts/test-catalog-sync-db.mjs
         env:
           CATALOG_SYNC_TEST_CONTAINER: ${{ job.services.postgres.id }}
