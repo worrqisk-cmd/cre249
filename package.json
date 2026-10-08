@@ -24,7 +24,9 @@
     "test:seo": "node tests/seo-check.mjs",
     "format": "prettier --write \"src/**/*.{ts,html,scss}\"",
     "format:check": "prettier --check \"src/**/*.{ts,html,scss}\"",
-    "test:bootstrap": "node tests/bootstrap-check.mjs"
+    "test:bootstrap": "node tests/bootstrap-check.mjs",
+    "test:catalog-fallback": "node tests/catalog-fallback-check.mjs",
+    "test:static-empty": "node tests/static-empty-check.mjs"
   },
   "private": true,
   "packageManager": "pnpm@12.8.1",

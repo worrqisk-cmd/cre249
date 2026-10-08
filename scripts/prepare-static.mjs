@@ -22,12 +22,10 @@ for (const result of [p, c, s])
   if (result.error)
     throw new Error("Static catalog request failed: " + result.error.message);
 if (
-  !p.data.length ||
-  !c.data.length ||
   p.count !== p.data.length ||
   c.count !== c.data.length
 )
-  throw new Error("Empty or truncated static catalog");
+  throw new Error("Truncated static catalog");
 const safe = (value) => /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value);
 if (
   p.data.some(

@@ -20,7 +20,11 @@ for (const path of ["admin", "admin/login"]) {
 }
 await writeFile(
   `${root}/404.html`,
-  '<!doctype html><html lang="ru"><meta charset="utf-8"><meta name="robots" content="noindex"><title>Страница не найдена</title><h1>Страница не найдена</h1><a href="/catalog/">Перейти в каталог</a></html>',
+  // Pages сохраняет HTTP 404, но Angular может загрузить новый опубликованный slug.
+  shell
+    .replace(/<title>[^<]*<\/title>/, '<title>Выпечка у Миланы</title>')
+    .replace('</head>', '<meta name="app-http-status" content="404"></head>')
+    .replace('<app-root></app-root>', '<app-root></app-root><noscript><h1>Страница не найдена</h1><a href="/catalog/">Перейти в каталог</a></noscript>'),
 );
 await writeFile(
   `${root}/sitemap.xml`,
