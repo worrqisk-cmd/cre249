@@ -44,6 +44,11 @@ export function emptyProductModel(): ProductFormModel {
 export function productToForm(row: ProductRow): ProductFormModel {
   return {
     ...structuredClone(row),
+    photos: row.photos.map((photo) => ({
+      ...photo,
+      desktop: photo.desktop || '50% 50%',
+      mobile: photo.mobile || '50% 50%',
+    })),
     price: row.price === null ? '' : String(row.price),
     price_unit: row.price_unit || '',
     fillings: row.fillings.join('\n'),

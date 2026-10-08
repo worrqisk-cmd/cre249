@@ -18,7 +18,9 @@ export function homePresentation(product: Product): CardPresentation | undefined
   return undefined;
 }
 
-export function catalogPresentation(product: Product): CardPresentation | undefined {
+export function catalogPresentation(
+  product: Pick<Product, 'slug' | 'photos'>,
+): CardPresentation | undefined {
   if (product.slug === 'slivochno-karamelny') {
     const photo = product.photos.find(
       (source) => source === 'photos/archive_085_slivochno-karamelny.jpg',

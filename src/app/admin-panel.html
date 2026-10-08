@@ -183,21 +183,12 @@
                 <legend>Фотографии</legend>
                 <p class="muted">
                   Загруженные фото хранятся в приватном Storage. Посетители получают короткую ссылку
-                  только для опубликованного изделия.
+                  только для опубликованного изделия. В карточке показывается основное фото.
+                  Предпросмотр ниже — для каталога; на главной у фото может быть отдельное
+                  оформление.
                 </p>
                 @for (photo of item.photos; track $index; let i = $index) {
                   <div class="admin-photo-row">
-                    <div class="admin-photo-preview">
-                      @if (previews()[i]) {
-                        <img
-                          [src]="previews()[i]"
-                          alt="Предпросмотр фотографии изделия"
-                          [style.object-position]="photo.desktop"
-                        />
-                      } @else {
-                        <span>Фото не загрузилось</span>
-                      }
-                    </div>
                     <div class="admin-photo-controls">
                       <label class="admin-radio"
                         ><input
@@ -208,21 +199,30 @@
                           (change)="setPrimary(i)"
                         />
                         Основное фото</label
-                      ><label
-                        >Фокус на компьютере<input
+                      >
+                      <div class="admin-focus-pair">
+                        <app-photo-focus
                           [formField]="productForm.photos[i].desktop"
-                          [attr.aria-describedby]="'photo-desktop-' + i + '-error-0'"
-                          placeholder="50% 50%" /><app-field-errors
-                          [id]="'photo-desktop-' + i + '-error'"
-                          [state]="productForm.photos[i].desktop()" /></label
-                      ><label
-                        >Фокус на телефоне<input
+                          [src]="previews()[i] || ''"
+                          [ratio]="previewFrame()?.ratio || 4 / 5"
+                          [fit]="previewFrame()?.fit || 'cover'"
+                          [fixed]="!!previewFrame()"
+                          [previewSrc]="catalogPreviewSrc()"
+                          label="Компьютер"
+                          [id]="'focus-desktop-' + i"
+                        />
+                        <app-photo-focus
                           [formField]="productForm.photos[i].mobile"
-                          [attr.aria-describedby]="'photo-mobile-' + i + '-error-0'"
-                          placeholder="50% 50%" /><app-field-errors
-                          [id]="'photo-mobile-' + i + '-error'"
-                          [state]="productForm.photos[i].mobile()" /></label
-                      ><label class="admin-file"
+                          [src]="previews()[i] || ''"
+                          [ratio]="previewFrame()?.ratio || 4 / 5"
+                          [fit]="previewFrame()?.fit || 'cover'"
+                          [fixed]="!!previewFrame()"
+                          [previewSrc]="catalogPreviewSrc()"
+                          label="Телефон"
+                          [id]="'focus-mobile-' + i"
+                        />
+                      </div>
+                      <label class="admin-file"
                         >Заменить фото<input
                           type="file"
                           accept="image/jpeg,image/png,image/webp"

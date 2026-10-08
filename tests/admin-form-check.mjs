@@ -18,7 +18,9 @@ const jwt = [
   'signature',
 ].join('.');
 const browser = await chromium.launch({ headless: true });
-const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+const page = await browser.newPage({
+  viewport: { width: Number(process.env.VIEWPORT_WIDTH || 390), height: 844 },
+});
 page.setDefaultTimeout(6000);
 let saves = 0;
 let failUpload = true;
@@ -256,11 +258,44 @@ try {
   await page.getByRole('button', { name: /Существующее изделие 0/ }).click();
   assert.equal(await page.getByLabel('Slug').inputValue(), 'existing-0');
   assert.equal(await page.getByLabel('Slug').getAttribute('readonly'), '');
-  await page.getByLabel('Фокус на компьютере').fill('101% 50%');
-  await page.getByRole('button', { name: 'Сохранить изделие' }).click();
-  await page.getByText(/Укажите две позиции/).waitFor();
-  assert.equal(saves, 2);
-  await page.getByLabel('Фокус на компьютере').fill('25% 75%');
+  const desktop = page.getByRole('button', { name: 'Выбрать точку фокуса: Компьютер' });
+  await desktop.waitFor();
+  await page.waitForFunction(
+    () => !document.querySelector('app-photo-focus button.source').disabled,
+  );
+  assert.equal(await page.locator('app-photo-focus input').count(), 0);
+  assert.equal(
+    await page
+      .locator('app-photo-focus .crop')
+      .first()
+      .evaluate((el) => getComputedStyle(el).aspectRatio),
+    '0.8 / 1',
+  );
+  const box = await desktop.boundingBox();
+  await desktop.click({ position: { x: box.width * 0.25, y: box.height * 0.75 } });
+  await page.waitForFunction(
+    () =>
+      getComputedStyle(document.querySelector('app-photo-focus .crop img')).objectPosition ===
+      '25% 75%',
+  );
+  await desktop.press('Shift+ArrowRight');
+  await desktop.press('ArrowUp');
+  await page.waitForFunction(
+    () =>
+      getComputedStyle(document.querySelector('app-photo-focus .crop img')).objectPosition ===
+      '35% 74%',
+  );
+  await page.getByRole('button', { name: 'Сбросить по центру' }).first().click();
+  await page.waitForFunction(
+    () =>
+      getComputedStyle(document.querySelector('app-photo-focus .crop img')).objectPosition ===
+      '50% 50%',
+  );
+  await desktop.click({ position: { x: box.width * 0.25, y: box.height * 0.75 } });
+  const mobile = page.getByRole('button', { name: 'Выбрать точку фокуса: Телефон' });
+  await mobile.focus();
+  await mobile.press('ArrowLeft');
+  await page.getByRole('button', { name: 'Сбросить по центру' }).last().click();
   await page.getByLabel('Опубликовано').uncheck();
   await page.getByLabel('Описание').fill('Редактирование');
   await page.getByRole('button', { name: 'Сохранить изделие' }).click();
@@ -275,6 +310,12 @@ try {
   await photoInput.setInputFiles({ name: 'test.jpg', mimeType: 'image/jpeg', buffer: photoBytes });
   await page.waitForFunction(() => document.querySelector('.admin-editor input').disabled);
   assert.equal(await page.getByLabel('Название').isDisabled(), true);
+  assert.equal(await desktop.isDisabled(), true);
+  assert.equal(await mobile.isDisabled(), true);
+  assert.equal(
+    await page.getByRole('button', { name: 'Сбросить по центру' }).first().isDisabled(),
+    true,
+  );
   while (!releaseUpload) await new Promise((resolve) => setTimeout(resolve, 10));
   releaseUpload();
   releaseUpload = undefined;
@@ -309,6 +350,8 @@ try {
   await page.getByText('Изделие сохранено.', { exact: true }).waitFor();
   assert.equal(versions[1], 'eq.' + firstSavedVersion, 'second save uses the returned updated_at');
   assert.equal(savedProduct.photos.length, 2);
+  assert.equal(savedProduct.photos[1].desktop, '50% 50%');
+  assert.equal(savedProduct.photos[1].mobile, '50% 50%');
   assert.equal(await page.getByRole('button', { name: 'Сохранить изделие' }).isDisabled(), true);
   await page.getByRole('button', { name: 'Добавить', exact: true }).click();
   assert.equal(await page.getByLabel('Название').inputValue(), '');

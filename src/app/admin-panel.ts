@@ -9,6 +9,8 @@ import {
 import { FormField, submit } from '@angular/forms/signals';
 import { RouterLink } from '@angular/router';
 import { Category, ProductPhoto, ProductRow, SiteSettings } from './data';
+import { PhotoFocus } from './photo-focus';
+import { catalogPresentation } from './product-presentation';
 import { FieldErrors } from './field-errors';
 import { AdminAuth } from './admin-auth';
 import { AdminCatalogApi, ProductConflict } from './admin-catalog-api';
@@ -30,7 +32,7 @@ type AdminTab = 'products' | 'settings';
 
 @Component({
   standalone: true,
-  imports: [RouterLink, FormField, FieldErrors],
+  imports: [RouterLink, FormField, FieldErrors, PhotoFocus],
   providers: [AdminPhotos],
   templateUrl: './admin-panel.html',
   styleUrl: './admin-panel.scss',
@@ -56,6 +58,17 @@ export class AdminPanel {
   readonly productModel = signal<ProductFormModel>(emptyProductModel());
   private readonly selected = signal(false);
   readonly draft = computed(() => (this.selected() ? this.productModel() : null));
+  readonly previewFrame = computed(() =>
+    catalogPresentation({
+      slug: this.productModel().slug,
+      photos: this.productModel().photos.map((photo) => photo.static || ''),
+    }),
+  );
+  readonly catalogPreviewSrc = computed(() => {
+    const photo = this.previewFrame()?.photo;
+    const index = this.productModel().photos.findIndex((item) => item.static === photo);
+    return photo && index >= 0 ? this.previews()[index] || '' : '';
+  });
   readonly productForm = createProductForm(this.productModel, {
     busy: this.busy,
     isNew: this.isNew,
