@@ -118,14 +118,25 @@ try {
         ['first', 'second'],
       ],
       [
-        [product('other'), product('milka'), product('kurnik'), product('assorti')],
-        ['assorti', 'kurnik', 'milka'],
+        [
+          product('other', { sort_order: 0 }),
+          product('milka', { sort_order: 3 }),
+          product('kurnik', { sort_order: 2 }),
+          product('assorti', { sort_order: 1 }),
+        ],
+        ['other', 'assorti', 'kurnik'],
       ],
       [
         ['fourth', 'third', 'second', 'first'].map((slug, index) =>
           product(slug, { sort_order: 4 - index }),
         ),
         ['first', 'second', 'third'],
+      ],
+      [
+        ['zeta', 'milka', 'alpha', 'assorti', 'kurnik'].map((slug) =>
+          product(slug, { sort_order: 10 }),
+        ),
+        ['alpha', 'assorti', 'kurnik'],
       ],
     ]) {
       const { page, goto } = await publicPage(width, rows);

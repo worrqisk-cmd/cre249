@@ -15,6 +15,7 @@ const assorti: Product = {
   photos: [],
   photoFocus: [],
   featured: true,
+  sortOrder: 1,
   availability: 'unconfirmed',
 };
 

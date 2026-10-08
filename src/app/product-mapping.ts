@@ -30,6 +30,7 @@ export function publicProduct(row: ProductRow, photos: ProductPhoto[], urls: str
       desktop: photo.desktop || '50% 50%',
       mobile: photo.mobile || '50% 50%',
     })),
+    sortOrder: row.sort_order,
     featured: row.featured,
     availability: row.availability,
   };

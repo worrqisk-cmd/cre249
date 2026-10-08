@@ -97,6 +97,7 @@ for (const row of p.data) {
       mobile: photo.mobile || "50% 50%",
     })),
     featured: row.featured,
+    sortOrder: row.sort_order,
     availability: row.availability,
   });
 }

@@ -49,6 +49,7 @@ export interface Product {
   photos: string[];
   focus?: { mobile: string; desktop: string };
   photoFocus: { mobile: string; desktop: string }[];
+  sortOrder: number;
   featured: boolean;
   availability: ProductRow['availability'];
 }

@@ -34,6 +34,7 @@ export async function usePublishedSnapshot(page) {
             })),
             primary_photo: 0,
             featured: p.featured,
+            sort_order: p.sortOrder,
             published: true,
             availability: p.availability,
           }))

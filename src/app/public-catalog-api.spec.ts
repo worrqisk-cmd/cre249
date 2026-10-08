@@ -16,6 +16,7 @@ const product = (slug: string, featured = true): Product => ({
   photos: [],
   photoFocus: [],
   featured,
+  sortOrder: 1,
   availability: 'unconfirmed',
 });
 const photo = (path: string, focus = '50% 50%'): ProductPhoto => ({
