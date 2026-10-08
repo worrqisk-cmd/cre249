@@ -1,20 +1,19 @@
-import { inject, Injectable } from "@angular/core";
-import {
-  ActivatedRouteSnapshot,
-  BaseRouteReuseStrategy,
-} from "@angular/router";
+import { inject, Injectable } from '@angular/core';
+import { ActivatedRouteSnapshot, BaseRouteReuseStrategy } from '@angular/router';
 
-import { NavigationState } from "./navigation-state";
+import { NavigationState } from './navigation-state';
 
-/** A product opened from the catalog is an overlay on the same catalog DOM. */
+/** Каталог и открытое из него изделие используют один DOM: иначе scrollbar,
+ * фокус и исходная рамка фотографии потеряются во время закрытия оверлея.
+ * Прямой URL изделия остаётся отдельной prerender-страницей. */
 @Injectable()
 export class CatalogRouteReuse extends BaseRouteReuseStrategy {
   private readonly nav = inject(NavigationState);
 
   private isCatalogView(route: ActivatedRouteSnapshot): boolean {
-    const slug = route.paramMap.get("slug");
+    const slug = route.paramMap.get('slug');
     return (
-      route.routeConfig?.data?.["preserveCatalog"] === true &&
+      route.routeConfig?.data?.['preserveCatalog'] === true &&
       (!slug || this.nav.openedSlugs.has(slug))
     );
   }

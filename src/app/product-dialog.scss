@@ -1,0 +1,300 @@
+.dialog-photo picture {
+  display: block;
+  width: 100%;
+  height: 100%;
+  flex: 1;
+  min-height: 0;
+}
+
+.fillings button {
+  min-height: 44px;
+  background: transparent;
+  border: 1px solid #8b7460;
+  border-radius: 99px;
+  padding: 8px 17px;
+  transition:
+    background 0.2s,
+    color 0.2s;
+}
+
+.fillings button.selected {
+  background: var(--cocoa);
+  color: var(--paper);
+}
+
+.fillings button:hover {
+  border-color: var(--berry);
+}
+
+.dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  background: #3a2418aa;
+  z-index: 60;
+}
+
+.dialog-panel {
+  position: fixed;
+  z-index: 61;
+  inset: 5vh max(20px, calc((100vw - 1120px) / 2));
+  background: var(--cream);
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 30px 70px #1a0f0877;
+}
+
+.dialog-close {
+  position: absolute;
+  right: 18px;
+  top: 18px;
+  z-index: 2;
+  border: 0;
+  border-radius: 50%;
+  background: var(--paper);
+  width: 48px;
+  height: 48px;
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.dialog-grid {
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
+  height: 100%;
+  min-height: 0;
+}
+
+.dialog-photo {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  min-height: 0;
+  background: var(--kraft);
+}
+
+.dialog-image-link {
+  position: relative;
+  display: block;
+  flex: 1;
+  min-height: 0;
+}
+
+.dialog-photo picture img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: var(--focus-desktop, 50% 50%);
+}
+
+.missing-photo {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  color: var(--muted);
+}
+
+.dialog-content {
+  overflow-y: auto;
+  padding: 64px 32px 32px;
+  scroll-padding-block: 20px;
+}
+
+.dialog-content h2,
+.item-page .dialog-content h1 {
+  font-size: clamp(1.75rem, 3vw, 2.5rem);
+  margin-bottom: 12px;
+}
+
+.dialog-price {
+  font-size: 1rem;
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+
+.dialog-price.price-confirmed {
+  color: var(--berry);
+  font-weight: 600;
+}
+
+.dialog-content fieldset {
+  border: 0;
+  padding: 0;
+  margin: 20px 0;
+  min-width: 0;
+}
+
+.fillings {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.note {
+  border-left: 2px solid #8b7460;
+  padding-left: 12px;
+  color: var(--muted);
+  font-size: 0.875rem;
+  margin-block: 20px;
+}
+
+.order-button {
+  width: 100%;
+  margin-top: 4px;
+}
+
+.is-composing h2 {
+  font-size: 1.5rem;
+}
+
+.is-composing > .eyebrow {
+  display: none;
+}
+
+.dialog-missing {
+  text-align: center;
+  max-width: 500px;
+  margin: auto;
+  padding: 100px 25px;
+}
+
+.dialog-missing .button {
+  margin-top: 20px;
+}
+
+.dialog-thumbnails {
+  flex: none;
+  margin: 12px;
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 6px;
+  background: #3a241866;
+  border-radius: 12px;
+}
+
+.dialog-thumbnails button {
+  flex: none;
+  width: 64px;
+  height: 64px;
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--paper);
+}
+
+.dialog-thumbnails button[aria-pressed='true'] {
+  border-color: var(--paper);
+  outline: 2px solid var(--berry);
+  outline-offset: 1px;
+}
+
+.dialog-thumbnails button img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.dialog-panel.item-page {
+  position: relative;
+  inset: auto;
+  transform: none;
+  margin: 32px auto;
+  width: min(1100px, calc(100% - 32px));
+  max-height: none;
+  overflow: visible;
+}
+
+.item-page .dialog-grid {
+  min-height: 0;
+}
+
+.item-page .dialog-content {
+  overflow: visible;
+}
+
+.item-page .dialog-photo {
+  max-height: 800px;
+}
+
+@media (max-width: 700px), (max-height: 500px) and (max-width: 1000px) {
+  .dialog-panel {
+    inset: var(--visual-top, 0px) 0 auto;
+    height: var(--visual-height, 100dvh);
+    border-radius: 0;
+  }
+  .dialog-grid {
+    display: block;
+    overflow-y: auto;
+    height: 100%;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    scroll-padding-block: 16px;
+  }
+  .dialog-photo {
+    height: auto;
+    min-height: 0;
+    background: var(--cream);
+  }
+  .dialog-image-link {
+    flex: none;
+    width: 100%;
+    aspect-ratio: var(--gallery-ratio, 0.75);
+  }
+  .dialog-thumbnails {
+    margin: 0;
+    padding: 10px 12px;
+    background: transparent;
+    border-radius: 0;
+  }
+  .dialog-thumbnails button {
+    width: 48px;
+    height: 48px;
+  }
+  .item-page .dialog-photo {
+    max-height: none;
+  }
+  .dialog-photo picture img {
+    object-position: var(--focus-mobile, 50% 50%);
+  }
+  .dialog-content {
+    overflow: visible;
+    padding: 24px 16px max(24px, env(safe-area-inset-bottom, 0px));
+  }
+  .dialog-close {
+    right: max(12px, env(safe-area-inset-right, 0px));
+    top: max(12px, env(safe-area-inset-top, 0px));
+  }
+  .dialog-missing {
+    padding: 100px 20px 32px;
+    max-height: 100%;
+    overflow: auto;
+  }
+  .fillings button {
+    padding-inline: 14px;
+  }
+}
+
+.dialog-full-photo {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  padding: 5px 9px;
+  border-radius: 6px;
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 0.75rem;
+}
+
+.dialog-grid.is-gallery-loading {
+  visibility: hidden;
+}
+
+.gallery-loading {
+  position: absolute;
+  inset: 90px 20px auto;
+  text-align: center;
+  color: var(--muted);
+}

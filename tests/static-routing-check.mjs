@@ -46,7 +46,7 @@ try {
       await page
         .locator(
           path.startsWith("admin")
-            ? 'input[name="password"]'
+            ? 'input[autocomplete="current-password"]'
             : path.startsWith("item")
               ? ".item-page"
               : ".product-card",
@@ -57,7 +57,7 @@ try {
       await page
         .locator(
           path.startsWith("admin")
-            ? 'input[name="password"]'
+            ? 'input[autocomplete="current-password"]'
             : path.startsWith("item")
               ? ".item-page"
               : ".product-card",

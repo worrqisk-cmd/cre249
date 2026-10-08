@@ -1,32 +1,312 @@
 <section class="admin-page container">
-  <div class="admin-heading"><div><p class="eyebrow">Выпечка у Миланы</p><h1>Управление каталогом</h1></div><div class="admin-heading-actions"><a class="text-link" routerLink="/catalog">Посмотреть каталог ↗</a><button class="button outline" type="button" (click)="logout()">Выйти</button></div></div>
-  <div class="admin-tabs" role="group" aria-label="Разделы админки"><button type="button" [attr.aria-pressed]="tab()==='products'" (click)="selectTab('products')">Изделия</button><button type="button" [attr.aria-pressed]="tab()==='settings'" (click)="selectTab('settings')">Настройки сайта</button></div>
-  @if(loading()){<p role="status">Загружаем данные…</p>}
-  @else {
-    @if(error()){<p class="form-error" role="alert">{{error()}}</p>}
-    @if(notice()){<p class="form-success" role="status">{{notice()}}</p>}
-    @if(tab()==='products'){
-      <div class="admin-layout"><aside class="admin-list"><div class="admin-list-heading"><h2>Изделия</h2><button type="button" class="button primary" (click)="create()">Добавить</button></div>
-        @for(row of rows();track row.id){<button type="button" class="admin-list-item" [class.selected]="draft()?.id===row.id" (click)="edit(row)"><strong>{{row.title}}</strong><small>{{row.published?'Опубликовано':'Скрыто'}} · {{row.slug}}</small></button>}
-        @if(rows().length===0){<p>Изделий пока нет.</p>}
-      </aside>
-      <div class="admin-editor">
-        @if(draft();as item){<form (submit)="$event.preventDefault();saveProduct()">
-          <h2>{{isNew()?'Новое изделие':'Редактирование'}}</h2>
-          <div class="admin-fields two"><label>Название<input required [value]="item.title" (input)="patch({title:$any($event.target).value})"></label><label>Slug<input required pattern="[a-z0-9]+(-[a-z0-9]+)*" [value]="item.slug" (input)="patch({slug:$any($event.target).value})" [disabled]="!isNew()"></label></div>
-          <div class="admin-fields two"><label>Категория<select required [value]="item.category_id" (change)="patch({category_id:$any($event.target).value})">@for(category of categories();track category.id){<option [value]="category.id">{{category.label}}</option>}</select></label><label>Порядок показа<input type="number" step="1" [value]="item.sort_order" (input)="patch({sort_order:+$any($event.target).value})"><small class="muted">Меньшее число — раньше в каталоге. Изделия с фото показываются первыми</small></label></div>
-          <label>Описание<textarea rows="4" [value]="item.description" (input)="patch({description:$any($event.target).value})"></textarea></label>
-          <label>Начинки (по одной на строке)<textarea rows="4" [value]="fillingsText()" (input)="setFillings($any($event.target).value)"></textarea></label>
-          <div class="admin-fields two"><label>Цена, ₽<input type="number" min="0" step="0.01" [value]="item.price??''" (input)="patch({price:$any($event.target).value===''?null:+$any($event.target).value})"></label><label>Единица цены<select [value]="item.price_unit||''" (change)="patch({price_unit:$any($event.target).value||null})"><option value="">Не указана</option><option value="кг">За кг</option><option value="шт">За штуку</option><option value="изделие">За изделие</option></select></label></div>
-          <p class="muted">Пока не указаны и цена, и единица, посетители видят «Стоимость уточняйте».</p>
-          <div class="admin-fields two"><label>Наличие<select [value]="item.availability" (change)="patch({availability:$any($event.target).value})"><option value="unconfirmed">Не подтверждено</option><option value="available">В наличии</option><option value="unavailable">Недоступно</option></select></label><div class="admin-checks"><label><input type="checkbox" [checked]="item.featured" (change)="patch({featured:$any($event.target).checked})"> На главной</label><label><input type="checkbox" [checked]="item.published" (change)="patch({published:$any($event.target).checked})"> Опубликовано</label></div></div>
-          <fieldset class="admin-photos"><legend>Фотографии</legend><p class="muted">Загруженные фото хранятся в приватном Storage. Посетители получают короткую ссылку только для опубликованного изделия.</p>
-            @for(photo of item.photos;track $index;let i=$index){<div class="admin-photo-row"><div class="admin-photo-preview">@if(previews()[i]){<img [src]="previews()[i]" alt="Предпросмотр фотографии изделия" [style.object-position]="photo.desktop">}@else{<span>Фото не загрузилось</span>}</div><div class="admin-photo-controls"><label class="admin-radio"><input type="radio" name="primary-photo" [checked]="item.primary_photo===i" (change)="setPrimary(i)"> Основное фото</label><label>Фокус на компьютере<input [value]="photo.desktop" (input)="patchPhoto(i,{desktop:$any($event.target).value})" placeholder="50% 50%"></label><label>Фокус на телефоне<input [value]="photo.mobile" (input)="patchPhoto(i,{mobile:$any($event.target).value})" placeholder="50% 50%"></label><label class="admin-file">Заменить фото<input type="file" accept="image/jpeg,image/png,image/webp" [disabled]="uploading()||saving()" (change)="upload($event,i)"></label><button type="button" class="text-link admin-remove" (click)="removePhoto(i)" [disabled]="uploading()||saving()">Убрать фото</button></div></div>}
-            <label class="admin-file">Добавить фото<input type="file" accept="image/jpeg,image/png,image/webp" [disabled]="uploading()||saving()" (change)="upload($event)"></label>
-          </fieldset>
-          <div class="admin-save"><button class="button primary" type="submit" [disabled]="saving()||uploading()||!dirty()&&!isNew()">{{uploading()?'Загружаем фото…':saving()?'Сохраняем…':'Сохранить изделие'}}</button>@if(dirty()){<span>Есть несохранённые изменения</span>}</div>
-        </form>}@else{<div class="message-state"><h2>Выберите изделие</h2><p>Или добавьте новое.</p></div>}
-      </div></div>
-    }@else if(settings();as config){<form class="admin-settings" (submit)="$event.preventDefault();saveSettings()"><h2>Публичные настройки</h2><label>Город<input [value]="config.city" (input)="patchSettings({city:$any($event.target).value})"></label><label>WhatsApp, номер телефона<input type="tel" [value]="config.whatsapp_number||''" (input)="patchSettings({whatsapp_number:$any($event.target).value})" placeholder="Если подтверждён"></label><label>Telegram, username<input [value]="config.telegram_username||''" (input)="patchSettings({telegram_username:$any($event.target).value})" placeholder="Необязательно"></label><label>Получение<textarea rows="3" [value]="config.delivery_text" (input)="patchSettings({delivery_text:$any($event.target).value})"></textarea></label><button class="button primary" type="submit" [disabled]="saving()||!settingsDirty()">{{saving()?'Сохраняем…':'Сохранить настройки'}}</button></form>}
+  <div class="admin-heading">
+    <div>
+      <p class="eyebrow">Выпечка у Миланы</p>
+      <h1>Управление каталогом</h1>
+    </div>
+    <div class="admin-heading-actions">
+      <a class="text-link" routerLink="/catalog">Посмотреть каталог ↗</a
+      ><button class="button outline" type="button" (click)="logout()">Выйти</button>
+    </div>
+  </div>
+  <div class="admin-tabs" role="group" aria-label="Разделы админки">
+    <button
+      type="button"
+      [attr.aria-pressed]="tab() === 'products'"
+      (click)="selectTab('products')"
+    >
+      Изделия</button
+    ><button
+      type="button"
+      [attr.aria-pressed]="tab() === 'settings'"
+      (click)="selectTab('settings')"
+    >
+      Настройки сайта
+    </button>
+  </div>
+  @if (loading()) {
+    <p role="status">Загружаем данные…</p>
+  } @else {
+    @if (error()) {
+      <p class="form-error" role="alert">{{ error() }}</p>
+    }
+    @if (notice()) {
+      <p class="form-success" role="status">{{ notice() }}</p>
+    }
+    @if (tab() === 'products') {
+      <div class="admin-layout">
+        <aside class="admin-list">
+          <div class="admin-list-heading">
+            <h2>Изделия</h2>
+            <button type="button" class="button primary" (click)="create()">Добавить</button>
+          </div>
+          @for (row of rows(); track row.id) {
+            <button
+              type="button"
+              class="admin-list-item"
+              [class.selected]="draft()?.id === row.id"
+              (click)="edit(row)"
+            >
+              <strong>{{ row.title }}</strong
+              ><small>{{ row.published ? 'Опубликовано' : 'Скрыто' }} · {{ row.slug }}</small>
+            </button>
+          }
+          @if (rows().length === 0) {
+            <p>Изделий пока нет.</p>
+          }
+        </aside>
+        <div class="admin-editor">
+          @if (draft(); as item) {
+            <form novalidate (submit)="$event.preventDefault(); saveProduct()">
+              <h2>{{ isNew() ? 'Новое изделие' : 'Редактирование' }}</h2>
+              <div class="admin-fields two">
+                <label
+                  >Название<input
+                    [formField]="productForm.title"
+                    aria-describedby="product-title-error-0" /><app-field-errors
+                    id="product-title-error"
+                    [state]="productForm.title()" /></label
+                ><label
+                  >Slug<input
+                    [formField]="productForm.slug"
+                    aria-describedby="product-slug-error-0" /><app-field-errors
+                    id="product-slug-error"
+                    [state]="productForm.slug()"
+                /></label>
+              </div>
+              <div class="admin-fields two">
+                <label
+                  >Категория<select
+                    [formField]="productForm.category_id"
+                    aria-describedby="product-category_id-error-0"
+                  >
+                    @for (category of categories(); track category.id) {
+                      <option [value]="category.id">{{ category.label }}</option>
+                    }</select
+                  ><app-field-errors
+                    id="product-category_id-error"
+                    [state]="productForm.category_id()" /></label
+                ><label
+                  >Порядок показа<input
+                    type="number"
+                    step="1"
+                    [formField]="productForm.sort_order"
+                    aria-describedby="product-sort_order-error-0"
+                  /><app-field-errors
+                    id="product-sort_order-error"
+                    [state]="productForm.sort_order()"
+                  /><small class="muted"
+                    >Меньшее число — раньше в каталоге. Изделия с фото показываются первыми</small
+                  ></label
+                >
+              </div>
+              <label
+                >Описание<textarea
+                  rows="4"
+                  [formField]="productForm.description"
+                  aria-describedby="product-description-error-0"
+                ></textarea
+                ><app-field-errors
+                  id="product-description-error"
+                  [state]="productForm.description()"
+              /></label>
+              <label
+                >Начинки (по одной на строке)<textarea
+                  rows="4"
+                  [formField]="productForm.fillings"
+                ></textarea>
+              </label>
+              <div class="admin-fields two">
+                <label
+                  >Цена, ₽<input
+                    type="number"
+                    step="0.01"
+                    [formField]="productForm.price"
+                    aria-describedby="product-price-error-0" /><app-field-errors
+                    id="product-price-error"
+                    [state]="productForm.price()" /></label
+                ><label
+                  >Единица цены<select
+                    [formField]="productForm.price_unit"
+                    aria-describedby="product-price_unit-error-0"
+                  >
+                    <option value="">Не указана</option>
+                    <option value="кг">За кг</option>
+                    <option value="шт">За штуку</option>
+                    <option value="изделие">За изделие</option></select
+                  ><app-field-errors
+                    id="product-price_unit-error"
+                    [state]="productForm.price_unit()"
+                /></label>
+              </div>
+              <p class="muted">
+                Пока не указаны и цена, и единица, посетители видят «Стоимость уточняйте».
+              </p>
+              <div class="admin-fields two">
+                <label
+                  >Наличие<select
+                    [formField]="productForm.availability"
+                    aria-describedby="product-availability-error-0"
+                  >
+                    <option value="unconfirmed">Не подтверждено</option>
+                    <option value="available">В наличии</option>
+                    <option value="unavailable">Недоступно</option></select
+                  ><app-field-errors
+                    id="product-availability-error"
+                    [state]="productForm.availability()"
+                /></label>
+                <div class="admin-checks">
+                  <label
+                    ><input
+                      type="checkbox"
+                      [formField]="productForm.featured"
+                      aria-describedby="product-featured-error-0"
+                    /><app-field-errors
+                      id="product-featured-error"
+                      [state]="productForm.featured()"
+                    />
+                    На главной</label
+                  ><label
+                    ><input
+                      type="checkbox"
+                      [formField]="productForm.published"
+                      aria-describedby="product-published-error-0"
+                    /><app-field-errors
+                      id="product-published-error"
+                      [state]="productForm.published()"
+                    />
+                    Опубликовано</label
+                  >
+                </div>
+              </div>
+              <fieldset class="admin-photos">
+                <legend>Фотографии</legend>
+                <p class="muted">
+                  Загруженные фото хранятся в приватном Storage. Посетители получают короткую ссылку
+                  только для опубликованного изделия.
+                </p>
+                @for (photo of item.photos; track $index; let i = $index) {
+                  <div class="admin-photo-row">
+                    <div class="admin-photo-preview">
+                      @if (previews()[i]) {
+                        <img
+                          [src]="previews()[i]"
+                          alt="Предпросмотр фотографии изделия"
+                          [style.object-position]="photo.desktop"
+                        />
+                      } @else {
+                        <span>Фото не загрузилось</span>
+                      }
+                    </div>
+                    <div class="admin-photo-controls">
+                      <label class="admin-radio"
+                        ><input
+                          type="radio"
+                          name="primary-photo"
+                          [disabled]="saving() || uploading()"
+                          [checked]="item.primary_photo === i"
+                          (change)="setPrimary(i)"
+                        />
+                        Основное фото</label
+                      ><label
+                        >Фокус на компьютере<input
+                          [formField]="productForm.photos[i].desktop"
+                          [attr.aria-describedby]="'photo-desktop-' + i + '-error-0'"
+                          placeholder="50% 50%" /><app-field-errors
+                          [id]="'photo-desktop-' + i + '-error'"
+                          [state]="productForm.photos[i].desktop()" /></label
+                      ><label
+                        >Фокус на телефоне<input
+                          [formField]="productForm.photos[i].mobile"
+                          [attr.aria-describedby]="'photo-mobile-' + i + '-error-0'"
+                          placeholder="50% 50%" /><app-field-errors
+                          [id]="'photo-mobile-' + i + '-error'"
+                          [state]="productForm.photos[i].mobile()" /></label
+                      ><label class="admin-file"
+                        >Заменить фото<input
+                          type="file"
+                          accept="image/jpeg,image/png,image/webp"
+                          [disabled]="uploading() || saving()"
+                          (change)="upload($event, i)" /></label
+                      ><button
+                        type="button"
+                        class="text-link admin-remove"
+                        (click)="removePhoto(i)"
+                        [disabled]="uploading() || saving()"
+                      >
+                        Убрать фото
+                      </button>
+                    </div>
+                  </div>
+                }
+                <label class="admin-file"
+                  >Добавить фото<input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    [disabled]="uploading() || saving()"
+                    (change)="upload($event)"
+                /></label>
+              </fieldset>
+              <div class="admin-save">
+                <button
+                  class="button primary"
+                  type="submit"
+                  [disabled]="saving() || uploading() || (!dirty() && !isNew())"
+                >
+                  {{
+                    uploading() ? 'Загружаем фото…' : saving() ? 'Сохраняем…' : 'Сохранить изделие'
+                  }}
+                </button>
+                @if (dirty()) {
+                  <span>Есть несохранённые изменения</span>
+                }
+              </div>
+            </form>
+          } @else {
+            <div class="message-state">
+              <h2>Выберите изделие</h2>
+              <p>Или добавьте новое.</p>
+            </div>
+          }
+        </div>
+      </div>
+    } @else if (settingsModel()) {
+      <form novalidate class="admin-settings" (submit)="$event.preventDefault(); saveSettings()">
+        <h2>Публичные настройки</h2>
+        <label
+          >Город<input
+            [formField]="settingsForm.city"
+            aria-describedby="settings-city-error-0" /><app-field-errors
+            id="settings-city-error"
+            [state]="settingsForm.city()" /></label
+        ><label
+          >WhatsApp, номер телефона<input
+            type="tel"
+            [formField]="settingsForm.whatsapp_number"
+            aria-describedby="settings-whatsapp_number-error-0"
+            placeholder="Если подтверждён" /><app-field-errors
+            id="settings-whatsapp_number-error"
+            [state]="settingsForm.whatsapp_number()" /></label
+        ><label
+          >Telegram, username<input
+            [formField]="settingsForm.telegram_username"
+            aria-describedby="settings-telegram_username-error-0"
+            placeholder="Необязательно" /><app-field-errors
+            id="settings-telegram_username-error"
+            [state]="settingsForm.telegram_username()" /></label
+        ><label
+          >Получение<textarea
+            rows="3"
+            [formField]="settingsForm.delivery_text"
+            aria-describedby="settings-delivery_text-error-0"
+          ></textarea
+          ><app-field-errors
+            id="settings-delivery_text-error"
+            [state]="settingsForm.delivery_text()" /></label
+        ><button class="button primary" type="submit" [disabled]="saving() || !settingsDirty()">
+          {{ saving() ? 'Сохраняем…' : 'Сохранить настройки' }}
+        </button>
+      </form>
+    }
   }
 </section>

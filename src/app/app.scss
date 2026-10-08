@@ -1,0 +1,250 @@
+.skip {
+  position: fixed;
+  top: -70px;
+  left: 10px;
+  background: white;
+  padding: 12px;
+  z-index: 200;
+}
+
+.skip:focus {
+  top: 10px;
+}
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background: #fbf6ecee;
+  border-bottom: 1px solid var(--line);
+  backdrop-filter: blur(12px);
+}
+
+.header-inner {
+  width: min(100% - 40px, 1240px);
+  margin: auto;
+  min-height: 78px;
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  flex-wrap: wrap;
+}
+
+.brand {
+  font-family: 'Yeseva One', serif;
+  font-size: 1.4rem;
+  white-space: nowrap;
+}
+
+.brand em {
+  color: var(--berry);
+  font-style: normal;
+}
+
+.nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  margin: auto;
+}
+
+.nav button {
+  border: 0;
+  background: none;
+  color: var(--cocoa);
+}
+
+.nav a,
+.nav button {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 8px 0;
+  font-weight: 500;
+  line-height: 1.25;
+}
+
+.nav a:hover,
+.nav button:hover,
+.nav a[aria-current='page'] {
+  color: var(--berry);
+}
+
+.header-contact {
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.menu-toggle {
+  display: none;
+}
+
+.contacts {
+  background: var(--cocoa);
+  color: var(--paper);
+  padding-top: 48px;
+}
+
+.contacts .eyebrow {
+  color: var(--kraft);
+}
+
+.contacts-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 64px;
+  align-items: start;
+}
+
+.contacts h2 {
+  font-size: clamp(1.75rem, 3vw, 2.5rem);
+  margin-bottom: 16px;
+}
+
+.contacts h2 span {
+  color: #e6d5b8;
+}
+
+.contacts a:not(.button) {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.contacts .text-link {
+  display: inline-block;
+  padding: 12px 0;
+  margin-left: 18px;
+}
+
+.contacts :focus-visible {
+  outline-color: var(--paper);
+}
+
+.footer {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  justify-content: space-between;
+  column-gap: 24px;
+  row-gap: 12px;
+  border-top: 1px solid #ffffff30;
+  padding-block: 22px;
+  margin-top: 40px;
+  color: #e6d5b8;
+  font-size: 0.875rem;
+}
+
+.footer-credit {
+  grid-column: 1 / -1;
+  justify-self: end;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.contacts .footer-credit a {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  transition: color 160ms ease;
+}
+
+.contacts .footer-credit a:hover {
+  color: var(--paper);
+}
+
+.contacts .footer-credit a:focus-visible {
+  outline: 2px solid var(--paper);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+.contact-note {
+  font-size: 0.875rem;
+  color: var(--kraft);
+  max-width: 28rem;
+}
+
+@media (max-width: 1000px) {
+  .header-contact {
+    display: none;
+  }
+  .header-inner {
+    gap: 24px;
+  }
+  .contacts-grid {
+    gap: 32px;
+  }
+}
+
+@media (max-width: 700px) {
+  .header-inner {
+    width: min(100% - 32px, 1240px);
+  }
+  .header-inner {
+    min-height: 68px;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+  .brand {
+    font-size: 1.2rem;
+    white-space: normal;
+  }
+  .menu-toggle {
+    display: block;
+    background: none;
+    border: 1px solid #8b7460;
+    border-radius: 99px;
+    padding: 9px 16px;
+    min-height: 44px;
+  }
+  .nav {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    gap: 0;
+    background: var(--paper);
+    padding: 12px 20px 20px;
+    max-height: 70dvh;
+    overflow: auto;
+    box-shadow: 0 15px 20px #3a241820;
+  }
+  .nav.open {
+    display: flex;
+  }
+  .nav a,
+  .nav button {
+    text-align: left;
+    padding: 12px 0;
+  }
+  .contacts {
+    padding-top: 36px;
+  }
+  .contacts-grid {
+    display: block;
+  }
+  .contacts-grid > div + div {
+    margin-top: 24px;
+  }
+  .footer {
+    display: block;
+    margin-top: 32px;
+  }
+  .footer span {
+    display: block;
+    margin-bottom: 8px;
+  }
+  .footer .footer-credit {
+    margin-top: 16px;
+    margin-bottom: 0;
+    width: auto;
+    justify-self: start;
+    text-align: left;
+  }
+}
+
+:host {
+  display: block;
+}

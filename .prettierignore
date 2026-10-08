@@ -1,0 +1,6 @@
+node_modules/
+dist/
+public/
+.angular/
+src/app/static-catalog.json
+pnpm-lock.yaml

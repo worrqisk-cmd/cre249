@@ -1,40 +1,36 @@
-@if (intro.shouldPlay()) {<app-home-intro />}
+@if (intro.shouldPlay()) {
+  <app-home-intro />
+}
 <div class="home-shop">
   <section class="shop-front" id="featured">
     <div class="shop-intro">
       <p>Домашняя выпечка в Москве</p>
       <h1>Что к столу?</h1>
-      <p class="intro-text">
-        Пирог на ужин, торт к чаю или десерт в подарок — выбирайте у Миланы.
-      </p>
+      <p class="intro-text">Пирог на ужин, торт к чаю или десерт в подарок — выбирайте у Миланы.</p>
       <a class="solid-link" routerLink="/catalog" aria-label="Выбрать выпечку"
         >Весь ассортимент <span>↗</span></a
       >
     </div>
     <div class="shop-window">
-      @if(catalog.state()==='loading'){
-      <p role="status">Загружаем выпечку…</p>
-      }@else if(catalog.state()==='error'){
-      <div>
-        <p>Не удалось загрузить ассортимент.</p>
-        <button class="button outline" (click)="catalog.load(true)">
-          Повторить
-        </button>
-      </div>
-      }@else if(!products().length){
-      <p>Изделия пока не опубликованы.</p>
-      }@else{@for(p of products();track p.slug;let
-      first=$first){<app-product-card
-        [product]="p"
-        [priority]="first"
-        [presentation]="showcase(p)"
-      />}}
+      @if (catalog.state() === 'loading') {
+        <p role="status">Загружаем выпечку…</p>
+      } @else if (catalog.state() === 'error') {
+        <div>
+          <p>Не удалось загрузить ассортимент.</p>
+          <button class="button outline" (click)="catalog.load(true)">Повторить</button>
+        </div>
+      } @else if (!products().length) {
+        <p>Изделия пока не опубликованы.</p>
+      } @else {
+        @for (p of products(); track p.slug; let first = $first) {
+          <app-product-card [product]="p" [priority]="first" [presentation]="showcase(p)" />
+        }
+      }
     </div>
     <div class="category-shelf">
-      @for(c of catalog.categories();track c.id){<a
-        [routerLink]="'/catalog/'+c.id"
-        >{{c.label}} <span>→</span></a
-      >}
+      @for (c of catalog.categories(); track c.id) {
+        <a [routerLink]="'/catalog/' + c.id">{{ c.label }} <span>→</span></a>
+      }
     </div>
   </section>
 </div>
@@ -58,9 +54,7 @@
     <div class="about-copy" data-reveal-child>
       <p class="eyebrow">О Милане</p>
       <h2>Меня зовут Милана.</h2>
-      <p>
-        Готовлю дома в Москве: пироги, торты и десерты на заказ.
-      </p>
+      <p>Готовлю дома в Москве: пироги, торты и десерты на заказ.</p>
     </div>
   </div>
 </section>
@@ -83,35 +77,27 @@
       <span>2</span>
       <div>
         <h3>Напишите Милане</h3>
-        <p>
-          Сообщите желаемую дату и количество. Название и начинка уже будут в
-          сообщении.
-        </p>
+        <p>Сообщите желаемую дату и количество. Название и начинка уже будут в сообщении.</p>
       </div>
     </li>
     <li data-reveal-child>
       <span>3</span>
       <div>
         <h3>Согласуйте детали</h3>
-        <p>
-          Возможность приготовления, стоимость, состав, получение и оплату
-          согласуем лично.
-        </p>
+        <p>Возможность приготовления, стоимость, состав, получение и оплату согласуем лично.</p>
       </div>
     </li>
   </ol>
   <div class="order-contact">
     <p>Уже знаете, что заказать?</p>
-    @if(whatsapp()){<a
-      class="button primary"
-      [href]="whatsapp()"
-      target="_blank"
-      rel="noopener noreferrer"
-      >Написать Милане ↗</a
-    >}
+    @if (whatsapp()) {
+      <a class="button primary" [href]="whatsapp()" target="_blank" rel="noopener noreferrer"
+        >Написать Милане ↗</a
+      >
+    }
   </div>
   <div class="delivery">
     <p class="eyebrow">Получение</p>
-    <p>{{delivery()}}</p>
+    <p>{{ delivery() }}</p>
   </div>
 </section>

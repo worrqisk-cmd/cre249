@@ -1,10 +1,10 @@
 import { Seo } from './seo';
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { Router, RouterLink, RouterOutlet, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationState } from './navigation-state';
 import { HomeIntroState } from './home-intro-state';
-import { CONTACT_MESSAGE, DEFAULT_DELIVERY, PROTOTYPE_WHATSAPP, telegramLink, waLink } from './data';
 import { CatalogStore } from './catalog-store';
 
 export function shouldShowSiteCredit(url: string): boolean {
@@ -12,33 +12,52 @@ export function shouldShowSiteCredit(url: string): boolean {
   return !path.startsWith('/admin') && !path.startsWith('/item/');
 }
 
-@Component({selector:'app-root', standalone:true, imports:[RouterOutlet,RouterLink], templateUrl:'./app.html', styleUrl:'./app.css', changeDetection:ChangeDetectionStrategy.OnPush})
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  imports: [RouterOutlet, RouterLink],
+  templateUrl: './app.html',
+  styleUrl: './app.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
 export class App {
-  private seo = inject(Seo);
-  private router = inject(Router);
+  private readonly router = inject(Router);
   readonly nav = inject(NavigationState);
-  // Instantiate this before the first lazy route resolves.
-  private readonly homeIntro = inject(HomeIntroState);
+
   readonly catalog = inject(CatalogStore);
   readonly menu = signal(false);
   readonly isHome = signal(true);
   readonly showSiteCredit = signal(shouldShowSiteCredit(this.router.url));
-  readonly contactNumber = computed(() => this.catalog.settings()?.whatsapp_number || (this.catalog.state() === 'error' ? PROTOTYPE_WHATSAPP : null));
-  readonly whatsapp = computed(() => this.contactNumber() ? waLink(this.contactNumber()!, CONTACT_MESSAGE) : null);
-  readonly telegram = computed(() => this.catalog.settings()?.telegram_username ? telegramLink(this.catalog.settings()!.telegram_username!) : null);
-  readonly delivery = computed(() => this.catalog.settings()?.delivery_text || DEFAULT_DELIVERY);
+  readonly contactNumber = this.catalog.contactNumber;
+  readonly whatsapp = this.catalog.whatsapp;
+  readonly telegram = this.catalog.telegram;
+  readonly delivery = this.catalog.delivery;
   constructor() {
+    // Эти сервисы подписываются на первую навигацию: создаём их до lazy Home.
+    inject(Seo);
+    inject(HomeIntroState);
     void this.catalog.load();
-    this.router.events.pipe(filter(e => e instanceof NavigationEnd)).subscribe(() => {
-      this.isHome.set(this.router.url === '/');
-      this.showSiteCredit.set(shouldShowSiteCredit(this.router.url));
-      this.menu.set(false);
-      if (!this.router.url.startsWith('/item/')) this.nav.restoreFocus();
-    });
+    this.router.events
+      .pipe(
+        filter((event) => event instanceof NavigationEnd),
+        takeUntilDestroyed(),
+      )
+      .subscribe(() => {
+        this.isHome.set(this.router.url === '/');
+        this.showSiteCredit.set(shouldShowSiteCredit(this.router.url));
+        this.menu.set(false);
+        if (!this.router.url.startsWith('/item/')) this.nav.restoreFocus();
+      });
   }
-  goSection(id: string) {
+  goSection(id: string): void {
     this.menu.set(false);
-    if (this.router.url !== '/') this.router.navigateByUrl('/').then(() => setTimeout(() => document.getElementById(id)?.scrollIntoView(), 0));
-    else document.getElementById(id)?.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});
+    if (this.router.url !== '/') {
+      void this.router.navigateByUrl('/').then(() => {
+        setTimeout(() => document.getElementById(id)?.scrollIntoView(), 0);
+      });
+      return;
+    }
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    document.getElementById(id)?.scrollIntoView({ behavior: reduced ? 'instant' : 'smooth' });
   }
 }

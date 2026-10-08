@@ -6,7 +6,7 @@ This repository contains the public «Выпечка у Миланы» site on A
 
 ## Structure
 
-`src/app/app.ts` is the shared shell. `home.ts`, `catalog.ts` and `product-dialog.ts` implement the public journey; `product-card.ts` is shared, `navigation-state.ts` restores focus and scroll. `catalog-store.ts` loads typed Supabase data, while `admin-panel.ts` and `admin-auth.ts` implement owner editing. `src/styles.css` defines the visual system. Selected real photos are in `public/photos/`; new uploads go to private Storage. `supabase/` holds the migration and initial import, and `SUPABASE_SETUP.md` explains setup. The source archive remains at `../milana/vypech.zip` and is excluded from the site build.
+`src/app/app.ts` is the shared shell. `home.ts`, `catalog.ts` and `product-dialog.ts` implement the public journey; `product-card.ts` is shared, `navigation-state.ts` restores focus and scroll. `catalog-store.ts` holds public state; `public-catalog-api.ts` and `admin-catalog-api.ts` access typed Supabase data. `admin-panel.ts`, `admin-forms.ts`, `admin-photos.ts` and `admin-auth.ts` implement owner editing. `product-dialog-environment.ts`, `product-gallery-motion.ts` and `order-message.ts` own the dialog lifecycles. `src/styles.scss` imports global foundations and shared elements from `src/styles/`; component HTML and scoped SCSS live beside their TS. Selected real photos are in `public/photos/`; new uploads go to private Storage. `supabase/` holds the migration and initial import, and `SUPABASE_SETUP.md` explains setup. The source archive remains at `../milana/vypech.zip` and is excluded from the site build.
 
 ## Commands
 
@@ -21,3 +21,5 @@ Follow `Milana_Figma_Make_Public_Brief.md` for approved content and flows. `guid
 Work on `feat/supabase-catalog-admin` for the catalog/admin task. Do not publish or push without authorization. Do not record video or create screenshots unless the user explicitly asks for them. Include affected routes and build/browser results. `.gitattributes` keeps ordinary site photos in Git; do not reintroduce broad LFS rules for those files. Keep `../milana` and its backup intact.
 
 Static URL generation and catalog unpublishing procedure: see `STATIC_PAGES.md`. Run `pnpm test:routing` against production without SPA fallback.
+
+Code-quality and form audits: `docs/audits/code-quality.md` and `docs/audits/forms.md`. Use `pnpm format:check` for source formatting. TypeScript strict checks and Angular strict templates are enabled. The current prerender uses client bootstrap without `provideClientHydration`.

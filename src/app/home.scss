@@ -1,3 +1,151 @@
+.about-photo picture {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.about {
+  background: var(--paper);
+}
+
+.about-grid {
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  align-items: center;
+  gap: 64px;
+  padding-block: 48px;
+}
+
+.about-photo {
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--kraft);
+  aspect-ratio: 1;
+  max-height: none;
+  max-width: 420px;
+}
+
+.about-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: 50% 50%;
+}
+
+.about-copy h2 {
+  font-size: clamp(1.75rem, 3vw, 2.5rem);
+  margin-bottom: 16px;
+}
+
+.about-copy > p:not(.eyebrow) {
+  max-width: 48ch;
+  color: var(--muted);
+}
+
+.steps {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 28px;
+  margin-bottom: 24px;
+}
+
+.steps li {
+  display: flex;
+  gap: 14px;
+  align-items: start;
+  min-width: 0;
+}
+
+.steps li > span {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--cocoa);
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.steps h3 {
+  margin-bottom: 8px;
+}
+
+.steps p {
+  color: var(--muted);
+  margin-bottom: 0;
+}
+
+.order-contact {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  border-top: 1px solid var(--line);
+  padding-top: 20px;
+}
+
+.order-contact p {
+  margin: 0;
+  font-weight: 500;
+}
+
+.delivery {
+  margin-top: 24px;
+  max-width: 60ch;
+}
+
+.delivery .eyebrow {
+  margin-bottom: 4px;
+}
+
+.delivery p:last-child {
+  margin: 0;
+  color: var(--muted);
+}
+
+@media (max-width: 1000px) {
+  .about-grid {
+    gap: 32px;
+  }
+  .steps {
+    gap: 20px;
+  }
+  .steps li {
+    display: block;
+  }
+  .steps li > span {
+    margin-bottom: 12px;
+  }
+}
+
+@media (max-width: 700px) {
+  .about-grid {
+    display: block;
+    padding-block: 36px;
+  }
+  .about-photo {
+    margin-bottom: 24px;
+  }
+  .steps {
+    display: block;
+  }
+  .steps li {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .steps li > span {
+    margin: 0;
+  }
+  .order-contact {
+    flex-wrap: wrap;
+  }
+}
+
 :host {
   display: block;
 }
@@ -140,12 +288,3 @@ app-product-card {
 }
 
 /* The complete square archive photo stays uncropped on both layouts. */
-.about-photo {
-  aspect-ratio: 1;
-  max-width: 420px;
-  max-height: none;
-}
-.about-photo img {
-  object-fit: contain;
-  object-position: 50% 50%;
-}

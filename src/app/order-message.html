@@ -1,0 +1,31 @@
+<div class="composer">
+  <label for="order-message">Сообщение Милане</label
+  ><textarea
+    id="order-message"
+    rows="5"
+    [formField]="messageForm.text"
+    aria-describedby="message-error-0"
+    (input)="onInput()"
+  ></textarea>
+  <app-field-errors id="message-error" [state]="messageForm.text()" />
+  @if (copyError()) {
+    <p class="form-error" role="alert">{{ copyError() }}</p>
+  }
+  <div class="actions">
+    @if (link()) {
+      <a class="button primary" [href]="link()" target="_blank" rel="noopener noreferrer"
+        >Открыть WhatsApp</a
+      >
+    }
+    <button
+      class="button outline"
+      type="button"
+      (click)="copy()"
+      [disabled]="messageForm().submitting()"
+      aria-live="polite"
+    >
+      {{ copied() ? 'Скопировано ✓' : 'Скопировать' }}
+    </button>
+  </div>
+  <p class="muted">Отправьте сообщение сами. Заказ подтвердит Милана.</p>
+</div>

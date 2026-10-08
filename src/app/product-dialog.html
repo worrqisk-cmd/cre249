@@ -1,4 +1,6 @@
-@if(!standalone()){<div class="dialog-backdrop" (click)="requestClose()"></div>}
+@if (!standalone()) {
+  <div class="dialog-backdrop" (click)="requestClose()"></div>
+}
 <div
   class="dialog-panel"
   [class.item-page]="standalone()"
@@ -14,127 +16,117 @@
   >
     ×
   </button>
-  @if(product()&&!standalone()&&!layoutReady()){
+  @if (product() && !standalone() && !layoutReady()) {
     <p class="gallery-loading" role="status">Загружаем фотографии…</p>
   }
-  @if(missing()||!product()){
-  <div class="dialog-missing">
-    <p class="eyebrow">Изделие недоступно</p>
-    <h2 id="dialog-title">Этого изделия сейчас нет на сайте</h2>
-    <p>Возможно, ссылка устарела или изделие временно скрыто.</p>
-    <button class="button primary" (click)="requestClose()">
-      Перейти в каталог
-    </button>
-  </div>
+  @if (missing() || !product()) {
+    <div class="dialog-missing">
+      <p class="eyebrow">Изделие недоступно</p>
+      <h2 id="dialog-title">Этого изделия сейчас нет на сайте</h2>
+      <p>Возможно, ссылка устарела или изделие временно скрыто.</p>
+      <button class="button primary" (click)="requestClose()">Перейти в каталог</button>
+    </div>
   } @else {
-  <div class="dialog-grid" [class.is-gallery-loading]="!standalone()&&!layoutReady()">
-    <div class="dialog-photo" [style.--gallery-ratio]="galleryRatio()">
-      @if(currentPhoto()){<a class="dialog-image-link" [href]="currentPhoto()" target="_blank" rel="noopener" [attr.aria-label]="'Открыть полное фото: '+product()!.title+' (новая вкладка)'"><picture
-        ><source
-          type="image/webp"
-          [attr.srcset]="webpSet(currentPhoto())"
-          sizes="(max-width: 700px) 100vw, 50vw" />
-        <img
-          [src]="currentPhoto()"
-          [alt]="product()!.title"
-          [style.visibility]="!standalone()&&!photoReady() ? 'hidden' : null"
-          width="960"
-          height="1280"
-          [style.--focus-mobile]="currentFocus().mobile"
-          [style.--focus-desktop]="currentFocus().desktop"
-          decoding="async" /></picture
-      ><span class="dialog-full-photo" aria-hidden="true">Фото целиком ↗</span></a>@if(product()!.photos.length>1){
-      <div
-        class="dialog-thumbnails"
-        role="group"
-        aria-label="Фотографии изделия"
-      >
-        @for(photo of product()!.photos;track $index;let i=$index){<button
-          type="button"
-          [disabled]="!photoReady()"
-          [attr.aria-label]="'Фото '+(i+1)"
-          [attr.aria-pressed]="selectedPhoto()===i"
-          (click)="selectPhoto(i)"
-        >
-          <img [src]="photo" alt="" loading="lazy" /></button
-        >}
-      </div>
-      }}@else{
-      <div class="missing-photo">Фото изделия пока нет</div>
-      }
-    </div>
-    <div class="dialog-content" [class.is-composing]="composing()">
-      <p class="eyebrow">Выпечка у Миланы</p>
-      @if(standalone()){<h1 id="dialog-title">{{product()!.title}}</h1>}@else{<h2 id="dialog-title">{{product()!.title}}</h2>}
-      @if(!composing()){
-      <p
-        class="dialog-price"
-        [class.price-confirmed]="product()!.price!==null && !!product()!.priceUnit"
-      >
-        {{price(product()!)}}
-      </p>
-      @if(product()!.availability!=='unconfirmed'){
-      <p class="muted">
-        {{product()!.availability==='available'?'В наличии':'Сейчас
-        недоступно'}}
-      </p>
-      } @if(description()){
-      <p>{{description()}}</p>
-      } } @if(product()!.fillings.length){
-      <fieldset>
-        <legend class="eyebrow">Начинка · по желанию</legend>
-        <div class="fillings">
-          @for(v of product()!.fillings;track v){<button
-            type="button"
-            [attr.aria-pressed]="variant()===v"
-            [class.selected]="variant()===v"
-            (click)="select(v)"
-          >
-            {{v}}</button
-          >}
-        </div>
-      </fieldset>
-      } @if(!composing()){
-      <p class="note">
-        Возможность приготовления, {{product()!.price!==null &&
-        product()!.priceUnit ? 'состав' : 'стоимость, состав'}}, размер и вес
-        согласуйте с Миланой.
-      </p>
-      } @if(!composing()){<button
-        type="button"
-        class="button primary order-button"
-        (click)="compose()"
-      >
-        Обсудить заказ</button
-      >} @else {
-      <div class="composer">
-        <label for="order-message">Сообщение Милане</label
-        ><textarea
-          id="order-message"
-          rows="5"
-          [value]="message()"
-          (input)="message.set($any($event.target).value); copied.set(false)"
-        ></textarea>
-        <div class="actions">
-          @if(link()){<a
-            class="button primary"
-            [href]="link()"
+    <div class="dialog-grid" [class.is-gallery-loading]="!standalone() && !layoutReady()">
+      <div class="dialog-photo" [style.--gallery-ratio]="galleryRatio()">
+        @if (currentPhoto()) {
+          <a
+            class="dialog-image-link"
+            [href]="currentPhoto()"
             target="_blank"
-            rel="noopener noreferrer"
-            >Открыть WhatsApp</a
-          >}<button
-            class="button outline"
-            type="button"
-            (click)="copy()"
-            aria-live="polite"
+            rel="noopener"
+            [attr.aria-label]="'Открыть полное фото: ' + product()!.title + ' (новая вкладка)'"
+            ><picture
+              ><source
+                type="image/webp"
+                [attr.srcset]="webpSet(currentPhoto())"
+                sizes="(max-width: 700px) 100vw, 50vw" />
+              <img
+                [src]="currentPhoto()"
+                [alt]="product()!.title"
+                [style.visibility]="!standalone() && !photoReady() ? 'hidden' : null"
+                width="960"
+                height="1280"
+                [style.--focus-mobile]="currentFocus().mobile"
+                [style.--focus-desktop]="currentFocus().desktop"
+                decoding="async" /></picture
+            ><span class="dialog-full-photo" aria-hidden="true">Фото целиком ↗</span></a
           >
-            {{copied()?'Скопировано ✓':'Скопировать'}}
-          </button>
-        </div>
-        <p class="muted">Отправьте сообщение сами. Заказ подтвердит Милана.</p>
+          @if (product()!.photos.length > 1) {
+            <div class="dialog-thumbnails" role="group" aria-label="Фотографии изделия">
+              @for (photo of product()!.photos; track $index; let i = $index) {
+                <button
+                  type="button"
+                  [disabled]="!photoReady()"
+                  [attr.aria-label]="'Фото ' + (i + 1)"
+                  [attr.aria-pressed]="selectedPhoto() === i"
+                  (click)="selectPhoto(i)"
+                >
+                  <img [src]="photo" alt="" loading="lazy" />
+                </button>
+              }
+            </div>
+          }
+        } @else {
+          <div class="missing-photo">Фото изделия пока нет</div>
+        }
       </div>
-      }
+      <div class="dialog-content" [class.is-composing]="composing()">
+        <p class="eyebrow">Выпечка у Миланы</p>
+        @if (standalone()) {
+          <h1 id="dialog-title">{{ product()!.title }}</h1>
+        } @else {
+          <h2 id="dialog-title">{{ product()!.title }}</h2>
+        }
+        @if (!composing()) {
+          <p
+            class="dialog-price"
+            [class.price-confirmed]="product()!.price !== null && !!product()!.priceUnit"
+          >
+            {{ price(product()!) }}
+          </p>
+          @if (product()!.availability !== 'unconfirmed') {
+            <p class="muted">
+              {{ product()!.availability === 'available' ? 'В наличии' : 'Сейчас недоступно' }}
+            </p>
+          }
+          @if (description()) {
+            <p>{{ description() }}</p>
+          }
+        }
+        @if (product()!.fillings.length) {
+          <fieldset>
+            <legend class="eyebrow">Начинка · по желанию</legend>
+            <div class="fillings">
+              @for (v of product()!.fillings; track v) {
+                <button
+                  type="button"
+                  [attr.aria-pressed]="variant() === v"
+                  [class.selected]="variant() === v"
+                  (click)="select(v)"
+                >
+                  {{ v }}
+                </button>
+              }
+            </div>
+          </fieldset>
+        }
+        @if (!composing()) {
+          <p class="note">
+            Возможность приготовления,
+            {{
+              product()!.price !== null && product()!.priceUnit ? 'состав' : 'стоимость, состав'
+            }}, размер и вес согласуйте с Миланой.
+          </p>
+        }
+        @if (!composing()) {
+          <button type="button" class="button primary order-button" (click)="compose()">
+            Обсудить заказ
+          </button>
+        } @else {
+          <app-order-message [product]="product()" [variant]="variant()" />
+        }
+      </div>
     </div>
-  </div>
   }
 </div>

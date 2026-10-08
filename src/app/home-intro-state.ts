@@ -1,14 +1,12 @@
-import { Injectable, PLATFORM_ID, inject, signal } from "@angular/core";
-import { isPlatformBrowser } from "@angular/common";
-import { NavigationEnd, Router } from "@angular/router";
-import { filter } from "rxjs";
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Injectable, PLATFORM_ID, inject, signal } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { NavigationEnd, Router } from '@angular/router';
+import { filter } from 'rxjs';
 
-/**
- * Decides once, during the application's initial navigation, whether the
- * decorative home intro belongs to this document load. Keeping this in a
- * root service prevents a later in-app visit to `/` from replaying it.
- */
-@Injectable({ providedIn: "root" })
+/** Интро определяется на первой навигации документа. Root-сервис не даёт
+ * повторить его при последующем переходе на главную внутри приложения. */
+@Injectable({ providedIn: 'root' })
 export class HomeIntroState {
   readonly shouldPlay = signal(false);
   private readonly router = inject(Router);
@@ -16,13 +14,14 @@ export class HomeIntroState {
   private readonly startedOnHome = this.isBrowser && this.isHomePath();
   private readonly fullPageLoad = this.isBrowser && this.isDocumentLoad();
   private readonly reducedMotion =
-    this.isBrowser && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    this.isBrowser && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   private firstNavigation = true;
 
   constructor() {
     this.router.events
       .pipe(
         filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+        takeUntilDestroyed(),
       )
       .subscribe((event) => {
         if (!this.firstNavigation) {
@@ -33,23 +32,22 @@ export class HomeIntroState {
         this.shouldPlay.set(
           this.startedOnHome &&
             this.fullPageLoad &&
-            document.documentElement.dataset["homeIntro"] === "pending" &&
+            document.documentElement.dataset['homeIntro'] === 'pending' &&
             !this.reducedMotion &&
-            event.urlAfterRedirects === "/",
+            event.urlAfterRedirects === '/',
         );
         if (this.isBrowser && !this.shouldPlay())
-          document.documentElement.removeAttribute("data-home-intro");
+          document.documentElement.removeAttribute('data-home-intro');
       });
   }
 
-  private isHomePath() {
+  private isHomePath(): boolean {
     return window.location.pathname === new URL(document.baseURI).pathname;
   }
 
-  private isDocumentLoad() {
-    const navigation = performance
-      .getEntriesByType("navigation")
-      .at(0) as PerformanceNavigationTiming | undefined;
-    return !navigation || navigation.type === "navigate" || navigation.type === "reload";
+  private isDocumentLoad(): boolean {
+    const navigation = performance.getEntriesByType('navigation').at(0) as
+      PerformanceNavigationTiming | undefined;
+    return !navigation || navigation.type === 'navigate' || navigation.type === 'reload';
   }
 }

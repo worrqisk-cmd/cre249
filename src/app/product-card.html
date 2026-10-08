@@ -1,0 +1,44 @@
+<a
+  class="product-card"
+  [class.is-photo-origin]="isPhotoOrigin()"
+  [routerLink]="'/item/' + product().slug"
+  [attr.data-product-slug]="product().slug"
+  (click)="open($event)"
+>
+  <div
+    class="product-image"
+    [class.placeholder]="!photo()"
+    [class.photo-contained]="frame()?.fit === 'contain'"
+    [class.photo-overview]="!presentation() && !!catalogFrame()"
+    [style.--card-photo-ratio]="frame()?.ratio || null"
+  >
+    @if (photo()) {
+      <picture
+        ><source type="image/webp" [attr.srcset]="webpSet(photo())" [attr.sizes]="imageSizes()" />
+        <img
+          [src]="photo()"
+          [alt]="product().title"
+          width="960"
+          height="1280"
+          [attr.loading]="priority() ? 'eager' : 'lazy'"
+          [attr.fetchpriority]="priority() ? 'high' : null"
+          decoding="async"
+          [style.visibility]="isPhotoOrigin() ? 'hidden' : null"
+          [style.--focus-mobile]="frame()?.mobile || product().focus?.mobile || '50% 50%'"
+          [style.--focus-desktop]="frame()?.desktop || product().focus?.desktop || '50% 50%'"
+      /></picture>
+    } @else {
+      <span class="placeholder-copy"><span aria-hidden="true">◇</span>Фото изделия пока нет</span>
+    }
+    <span class="view-hint">Смотреть ↗</span>
+  </div>
+  <div class="product-meta">
+    <h3>{{ product().title }}</h3>
+    <p
+      class="product-price"
+      [class.price-confirmed]="product().price !== null && !!product().priceUnit"
+    >
+      {{ price(product()) }}
+    </p>
+  </div>
+</a>
