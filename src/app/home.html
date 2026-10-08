@@ -20,7 +20,7 @@
           <button class="button outline" (click)="catalog.load(true)">Повторить</button>
         </div>
       } @else if (!products().length) {
-        <p>Изделия пока не опубликованы.</p>
+        <p>Всю выпечку смотрите в каталоге.</p>
       } @else {
         @for (p of products(); track p.slug; let first = $first) {
           <app-product-card [product]="p" [priority]="first" [presentation]="showcase(p)" />
