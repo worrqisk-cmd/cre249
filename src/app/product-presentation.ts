@@ -11,7 +11,7 @@ export interface CardPresentation {
 /** Up to six showcase slots; unselected products never fill empty slots. */
 export function showcaseProducts(products: Product[]): Product[] {
   return products
-    .filter((product) => product.featured)
+    .filter((product) => product.featured && product.photos.length > 0)
     .sort((a, b) => a.sortOrder - b.sortOrder || (a.slug < b.slug ? -1 : a.slug > b.slug ? 1 : 0))
     .slice(0, 6);
 }
@@ -29,6 +29,8 @@ export function homePresentation(product: Product): CardPresentation | undefined
 export function catalogPresentation(
   product: Pick<Product, 'slug' | 'photos'>,
 ): CardPresentation | undefined {
+  if (product.slug === 'myasnoy') return { desktop: '50% 80%', mobile: '50% 80%', fit: 'cover' };
+  if (product.slug === 'kurnik') return { desktop: '50% 100%', mobile: '50% 100%', fit: 'cover' };
   if (product.slug === 'slivochno-karamelny') {
     const photo = product.photos.find(
       (source) => source === 'photos/archive_085_slivochno-karamelny.jpg',

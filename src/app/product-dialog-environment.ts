@@ -19,7 +19,9 @@ export class ProductDialogEnvironment {
         ...this.host.querySelectorAll<HTMLElement>('button,a[href],textarea'),
       ].filter(
         (control) =>
-          !control.hasAttribute('disabled') && getComputedStyle(control).visibility !== 'hidden',
+          !control.hasAttribute('disabled') &&
+          control.getClientRects().length > 0 &&
+          getComputedStyle(control).visibility !== 'hidden',
       );
       const first = controls[0];
       const last = controls.at(-1);

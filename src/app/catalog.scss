@@ -70,6 +70,34 @@
     display: none;
   }
   .category-list {
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding: 4px 3px 12px;
+    scroll-padding-inline: 3px;
+  }
+  .category-list button {
+    flex: 0 0 auto;
+  }
+  .category-indicator {
+    display: none;
+  }
+}
+
+.catalog-price-note {
+  color: var(--muted);
+  font-size: 0.875rem;
+  line-height: 1.6;
+  margin: 0 0 52px;
+}
+@media (max-width: 700px) {
+  .catalog-price-note {
+    margin-bottom: 44px;
+  }
+}
+@media (min-width: 701px) {
+  .catalog-top h1 {
+    font-family: 'Yeseva One', serif;
+    font-weight: 400;
+    letter-spacing: -0.02em;
   }
 }

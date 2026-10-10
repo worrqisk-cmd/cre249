@@ -75,6 +75,7 @@ jobs:
           pnpm test:admin-form
           pnpm test:release-readiness
           pnpm test:routing
+          node tests/mobile-order-check.mjs
           pnpm test:catalog-fallback
         env:
           CAPTURE_SCREENSHOTS: '0'
