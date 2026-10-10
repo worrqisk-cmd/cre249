@@ -1,5 +1,6 @@
 <a
   class="product-card"
+  [class.catalog-card]="!presentation()"
   [class.is-photo-origin]="isPhotoOrigin()"
   [routerLink]="'/item/' + product().slug"
   [attr.data-product-slug]="product().slug"
@@ -38,11 +39,13 @@
   </div>
   <div class="product-meta">
     <h2>{{ product().title }}</h2>
-    <p
-      class="product-price"
-      [class.price-confirmed]="product().price !== null && !!product().priceUnit"
-    >
-      {{ price(product()) }}
-    </p>
+    @if (product().price !== null && product().priceUnit) {
+      <p
+        class="product-price"
+        [class.price-confirmed]="product().price !== null && !!product().priceUnit"
+      >
+        {{ price(product()) }}
+      </p>
+    }
   </div>
 </a>

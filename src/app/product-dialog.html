@@ -138,4 +138,9 @@
       </div>
     </div>
   }
+  @if (product() && !missing() && !composing()) {
+    <div class="mobile-order-action">
+      <button type="button" class="button primary" (click)="compose()">Обсудить заказ</button>
+    </div>
+  }
 </div>

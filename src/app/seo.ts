@@ -3,6 +3,7 @@ import { DOCUMENT } from '@angular/common';
 import { effect, inject, Injectable, signal } from '@angular/core';
 import { Title, Meta } from '@angular/platform-browser';
 import { NavigationEnd, Router } from '@angular/router';
+import { publicDescription } from './data';
 import { CatalogStore } from './catalog-store';
 @Injectable({ providedIn: 'root' })
 export class Seo {
@@ -36,7 +37,7 @@ export class Seo {
       this.meta.updateTag({
         name: 'description',
         content: product
-          ? `${product.title}. ${product.description} Обсудите заказ с Миланой в WhatsApp.`
+          ? `${product.title}. ${publicDescription(product)} Обсудите заказ с Миланой в WhatsApp.`
           : category
             ? `${category.label} от Миланы в Москве. Выберите изделие и обсудите заказ в WhatsApp.`
             : path.startsWith('/catalog')

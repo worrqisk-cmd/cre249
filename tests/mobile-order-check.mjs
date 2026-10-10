@@ -1,0 +1,58 @@
+import assert from 'node:assert/strict';
+import { chromium } from 'playwright';
+import { usePublishedSnapshot } from './catalog-fixture.mjs';
+const base = process.env.BASE_URL || 'http://127.0.0.1:8447/';
+const browser = await chromium.launch();
+try {
+  for (const width of [360, 390]) {
+    const page = await browser.newPage({viewport: {width, height: 780}, isMobile: true, hasTouch: true, reducedMotion: 'reduce'});
+    await usePublishedSnapshot(page);
+    const errors = [];
+    page.on('pageerror', error => errors.push(error.message));
+    await page.goto(base + 'catalog/');
+    await page.locator('.product-card').first().waitFor();
+    assert.ok((await page.locator('.category-list').boundingBox()).height < 80, 'Categories use one scrollable row');
+    const category = page.locator('.category-list button').last();
+    await category.scrollIntoViewIfNeeded();
+    await category.tap();
+    const categoryBox = await category.boundingBox();
+    assert.ok(categoryBox.x >= 0 && categoryBox.x + categoryBox.width <= width, 'Selected category stays visible');
+    await page.goto(base + 'catalog/');
+    const card = page.locator('[data-product-slug="assorti"]');
+    await card.tap();
+    await page.getByRole('dialog').waitFor();
+    await page.locator('.dialog-content').waitFor();
+    const action = page.getByRole('button', {name: 'Обсудить заказ', exact: true});
+    await action.waitFor();
+    assert.equal(await action.count(), 1, 'One visible order action');
+    await page.waitForFunction(() => document.querySelector('.dialog-grid')?.classList.contains('is-gallery-loading') === false);
+    const box = await action.boundingBox();
+    assert.ok(box.y >= 0 && box.y + box.height <= 780, 'Order action visible before scrolling');
+    await action.focus();
+    await page.keyboard.press('Tab');
+    assert.equal(await page.getByRole('button', {name: 'Закрыть подробности'}).evaluate(el => document.activeElement === el), true, 'Tab wraps to close');
+    await page.keyboard.press('Shift+Tab');
+    assert.equal(await action.evaluate(el => document.activeElement === el), true, 'Shift+Tab wraps to visible order action');
+    await action.tap();
+    const message = page.getByLabel('Сообщение Милане');
+    await message.waitFor();
+    assert.match(await message.inputValue(), /Здравствуйте, Милана!/);
+    assert.equal(await page.locator('.mobile-order-action').count(), 0, 'Bar clears when composing');
+    await page.setViewportSize({width, height: 390});
+    const whatsapp = page.getByRole('link', {name: 'Открыть WhatsApp'});
+    await whatsapp.scrollIntoViewIfNeeded();
+    const linkBox = await whatsapp.boundingBox();
+    assert.ok(linkBox.y >= 0 && linkBox.y + linkBox.height <= 390, 'WhatsApp reachable with reduced viewport');
+    await page.setViewportSize({width, height: 780});
+    await page.getByRole('button', {name: 'Закрыть подробности'}).tap();
+    await page.getByRole('dialog').waitFor({state: 'detached'});
+    await page.goto(base + 'item/assorti/');
+    await page.locator('.dialog-content').waitFor();
+    const directBox = await page.getByRole('button', {name: 'Обсудить заказ', exact: true}).boundingBox();
+    assert.ok(directBox.y >= 0 && directBox.y + directBox.height <= 780, 'Direct item link has visible order action');
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
+    assert.deepEqual(errors, []);
+    await page.close();
+  }
+  console.log('Mobile checks passed at 360/390px: categories, modal/direct order action, compose, reduced viewport, close, overflow. No media or external messages.');
+} finally { await browser.close(); }

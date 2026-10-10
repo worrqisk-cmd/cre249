@@ -80,12 +80,21 @@ export class Catalog implements AfterViewInit {
     const active = this.host.nativeElement.querySelector<HTMLElement>(
       '.category-list button.active',
     );
-    if (active)
+    if (active) {
+      const list = active.parentElement!;
+      if (list.scrollWidth > list.clientWidth) {
+        const left = active.offsetLeft,
+          right = left + active.offsetWidth;
+        if (left < list.scrollLeft) list.scrollLeft = Math.max(0, left - 3);
+        else if (right > list.scrollLeft + list.clientWidth)
+          list.scrollLeft = right - list.clientWidth + 3;
+      }
       this.indicator.set({
         left: active.offsetLeft,
         top: active.offsetTop + active.offsetHeight + 4,
         width: active.offsetWidth,
       });
+    }
   }
   close(): void {
     if (!this.standalone()) {

@@ -143,7 +143,15 @@ try {
       await goto('');
       if (expected.length) await page.locator('#featured .product-card').first().waitFor();
       else await page.getByText('Всю выпечку смотрите в каталоге.', { exact: true }).waitFor();
-      await page.waitForFunction((expected) => JSON.stringify([...document.querySelectorAll('#featured .product-card')].map(el => el.dataset.productSlug)) === JSON.stringify(expected), expected);
+      await page.waitForFunction(
+        (expected) =>
+          JSON.stringify(
+            [...document.querySelectorAll('#featured .product-card')].map(
+              (el) => el.dataset.productSlug,
+            ),
+          ) === JSON.stringify(expected),
+        expected,
+      );
       assert.deepEqual(await slugs(page, '#featured .product-card'), expected);
       assert.ok(await page.getByRole('link', { name: 'Весь ассортимент' }).isVisible());
       assert.equal(
@@ -365,7 +373,14 @@ try {
     );
     assert.equal(saves.at(-1).featured, true);
     await page.goto(base);
-    await page.locator('#featured [data-product-slug="cover"]').waitFor();
+    await page.getByText('Всю выпечку смотрите в каталоге.', { exact: true }).waitFor();
+    assert.equal(
+      await page.locator('#featured .product-card').count(),
+      0,
+      'Selected item without photos stays out of the showcase',
+    );
+    await page.goto(base + 'catalog/');
+    await page.locator('[data-product-slug="cover"] .placeholder-copy').waitFor();
     await page.close();
     console.log(
       `PASS ${width}: delete before cover, delete cover fallback, delete final photo, persisted payloads, admin featured save → home`,

@@ -301,3 +301,57 @@
   text-align: center;
   color: var(--muted);
 }
+
+@media (min-width: 701px) {
+  .dialog-panel:not(.item-page) {
+    top: 50%;
+    bottom: auto;
+    height: min(620px, 86dvh);
+    margin-top: max(-310px, -43dvh);
+  }
+  .dialog-content:not(.is-composing) {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-top: 48px;
+    padding-bottom: 48px;
+  }
+  .dialog-content:not(.is-composing) .order-button {
+    margin-top: 16px;
+  }
+  .dialog-content h2 {
+    text-wrap: balance;
+  }
+}
+
+.mobile-order-action {
+  display: none;
+}
+@media (max-width: 700px) {
+  .dialog-panel:has(.mobile-order-action) .dialog-grid {
+    padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px));
+    scroll-padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px));
+  }
+  .dialog-panel:has(.mobile-order-action) .order-button {
+    display: none;
+  }
+  .mobile-order-action {
+    display: block;
+    position: absolute;
+    inset: auto 0 0;
+    z-index: 3;
+    padding: 12px max(16px, env(safe-area-inset-right, 0px))
+      max(12px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
+    background: var(--paper);
+    border-top: 1px solid var(--line);
+  }
+  .item-page .mobile-order-action {
+    position: fixed;
+  }
+  .mobile-order-action .button {
+    width: 100%;
+  }
+  .dialog-panel.item-page:has(.mobile-order-action) {
+    padding-bottom: 88px;
+  }
+}

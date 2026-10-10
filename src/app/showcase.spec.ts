@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { Product } from './data';
+import { Product, publicDescription } from './data';
 import { showcaseProducts } from './product-presentation';
 const product = (slug: string, sortOrder = 1, featured = true): Product => ({
   id: slug,
@@ -10,13 +10,27 @@ const product = (slug: string, sortOrder = 1, featured = true): Product => ({
   fillings: [],
   price: null,
   priceUnit: null,
-  photos: [],
+  photos: ['photos/example.jpg'],
   photoFocus: [],
   sortOrder,
   featured,
   availability: 'unconfirmed',
 });
 describe('showcase selection', () => {
+  it('hides only the known demo description and preserves owner edits', () => {
+    expect(publicDescription({ slug: 'tri-shokolada', description: 'тест публикации' })).toBe('');
+    expect(publicDescription({ slug: 'tri-shokolada', description: 'Шоколадный торт' })).toBe(
+      'Шоколадный торт',
+    );
+  });
+  it('excludes selected products without photos while retaining owner selection', () => {
+    const missing = { ...product('missing'), photos: [] };
+    expect(
+      showcaseProducts([missing, product('visible'), product('unselected', 0, false)]).map(
+        (p) => p.slug,
+      ),
+    ).toEqual(['visible']);
+  });
   it('selects by owner order regardless of input order or specific product names', () => {
     const products = [
       product('assorti', 100),

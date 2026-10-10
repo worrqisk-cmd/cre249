@@ -45,6 +45,7 @@
         <button class="button outline" (click)="choose('all')">Посмотреть всё</button>
       </div>
     } @else {
+      <p class="catalog-price-note">Если цена не указана, стоимость согласуем с Миланой.</p>
       <div class="catalog-grid" aria-live="polite">
         @for (p of products(); track p.slug) {
           <app-product-card [product]="p" />

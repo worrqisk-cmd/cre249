@@ -89,3 +89,10 @@ export const waLink = (number: string, text?: string) =>
   `https://wa.me/${number.replace(/\D/g, '')}${text ? `?text=${encodeURIComponent(text)}` : ''}`;
 
 export const telegramLink = (username: string) => `https://t.me/${username.replace(/^@/, '')}`;
+
+/** Keep the known demo placeholder out of public copy; preserve owner edits. */
+export function publicDescription(product: Pick<Product, 'slug' | 'description'>): string {
+  return product.slug === 'tri-shokolada' && product.description.trim() === 'тест публикации'
+    ? ''
+    : product.description;
+}

@@ -310,3 +310,11 @@ app-product-card {
     padding-top: 24px;
   }
 }
+
+@media (min-width: 701px) {
+  #order .section-heading h2 {
+    font-family: 'Yeseva One', serif;
+    font-weight: 400;
+    letter-spacing: -0.02em;
+  }
+}

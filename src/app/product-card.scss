@@ -110,3 +110,9 @@
     object-position: var(--focus-mobile, 50% 50%);
   }
 }
+
+@media (min-width: 701px) {
+  .catalog-card .product-image {
+    aspect-ratio: 1.18;
+  }
+}

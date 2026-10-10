@@ -11,7 +11,7 @@ import {
   linkedSignal,
 } from '@angular/core';
 import { OrderMessage } from './order-message';
-import { formatPrice, Product, webpSet } from './data';
+import { formatPrice, Product, publicDescription, webpSet } from './data';
 import { NavigationState } from './navigation-state';
 import { ProductGalleryMotion } from './product-gallery-motion';
 import { ProductDialogEnvironment } from './product-dialog-environment';
@@ -48,7 +48,9 @@ export class ProductDialog implements AfterViewInit {
     return p?.slug === 'assorti' &&
       p.description === 'Сладкий пирог, в котором можно сочетать разные начинки.'
       ? 'Сладкий пирог. Выберите одну начинку для обращения; возможность сочетать несколько уточните у Миланы.'
-      : p?.description || '';
+      : p
+        ? publicDescription(p)
+        : '';
   });
   // Одна рамка на изделие: смена фотографии не сдвигает содержимое галереи.
   private readonly gallery = inject(ProductGalleryMotion);
