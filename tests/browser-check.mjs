@@ -52,7 +52,7 @@ try {
     assert.match(url.searchParams.get('text'), /Хочу обсудить заказ выпечки/);
   }
   assert.equal(await page.getByRole('link', { name: 'Написать в Telegram' }).count(), 0);
-  await page.getByRole('link', { name: 'Выбрать выпечку' }).click();
+  await page.getByRole('link', { name: 'Весь ассортимент' }).click();
   await page.waitForURL('**/#/catalog');
   await page.getByRole('button', { name: 'Сладкие пироги', exact: true }).click();
   await page.waitForURL('**/#/catalog/sweet');

@@ -98,7 +98,7 @@ try {
         getComputedStyle(document.querySelector(".home-intro")).visibility ===
         "hidden",
     );
-    await page.getByRole("link", { name: "Выбрать выпечку" }).click();
+    await page.getByRole("link", { name: "Весь ассортимент" }).click();
     await page.locator(".catalog-page").waitFor();
     await page.locator(".brand").click();
     await page.locator(".shop-intro").waitFor();

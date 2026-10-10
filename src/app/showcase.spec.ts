@@ -26,7 +26,14 @@ describe('showcase selection', () => {
       product('first', 1),
       product('second', 2),
     ];
-    expect(showcaseProducts(products).map((p) => p.slug)).toEqual(['first', 'second', 'third']);
+    expect(showcaseProducts(products).map((p) => p.slug)).toEqual([
+      'first',
+      'second',
+      'third',
+      'milka',
+      'kurnik',
+      'assorti',
+    ]);
     expect(products.map((p) => p.slug)).toEqual([
       'assorti',
       'kurnik',
@@ -36,15 +43,23 @@ describe('showcase selection', () => {
       'second',
     ]);
   });
-  it('uses stable slug order for ties, including the third-place boundary', () => {
+  it('uses stable slug order for ties, including the stable ordering', () => {
     const products = ['zeta', 'milka', 'alpha', 'assorti', 'kurnik'].map((slug) =>
       product(slug, 10),
     );
-    expect(showcaseProducts(products).map((p) => p.slug)).toEqual(['alpha', 'assorti', 'kurnik']);
+    expect(showcaseProducts(products).map((p) => p.slug)).toEqual([
+      'alpha',
+      'assorti',
+      'kurnik',
+      'milka',
+      'zeta',
+    ]);
     expect(showcaseProducts([...products].reverse()).map((p) => p.slug)).toEqual([
       'alpha',
       'assorti',
       'kurnik',
+      'milka',
+      'zeta',
     ]);
   });
   it('does not fill zero, one or two selections with unselected products', () => {

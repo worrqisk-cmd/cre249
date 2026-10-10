@@ -7,6 +7,8 @@ import {
   InjectionToken,
   PLATFORM_ID,
   signal,
+  makeStateKey,
+  TransferState,
 } from '@angular/core';
 import { Router } from '@angular/router';
 import {
@@ -22,6 +24,10 @@ import { PublicCatalogApi, PublicCatalogData } from './public-catalog-api';
 
 export const STATIC_CATALOG = new InjectionToken<PublicCatalogData & { settings: SiteSettings }>(
   'static catalog',
+);
+
+const CATALOG_STATE_KEY = makeStateKey<PublicCatalogData & { settings: SiteSettings }>(
+  'milana-catalog',
 );
 
 @Injectable({ providedIn: 'root' })
@@ -53,13 +59,20 @@ export class CatalogStore {
 
   constructor() {
     this.destroy.onDestroy(() => clearTimeout(this.refreshTimer));
-    const snapshot = inject(STATIC_CATALOG, { optional: true });
+    const transferState = inject(TransferState);
+    const serverSnapshot = inject(STATIC_CATALOG, { optional: true });
+    const snapshot = serverSnapshot ?? transferState.get(CATALOG_STATE_KEY, null);
     if (snapshot) {
       this.products.set(snapshot.products);
       this.categories.set(snapshot.categories);
       this.settings.set(snapshot.settings);
       this.state.set('ok');
-      this.refreshAt = Infinity;
+      if (serverSnapshot) {
+        transferState.set(CATALOG_STATE_KEY, serverSnapshot);
+        this.refreshAt = Infinity;
+      } else {
+        transferState.remove(CATALOG_STATE_KEY);
+      }
     }
   }
 
@@ -85,6 +98,11 @@ export class CatalogStore {
       this.scheduleRefresh();
     } catch {
       if (this.destroy.destroyed) return;
+      if (this.state() === 'ok' && this.products().length) {
+        this.refreshAt = Date.now() + 60_000;
+        this.scheduleRefresh();
+        return;
+      }
       this.products.set([]);
       this.categories.set([]);
       this.settings.set(null);

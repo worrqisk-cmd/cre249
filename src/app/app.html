@@ -54,7 +54,7 @@
           <a [href]="telegram()" target="_blank" rel="noopener noreferrer">Написать в Telegram</a>
         </p>
       }
-      @if (!whatsapp() && !telegram()) {
+      @if (catalog.state() === 'error' && !whatsapp() && !telegram()) {
         <p>Контакты временно недоступны.</p>
       }
       <a class="text-link" routerLink="/catalog">К каталогу →</a>

@@ -22,4 +22,4 @@ Work on `feat/supabase-catalog-admin` for the catalog/admin task. Do not publish
 
 Static URL generation and catalog unpublishing procedure: see `STATIC_PAGES.md`. Run `pnpm test:routing` against production without SPA fallback.
 
-Code-quality and form audits: `docs/audits/code-quality.md` and `docs/audits/forms.md`. Use `pnpm format:check` for source formatting. TypeScript strict checks and Angular strict templates are enabled. The current prerender uses client bootstrap without `provideClientHydration`.
+Code-quality and form audits: `docs/audits/code-quality.md` and `docs/audits/forms.md`. Use `pnpm format:check` for source formatting. TypeScript strict checks and Angular strict templates are enabled. The current prerender uses client hydration and transfers the initial public catalog snapshot.
