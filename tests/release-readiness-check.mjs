@@ -124,27 +124,28 @@ try {
           product('kurnik', { sort_order: 2 }),
           product('assorti', { sort_order: 1 }),
         ],
-        ['other', 'assorti', 'kurnik'],
+        ['other', 'assorti', 'kurnik', 'milka'],
       ],
       [
         ['fourth', 'third', 'second', 'first'].map((slug, index) =>
           product(slug, { sort_order: 4 - index }),
         ),
-        ['first', 'second', 'third'],
+        ['first', 'second', 'third', 'fourth'],
       ],
       [
         ['zeta', 'milka', 'alpha', 'assorti', 'kurnik'].map((slug) =>
           product(slug, { sort_order: 10 }),
         ),
-        ['alpha', 'assorti', 'kurnik'],
+        ['alpha', 'assorti', 'kurnik', 'milka', 'zeta'],
       ],
     ]) {
       const { page, goto } = await publicPage(width, rows);
       await goto('');
       if (expected.length) await page.locator('#featured .product-card').first().waitFor();
       else await page.getByText('Всю выпечку смотрите в каталоге.', { exact: true }).waitFor();
+      await page.waitForFunction((expected) => JSON.stringify([...document.querySelectorAll('#featured .product-card')].map(el => el.dataset.productSlug)) === JSON.stringify(expected), expected);
       assert.deepEqual(await slugs(page, '#featured .product-card'), expected);
-      assert.ok(await page.getByRole('link', { name: 'Выбрать выпечку' }).isVisible());
+      assert.ok(await page.getByRole('link', { name: 'Весь ассортимент' }).isVisible());
       assert.equal(
         await page.evaluate(() => document.documentElement.scrollWidth > innerWidth),
         false,

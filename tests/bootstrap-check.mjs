@@ -49,7 +49,7 @@ try {
     await page.close();
   }
   console.log(
-    'PASS: mobile/desktop prerender bootstrap, anonymous admin redirect, no pageerror or Angular/hydration error diagnostics. Hydration provider is not enabled in appConfig.',
+    'PASS: mobile/desktop prerender bootstrap, anonymous admin redirect, no pageerror or Angular/hydration error diagnostics. Client hydration is enabled.',
   );
 } finally {
   await browser.close();

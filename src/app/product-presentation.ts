@@ -8,12 +8,12 @@ export interface CardPresentation {
   ratio?: number;
 }
 
-/** Three existing showcase slots; unselected products never fill empty slots. */
+/** Up to six showcase slots; unselected products never fill empty slots. */
 export function showcaseProducts(products: Product[]): Product[] {
   return products
     .filter((product) => product.featured)
     .sort((a, b) => a.sortOrder - b.sortOrder || (a.slug < b.slug ? -1 : a.slug > b.slug ? 1 : 0))
-    .slice(0, 3);
+    .slice(0, 6);
 }
 
 export function homePresentation(product: Product): CardPresentation | undefined {
